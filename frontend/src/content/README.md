@@ -137,6 +137,7 @@ What each rule means:
 | C-18 | The contact links do not include exactly one each of LinkedIn, Email, and GitHub. |
 | C-19 | A link in the hero row is not also one of the contact links. |
 | C-20 | Some text contains an unfinished word: lorem, ipsum, todo, tbd, placeholder, or "coming soon" (any capitalization, plurals included). |
+| C-21 | The images and `media.generated.ts` are out of step: an image was added, removed, or replaced without running `npm run media`, or a generated file is missing. Run `npm run media` and commit everything it changes. |
 
 **Known false alarms for C-20.** It checks whole words in every piece of text, links
 included, so an honest use of those words is flagged too: "my todos", or a repository named
