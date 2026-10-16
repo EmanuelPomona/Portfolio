@@ -25,7 +25,8 @@ Mode A record archived to `docs/archive/status-main-mode-a.md`.
 ## Round 2 progress
 - [x] Contracts: 0f43d36 (DESIGN_BRIEF motion rows, API.md §2.2 min 2.2s, ACCEPTANCE M-01..M-05, K-01, L-07, ADR-011)
 - [x] Plan + tasks: 35a945c
-- [ ] Sync main to worktrees, dispatch: frontend (portfolio-frontend-7c) 109 -> 107 -> 108; stickman (portfolio-stickman-50) 206
+- [x] Synced all worktrees to 90f4ffb; dispatched via SendMessage (delivered, idle-notify on): portfolio-frontend-7c -> 109, 107, 108; portfolio-stickman-50 -> 206
+- [ ] Waiting on both; watching branch task statuses
 - [ ] Integrate, add the 2.2s contract clause, verify, hand off
 
 ## Done
