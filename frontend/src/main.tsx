@@ -8,6 +8,10 @@ import './styles/fonts.css';
 import './styles/tokens.css';
 import './styles/global.css';
 import { App } from './app/App';
+import { site } from './content';
+import { preloadHeroImage } from './sections/Hero/Hero';
+
+preloadHeroImage(site);
 
 const root = document.getElementById('root');
 if (!root) throw new Error('#root missing from index.html');

@@ -1,6 +1,7 @@
 // Owner: agent/frontend. The hero (TASK-102, wireframe 1): the alpine photograph, the name as a
 // book's title page, and the owner's "moving thingy", a slow drift of fog across the valley.
 import { useEffect, useState } from 'react';
+import { preload } from 'react-dom';
 import { getMedia, type Link, type Site } from '../../content';
 import { Picture } from '../../components/Picture/Picture';
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
@@ -12,6 +13,24 @@ interface HeroProps {
   readonly onHeroDecode: (decoded: Promise<void>) => void;
   /** False while the loader is up: the copy waits in the fog and clears as the paper does. */
   readonly ready?: boolean;
+}
+
+/**
+ * Starts the hero photograph's request before React renders (this is a client-only page, so the
+ * <img> alone would wait for the bundle to run and render). It hints the best format the manifest
+ * has, with its srcset and sizes, so the browser fetches the same candidate the <picture> picks; a
+ * browser that cannot decode that type skips the hint.
+ */
+export function preloadHeroImage(site: Site) {
+  const media = getMedia(site.heroImage);
+  const best = media.sources[0];
+  preload(media.fallback.src, {
+    as: 'image',
+    fetchPriority: 'high',
+    imageSizes: '100vw',
+    imageSrcSet: best ? best.srcset : media.fallback.srcset,
+    ...(best ? { type: best.type } : {}),
+  });
 }
 
 /** True while the hero is on screen, the tab is visible, and motion is allowed. */
