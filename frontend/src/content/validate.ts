@@ -4,7 +4,7 @@
 // It never throws on bad content: it collects every violation so the owner sees all problems at
 // once. Messages are written for a non-engineer; frontend/src/content/README.md explains each rule.
 import { isMediaId } from './media';
-import type { Content, LifePhoto, Link, LinkKind, ProjectScreen } from './types';
+import type { Content, LifePhoto, Link, LinkKind, ProjectScreen, SectionId } from './types';
 
 export type RuleId = 'C-01' | 'C-02' | 'C-03' | 'C-04' | 'C-05' | 'C-06' | 'C-07' | 'C-08' | 'C-09'
   | 'C-10' | 'C-11' | 'C-12' | 'C-13' | 'C-14' | 'C-15' | 'C-16' | 'C-17' | 'C-18' | 'C-19' | 'C-20';
@@ -28,6 +28,7 @@ const MAILTO = /^mailto:[^\s@]+@[^\s@]+$/;
 const REQUIRED_CONTACT_KINDS: readonly LinkKind[] = ['linkedin', 'email', 'github'];
 const GENERIC_ALT = /^(?:image|photo|screenshot)[.!]?$/i;
 const PHOTO_ID = /^photo-\d+$/;
+const NAV_ORDER: readonly SectionId[] = ['home', 'projects', 'about', 'contact'];
 
 /** Length in characters as a reader counts them (code points, not UTF-16 units). */
 const length = (s: string) => [...s].length;
@@ -46,6 +47,25 @@ function hrefProblem(href: string): string | null {
     return null;
   } catch {
     return `"${href}" is not a valid web address.`;
+  }
+}
+
+/** True for a YYYY-MM-DD string naming a day that exists (2024-02-29 yes, 2026-02-30 no). */
+function isCalendarDate(s: string): boolean {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
+  if (!m) return false;
+  const [y, mo, d] = [Number(m[1]), Number(m[2]), Number(m[3])];
+  const date = new Date(Date.UTC(y, mo - 1, d));
+  return date.getUTCFullYear() === y && date.getUTCMonth() === mo - 1 && date.getUTCDate() === d;
+}
+
+/** True for "https://host[:port]" exactly: no path, query, hash, or trailing slash. */
+function isHttpsOrigin(s: string): boolean {
+  if (!s.startsWith('https://')) return false;
+  try {
+    return new URL(s).origin === s;
+  } catch {
+    return false;
   }
 }
 
@@ -222,6 +242,33 @@ export function validateContent(
     if (photoIds.has(ph.id)) add('C-17', `about.photos[${i}].id`, `The photo id "${ph.id}" is already used by another photo.`);
     photoIds.add(ph.id);
   });
+
+  // C-12: the four sections, in order.
+  const navIds = c.site.nav.map((item) => item.id);
+  if (navIds.join(',') !== NAV_ORDER.join(',')) {
+    add('C-12', 'site.nav', `The nav must list ${NAV_ORDER.join(', ')} in that order; it lists ${navIds.join(', ') || 'nothing'}.`);
+  }
+
+  // C-13: title and description fit search results.
+  if (length(c.site.title) > 70) {
+    add('C-13', 'site.title', `The page title is ${length(c.site.title)} characters; the limit is 70.`);
+  }
+  if (length(c.site.description) > 160) {
+    add('C-13', 'site.description', `The page description is ${length(c.site.description)} characters; the limit is 160.`);
+  }
+
+  // C-14: updated is a real YYYY-MM-DD date, not in the future.
+  const today = opts.today ?? new Date().toISOString().slice(0, 10);
+  if (!isCalendarDate(c.site.updated)) {
+    add('C-14', 'site.updated', `"${c.site.updated}" must be a real date written as YYYY-MM-DD, like 2026-10-16.`);
+  } else if (c.site.updated > today) {
+    add('C-14', 'site.updated', `${c.site.updated} is after today (${today}, UTC). Use the date of your edit.`);
+  }
+
+  // C-15: origin is empty, or a bare https origin.
+  if (c.site.origin !== '' && !isHttpsOrigin(c.site.origin)) {
+    add('C-15', 'site.origin', 'The origin must be empty or look like https://example.com, with no path and no trailing slash.');
+  }
 
   // C-16: the about description is one or two complete sentences and at most 320 characters.
   {
