@@ -1,0 +1,3 @@
+# Console, integrated main, 2026-10-16T20:03:58.329Z
+# base http://localhost:3000; headless Chrome over CDP; phases in brackets
+# entries: 0

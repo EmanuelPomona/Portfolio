@@ -1,0 +1,120 @@
+{
+  "loader": {
+    "mode": "show",
+    "progressbar": true,
+    "valuenow": "100",
+    "mainInert": true,
+    "mainReleasedMsAfterLoad": 952,
+    "msSinceNavigate": 1777
+  },
+  "afterLoader": {
+    "mode": "skip",
+    "bootCover": false,
+    "mainInert": false,
+    "ariaBusy": "false",
+    "seen": "1",
+    "h1": "Emanuel Ling",
+    "h2": [
+      "Projects",
+      "About",
+      "Contact"
+    ],
+    "sections": [
+      "home",
+      "projects",
+      "about",
+      "contact"
+    ]
+  },
+  "stickmanBeforeMove": false,
+  "stickmanAfterMove": {
+    "cls": true,
+    "canvas": 1,
+    "ring": true,
+    "canvasHidden": "true",
+    "hit": "DIV"
+  },
+  "windows": [
+    {
+      "label": "SagePlan, Live site, sageplan.vercel.app",
+      "href": "https://sageplan.vercel.app/",
+      "target": "_blank",
+      "rel": "noopener noreferrer",
+      "visible": "sageplan.vercel.appscreenshot soon",
+      "labelInName": true,
+      "state": "rest"
+    },
+    {
+      "label": "StreetSafe: LA, Code, github.com/EmanuelPomona/Street-Safe-LA",
+      "href": "https://github.com/EmanuelPomona/Street-Safe-LA",
+      "target": "_blank",
+      "rel": "noopener noreferrer",
+      "visible": "github.com/EmanuelPomona/Street-Safe-LAscreenshot soon",
+      "labelInName": true,
+      "state": "rest"
+    },
+    {
+      "label": "Revelation Youth, Live site, revelation-youth.vercel.app",
+      "href": "https://revelation-youth.vercel.app/",
+      "target": "_blank",
+      "rel": "noopener noreferrer",
+      "visible": "revelation-youth.vercel.appscreenshot soon",
+      "labelInName": true,
+      "state": "rest"
+    },
+    {
+      "label": "Snake AI, Code, github.com/EmanuelPomona/Snake-AI",
+      "href": "https://github.com/EmanuelPomona/Snake-AI",
+      "target": "_blank",
+      "rel": "noopener noreferrer",
+      "visible": "github.com/EmanuelPomona/Snake-AIscreenshot soon",
+      "labelInName": true,
+      "state": "rest"
+    }
+  ],
+  "attention": "attention",
+  "restAfterLeave": "rest",
+  "wheel": {
+    "scrollY": 1200,
+    "bodyOverflowY": "visible"
+  },
+  "navClick": {
+    "hash": "#about",
+    "current": [
+      "About"
+    ]
+  },
+  "desktop1440": {
+    "pageHeight": 6460,
+    "overflow": 0
+  },
+  "csp1440": [],
+  "tablet768": {
+    "mode": "skip",
+    "pageHeight": 6671,
+    "overflow": 0
+  },
+  "mobile390": {
+    "coarse": true,
+    "stickmanClass": false,
+    "stickmanCanvas": 0,
+    "navOneLine": {
+      "tops": [
+        6
+      ],
+      "minHeight": 44,
+      "right": 334.140625
+    },
+    "pageHeight": 5301,
+    "overflow": 0
+  },
+  "reduced": {
+    "mode": "fade",
+    "releasedMs": 265,
+    "stickmanClass": false,
+    "runningAnimations": 0
+  },
+  "forcedColors": {
+    "stickmanClass": false
+  }
+}
