@@ -1,0 +1,38 @@
+B-304 console evidence (TASK-304), agent/backend, 2026-10-16
+
+Preview:     https://emanuel-ling-oh4a2xaqd-team-boh-buh.vercel.app  (deployment dpl_6JfxyCWN96hdoo55KoQQiArueHaf, commit 454dc58, target: preview)
+Protection:  Vercel Authentication is on for previews. Access used the project's automation-bypass
+             secret (created by `vercel curl`); the secret is redacted from every file in docs/review/.
+Browser:     Google Chrome 155.0.8059.80, headless=new, throwaway profile holding only the bypass cookie.
+URL loaded:  /?loader=1   (forces the loader; docs/API.md 2.4)
+Wait:        --virtual-time-budget=8000, so the 4.5s loader cap elapses before the DOM is dumped.
+
+== Console messages (all of them, base64 elided) ==
+"Loading the font 'data:font/woff2;base64,<~3.4 KB elided>' violates the following Content Security Policy directive: "font-src 'self'". The action has been blocked.", source: https://emanuel-ling-oh4a2xaqd-team-boh-buh.vercel.app/?loader=1 (0)
+
+== DOM after the loader ==
+<html lang="en" data-loader="show">          gate script ran under the CSP (hash allowed)
+boot-cover elements: 0                             loader removed it on exit
+<main aria-busy="false">                         loader finished; main no longer inert
+application/ld+json blocks: 1                      present; no console error, so not executed
+<h1>Emanuel Ling</h1>
+
+== Lighthouse (mobile, same preview, URL /) errors-in-console ==
+[security] Loading the font 'data:font/woff2;base64,<~3.4 KB elided>' violates the following Content Security Policy directive: "font-src 'self'". The action has been blocked.
+[security] Loading the script 'https://vercel.live/_next-live/feedback/feedback.js' violates the following Content Security Policy directive: "script-src 'self' 'sha256-ufw5f6ifwImT+jxH5JK7bjG6qG0aSdcv/WESYWhlPfs='". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback. The action has been blocked.
+
+== Network (from the Lighthouse run): fonts and media ==
+200  Font   /assets/manrope-latin-wght-normal-DHIcAJRg.woff2   (Manrope latin, from 'self')
+200  Image  /media/backgrounds/alpine-valley-1672.jpg          (hero source the loader decodes)
+-1   Font   data:font/woff2;base64,<~3.4 KB elided>'self'
+-1   Script https://vercel.live/_next-live/feedback/feedback.js BLOCKED by script-src
+
+== Verdict: NOT zero CSP violations ==
+1. data: font (all page loads). Vite inlines assets under build.assetsInlineLimit (4096 B). The
+   Manrope Variable cyrillic-ext subset is ~3.4 KB, so it is inlined into the CSS as a data: URI,
+   which font-src 'self' (TASK-304 spec) blocks. Source: frontend/src/main.tsx imports every Manrope
+   subset; vite.config.ts uses the default inline limit. Both files are outside agent/backend.
+   See CONTRACT CHANGE REQUEST in docs/handoffs/agent-backend.md.
+2. vercel.live feedback.js (preview deployments only). Vercel injects its Toolbar into previews; the
+   CSP correctly blocks a third-party script. Production deployments do not inject it. Fix is an
+   owner setting (turn the Vercel Toolbar off for this project's previews), not a CSP change.

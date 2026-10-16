@@ -1,13 +1,13 @@
 ---
 id: TASK-304
 title: Vercel config, security headers, and the preview deployment
-status: READY
+status: BLOCKED
 owner: backend
 branch: agent/backend
 priority: HIGH
 round: 0
 depends_on: [TASK-303]
-blocked_on: ""
+blocked_on: contract
 ---
 
 # TASK-304: Vercel config, security headers, and the preview deployment

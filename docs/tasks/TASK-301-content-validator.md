@@ -1,7 +1,7 @@
 ---
 id: TASK-301
 title: Content validator, invariant contract tests, and owner editing guide
-status: READY
+status: REVIEW
 owner: backend
 branch: agent/backend
 priority: HIGH

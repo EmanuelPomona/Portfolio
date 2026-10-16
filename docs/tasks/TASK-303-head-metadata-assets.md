@@ -1,7 +1,7 @@
 ---
 id: TASK-303
 title: Head metadata plugin, favicon, Open Graph image, robots, sitemap
-status: READY
+status: REVIEW
 owner: backend
 branch: agent/backend
 priority: MEDIUM

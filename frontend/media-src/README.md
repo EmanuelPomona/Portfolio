@@ -9,4 +9,4 @@ Original images. Owner: agent/backend's pipeline reads this folder; Emanuel drop
 | `life/` | Collage photos | `<photo-id>.jpg`, e.g. `photo-1.jpg` |
 
 After adding a file, run `npm run media` and set the matching `image` and `alt` in
-`frontend/src/content/`. The full guide is written by TASK-301.
+`frontend/src/content/`. Step-by-step guide: `frontend/src/content/README.md`.
