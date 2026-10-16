@@ -1,0 +1,114 @@
+/*
+ * The hero is the title page of the plate book: the alpine photograph full-bleed, the name set in
+ * the empty fog at the upper left (wireframe 1), the mountains filling the right two-thirds.
+ * The photograph dissolves into Mist at its lower edge with an alpha mask (justified exception).
+ */
+.hero {
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+  min-height: 100svh; /* stable under mobile browser chrome */
+  overflow: clip;
+}
+
+.photo {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  mask-image: linear-gradient(to bottom, #000 0, #000 70%, transparent 100%);
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Keeps fog behind the name on narrow portrait screens, where only a slice of the photo shows. */
+  object-position: 62% 50%;
+}
+
+/*
+ * The fog drift: the same photograph, mirrored and screened over itself so only its fog adds
+ * light, masked to the valley's fog bands, sliding ±4% over 45s each way (a 90s cycle).
+ * Transform only. Paused off-screen, in a hidden tab, and under reduced motion.
+ */
+.drift {
+  position: absolute;
+  inset: 0 -6%; /* wider than the frame, so the slide never reveals an edge */
+  mix-blend-mode: screen;
+  opacity: 0.42;
+  mask-image: linear-gradient(to bottom, transparent 16%, #000 40%, #000 74%, transparent 96%);
+  transform: scaleX(-1) translateX(-4%);
+  animation: fog-drift 45s var(--ease-in-out) infinite alternate;
+  animation-play-state: paused;
+}
+
+.drift[data-drift='running'] {
+  animation-play-state: running;
+  will-change: transform;
+}
+
+@keyframes fog-drift {
+  from {
+    transform: scaleX(-1) translateX(-4%);
+  }
+  to {
+    transform: scaleX(-1) translateX(4%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drift {
+    animation: none;
+  }
+}
+
+.copy {
+  position: relative;
+  width: 100%;
+  max-width: calc(var(--page-max) + 2 * var(--gutter));
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+  padding-block: calc(var(--nav-h) + clamp(3rem, 1rem + 11svh, 9rem)) var(--space-8);
+}
+
+.name {
+  font-family: var(--font-display);
+  font-size: var(--step-6);
+  line-height: var(--leading-display);
+  letter-spacing: var(--tracking-display);
+  padding-block-end: 0.06em; /* descender of the g */
+  margin-inline-start: -0.035em; /* optical: the E's side bearing, so its stem sits on the gutter */
+}
+
+.tagline {
+  margin-block-start: var(--space-4);
+  font-size: var(--step-1);
+  font-weight: 540;
+  letter-spacing: 0.004em;
+  line-height: 1.3;
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-block-start: var(--space-3);
+  font-size: 0.9375rem;
+  font-weight: 540;
+}
+
+.item {
+  display: inline-flex;
+  align-items: center;
+}
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px; /* tap target */
+}
+
+.dot {
+  padding-inline: var(--space-3);
+  color: var(--color-ink-2);
+}
