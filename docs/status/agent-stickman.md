@@ -1,7 +1,7 @@
 # STATUS: agent/stickman
-Task: TASK-201 + TASK-202 (closing), then TASK-203, TASK-204
+Task: TASK-203 in progress (201/202 code-complete; 202 review pending), then TASK-204
 Round: 0
-Last updated: 2026-10-16T12:35:00Z
+Last updated: 2026-10-16T13:20:00Z
 
 ## Skills invoked so far
 - superpowers:test-driven-development @ TASK-201 step 1, before motion.ts -> RED/GREEN per module: motion.test.ts failed on missing module, then 17 pass; same for gestures (8) and pose (21); expectations hand-derived (scratchpad sim of the spike: 800px settles 1.083s, 50px peaks 198 px/s)
@@ -16,6 +16,11 @@ Last updated: 2026-10-16T12:35:00Z
 - superpowers:test-driven-development @ TASK-202 steps 1-3 (same skill load, continued) -> activation (33 tests), targets (8), controller (16), cursorChannel (3), StickmanLayer (7): each RED first (missing module / stub), then GREEN
 - ecc:frontend-a11y @ TASK-202, LATE: invoked after implementation as a review, not before (honest record) -> checklist passed, no change; residual risk recorded: hiding the native cursor also hides an OS-enlarged accessibility cursor (no media query exists); within the brief's custom-cursor exception
 - ecc:react-performance @ TASK-202, LATE: invoked after implementation as a review -> loop outside React, useSyncExternalStore primitive snapshot, passive single listeners; measured bundle: JS 74.61 KB gz (+3.76), CSS 3.79 KB gz
+- ecc:browser-qa @ TASK-202, before handoff -> smoke/interaction/a11y-structure on the main page: nav links all activate through the layer; CLS 0.0681 identical with layer on/off (skeleton font swap, frontend F-03); visual regression INCONCLUSIVE (no baseline); axe NOT run (not installed)
+- superpowers:requesting-code-review @ TASK-202, after browser QA -> reviewer dispatched on 765cf18..06da8f4 (result pending)
+- superpowers:test-driven-development @ TASK-203 stage (re-invoked) -> progress (17 tests), scribble (4; one RED on extent caught a real design weakness -> dominant+loop wave scheme, measured over 1000 seeds), follow (6), Loader (13, RED vs stub: 12 fail)
+- ecc:frontend-design-direction / frontend-design:frontend-design / ui-ux-pro-max:ui-ux-pro-max / design-taste-frontend @ TASK-203, before the Loader view (re-invoked for the loader) -> centered wireframe composition; tokens Ivory/Charcoal/Forest/#4F5552; outline pill (no grey track); tiny % only; one moving thing; ux: aria-busy + progressbar, accelerate-on-leave for the pencil drop
+- ecc:motion-patterns @ TASK-203, exit curve -> paper opacity 450ms cubic-bezier(0.22,1,0.36,1); pencil drop ease-in (gravity) rotating about the tip; fade mode 300ms opacity only (API wins over the skill's 200ms preference)
 
 ## Done
 - [x] Read protocol, routing, tasks 201-204, PRODUCT, DESIGN_BRIEF, DESIGN_CONSTRAINTS, API, ACCEPTANCE, ARCHITECTURE, reference spike, wireframe 1
@@ -35,7 +40,9 @@ Last updated: 2026-10-16T12:35:00Z
 - [x] TASK-202 step 5 browser verification + evidence 2a1f6de
 
 ## In progress
-- [ ] TASK-202: request code review (range 765cf18..HEAD incl. TASK-201 fixes), ecc:browser-qa, then verification-before-completion, HANDOFF-1 (201+202), tasks -> REVIEW
+- [ ] TASK-202: await reviewer (765cf18..06da8f4); act on findings; then verification-before-completion + HANDOFF-1 (201+202) + tasks -> REVIEW
+- [x] TASK-203 progress.ts ed02df6, scribble.ts 4d55458, follow.ts 0015de2
+- [ ] TASK-203 Loader view: Loader.test.tsx written (RED). Next: loader/artist.ts (canvas: graphite never-cleared scribble + figure with pencil + pencil drop), loader.css, Loader.tsx (timers not rAF; finish sets html data-loader=skip). Then lab replay control, evidence F-203-*.
 
 ## Verified
 - S-01 native cursor hidden, ring centred exactly at pointer (300.5,300.5 -> 300.5,300.5), click 2px inside "Projects" edge -> #projects -> docs/review/F-202-results.txt
@@ -52,6 +59,12 @@ Last updated: 2026-10-16T12:35:00Z
 - Lab not in production build -> `npm run build`: dist has only index.html, grep finds no lab code
 - Side-by-side recording -> docs/review/F-201-lab-parity.webm (2.2 MB, 567 frames per side, identical real CDP input)
 - `npm test` 66/66, typecheck 0, lint 0, `npm run test:contract` 9/9 (at 765cf18)
+
+## Findings for other agents (to put in the handoff)
+- DEFECT on main today: html[data-loader='show'] body{overflow:hidden} (index.html contract CSS) is never released after the loader, so first-visit pages cannot be wheel-scrolled (verified: 600px wheel -> scrollY 0). Fix in my Loader finish: set <html data-loader> to 'skip'. Flag to manager/frontend.
+- Skeleton CLS 0.0681 under the loader cover (font swap), frontend F-03.
+- API.md touch row does not exclude forced colors (implemented as written; flag to manager).
+- Contract test needs onDone <= 5s at the cap, so the exit is 450ms (task says <= 600).
 
 ## Blocked on
 - nothing
