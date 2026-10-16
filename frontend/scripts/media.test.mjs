@@ -271,6 +271,61 @@ describe('npm run media (pipeline)', { timeout: 60_000 }, () => {
     expect(failure.stderr).toContain('media-src/photo-3.heic: unsupported file type');
   });
 
+  it('applies EXIF orientation before planning widths', async () => {
+    const ws = await workspace();
+    await mkdir(path.join(ws.src, 'life'), { recursive: true });
+    // Stored 400x300 but tagged "rotate 90 degrees": it displays 300 wide and 400 tall.
+    await sharp({ create: { width: 400, height: 300, channels: 3, background: '#556677' } })
+      .jpeg()
+      .withMetadata({ orientation: 6 })
+      .toFile(path.join(ws.src, 'life', 'photo-1.jpg'));
+
+    await ws.run();
+
+    const entry = (await readManifest(ws.manifest))['life/photo-1'];
+    expect([entry.width, entry.height]).toEqual([300, 400]);
+    expect(entry.fallback.srcset).toBe('/media/life/photo-1-300.jpg 300w');
+  });
+
+  it('flattens transparency onto Ivory', async () => {
+    const ws = await workspace();
+    await sharp({ create: { width: 300, height: 200, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } })
+      .png()
+      .toFile(path.join(ws.src, 'clear.png'));
+
+    await ws.run();
+
+    expect((await readManifest(ws.manifest)).clear.placeholder).toBe('#f8f9f7');
+    const jpg = await sharp(path.join(ws.out, 'clear-300.jpg')).metadata();
+    expect([jpg.channels, jpg.hasAlpha]).toEqual([3, false]);
+  });
+
+  it('reads a grayscale source as RGB', async () => {
+    const ws = await workspace();
+    await sharp({ create: { width: 300, height: 200, channels: 3, background: '#808080' } })
+      .toColourspace('b-w')
+      .png()
+      .toFile(path.join(ws.src, 'gray.png'));
+    expect((await sharp(path.join(ws.src, 'gray.png')).metadata()).channels).toBe(1);
+
+    await ws.run();
+
+    expect((await readManifest(ws.manifest)).gray.placeholder).toBe('#808080');
+  });
+
+  it('reads a 16-bit source as 8-bit RGB', async () => {
+    const ws = await workspace();
+    await sharp({ create: { width: 300, height: 200, channels: 3, background: '#556677' } })
+      .toColourspace('rgb16')
+      .png()
+      .toFile(path.join(ws.src, 'deep.png'));
+    expect((await sharp(path.join(ws.src, 'deep.png')).metadata()).depth).toBe('ushort');
+
+    await ws.run();
+
+    expect((await readManifest(ws.manifest)).deep.placeholder).toBe('#556677');
+  });
+
   it('two sources with the same name fail the run', async () => {
     const ws = await workspace();
     await flatPng(path.join(ws.src, 'life', 'photo-1.png'));
