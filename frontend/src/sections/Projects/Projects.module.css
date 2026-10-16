@@ -8,6 +8,24 @@
  * template. The caption sits on the window's bottom edge, the way a plate's caption sits low on
  * the facing page: row 1 is a flexible spacer the window spans.
  */
+/*
+ * Where the plates alternate (1024px up), the evergreen photograph is mirrored so its dense pine
+ * cluster sits behind the first plate's window (opaque) instead of behind its caption: measured,
+ * the unmirrored pines put that caption at 1.8:1. Stacked layouts keep the photo's own
+ * orientation, which keeps the pines beside the heading's empty right side.
+ */
+@media (min-width: 64rem) {
+  .section {
+    --backdrop-flip: -1;
+    /* Dissolve the photo's caption-side edge sooner, so the faint pines there never sit under the
+       right-hand caption column (the meta line measured 3.96:1 at 1280px before this). */
+    --backdrop-edge-from: 36%;
+    --backdrop-edge-to: 70%;
+    /* Mirrored, the box's far edge faces into the page on wide screens: dissolve it too. */
+    --backdrop-edge-far: 84%;
+  }
+}
+
 .list {
   display: grid;
   row-gap: var(--space-9);

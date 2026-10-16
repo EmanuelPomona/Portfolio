@@ -34,10 +34,29 @@
   z-index: -1;
   width: min(100%, 72rem);
   pointer-events: none;
-  /* Fade in from the section above, hold through the pines, dissolve before the fog runs out. */
+  /* A section can mirror its photograph (-1) so the dense pines fall behind something opaque
+     rather than behind its text. The mask mirrors with it, so the inner edge still dissolves. */
+  transform: scaleX(var(--backdrop-flip, 1));
+  /*
+   * Fade in from the section above, hold through the pines, dissolve before the fog runs out.
+   * Horizontally the photo dissolves in from its inner edge (eased, so the ramp shows no band) and,
+   * when a section sets --backdrop-edge-far, out again at its far edge. All stops are % of this box.
+   */
+  --a: var(--backdrop-edge-from, 0%);
+  --b: var(--backdrop-edge-to, 38%);
+  --c: var(--backdrop-edge-far, 100%);
   mask-image:
     linear-gradient(to bottom, transparent 0, #000 14%, #000 52%, transparent 100%),
-    linear-gradient(to right, transparent 0, #000 38%);
+    linear-gradient(
+      to right,
+      transparent var(--a),
+      rgb(0 0 0 / 0.12) calc(var(--a) + (var(--b) - var(--a)) * 0.25),
+      rgb(0 0 0 / 0.5) calc(var(--a) + (var(--b) - var(--a)) * 0.5),
+      rgb(0 0 0 / 0.88) calc(var(--a) + (var(--b) - var(--a)) * 0.75),
+      #000 var(--b),
+      #000 var(--c),
+      transparent 100%
+    );
   mask-composite: intersect;
 }
 

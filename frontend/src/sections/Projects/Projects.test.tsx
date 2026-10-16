@@ -72,6 +72,17 @@ describe('Projects', () => {
     expect(articles(container).map((a) => a.dataset.side)).toEqual(['left', 'right', 'left', 'right']);
   });
 
+  it('keeps the backdrop pines out from under the captions where plates alternate (X-02)', () => {
+    // Regression guard for the measured 1.8:1 caption contrast at 1024px: from 64rem the photo is
+    // mirrored behind the first window and its caption-side edge dissolves early.
+    const wide = css.match(/@media \(min-width: 64rem\)\s*\{\s*\.section\s*\{([^}]*)\}/)?.[1] ?? '';
+    expect(wide).toMatch(/--backdrop-flip:\s*-1/);
+    expect(wide).toMatch(/--backdrop-edge-from:\s*\d+%/);
+    expect(wide).toMatch(/--backdrop-edge-far:\s*\d+%/);
+    // Stacked layouts keep the photo's own orientation, which measured clean.
+    expect(css.replace(/@media[^{]*\{[\s\S]*?\n\}/g, '')).not.toMatch(/--backdrop-flip/);
+  });
+
   it('a 60-character title fixture renders without truncation', () => {
     const title = 'A Sixty Character Project Title That Wraps Across Two Lines!';
     expect(title).toHaveLength(60);

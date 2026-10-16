@@ -57,7 +57,7 @@ function Plate({ project, index }: { readonly project: Project; readonly index: 
 
 export function Projects({ projects, heading }: ProjectsProps) {
   return (
-    <Section id="projects" heading={heading} backdrop="evergreen">
+    <Section id="projects" heading={heading} backdrop="evergreen" className={styles.section}>
       <div className={styles.list}>
         {projects.map((project, i) => (
           <Plate key={project.id} project={project} index={i} />
