@@ -2,15 +2,14 @@
 // The page. Keeps the mount contract (docs/API.md §2.5): StickmanLayer always mounted, Loader
 // mounted until onDone, <main> inert and aria-busy while the loader is up, and `ready` created
 // once from the same hero source the hero renders.
-// TASK-101: shell, nav, and sections. Section contents are still the scaffold's plain markup;
-// TASK-102 to TASK-106 replace them.
 import { useState } from 'react';
 import { Nav } from '../components/Nav/Nav';
-import { Section } from '../components/Section/Section';
 import { flags } from '../config/flags';
 import { content, type NavItem } from '../content';
 import { useActiveSection } from '../hooks/useActiveSection';
 import { About } from '../sections/About/About';
+import { Connect } from '../sections/Connect/Connect';
+import { Footer } from '../sections/Footer/Footer';
 import { Hero } from '../sections/Hero/Hero';
 import { Projects } from '../sections/Projects/Projects';
 import { Loader, StickmanLayer, loaderMode } from '../stickman';
@@ -62,16 +61,9 @@ export function App() {
 
         <About about={about} heading={label('about')} />
 
-        <Section id="contact" heading={label('contact')}>
-          <ul>
-            {contact.links.map((link) => (
-              <li key={link.kind}>
-                <a href={link.href}>{link.label}</a>
-              </li>
-            ))}
-          </ul>
-        </Section>
+        <Connect links={contact.links} heading={label('contact')} />
       </main>
+      <Footer site={site} />
     </>
   );
 }
