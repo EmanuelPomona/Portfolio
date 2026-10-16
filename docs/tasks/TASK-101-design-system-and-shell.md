@@ -1,7 +1,7 @@
 ---
 id: TASK-101
 title: Design system, page shell, nav, and fog-clear reveal
-status: IN_PROGRESS
+status: REVIEW
 owner: frontend
 branch: agent/frontend
 priority: HIGH

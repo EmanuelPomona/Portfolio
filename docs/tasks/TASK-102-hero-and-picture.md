@@ -1,7 +1,7 @@
 ---
 id: TASK-102
 title: Hero section and responsive Picture component
-status: IN_PROGRESS
+status: REVIEW
 owner: frontend
 branch: agent/frontend
 priority: HIGH

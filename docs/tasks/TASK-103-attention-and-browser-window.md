@@ -1,13 +1,13 @@
 ---
 id: TASK-103
 title: Attention system and the dark macOS BrowserWindow
-status: IN_PROGRESS
+status: BLOCKED
 owner: frontend
 branch: agent/frontend
 priority: HIGH
 round: 0
 depends_on: [TASK-102]
-blocked_on: ""
+blocked_on: "contract"
 ---
 
 # TASK-103: Attention system and the dark macOS BrowserWindow

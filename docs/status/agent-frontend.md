@@ -1,7 +1,7 @@
 # STATUS: agent/frontend
-Task: TASK-106 (101–105 implemented + verified)
+Task: TASK-101..106 handed off (HANDOFF-1). 101/102/104/105/106 REVIEW; 103 BLOCKED on contract (window accessible name, WCAG 2.5.3)
 Round: 0
-Last updated: 2026-10-16T15:20:00Z
+Last updated: 2026-10-16T16:05:00Z
 
 ## Skills invoked so far
 - ecc:frontend-design-direction @ TASK-101 step 1 (2026-10-16T10:16Z) -> direction: purpose = name→4 live project links in one scroll; tone = editorial/calm plate book, mostly fog; memorable detail = stickman (slice) + color-earned-by-attention (mine); scan order name→italic titles→sentence→links. Deliberate departure: skill's 'avoid one-hue palette' overridden by brief (monochrome is the point; content supplies color on attention). Constraint: stable dimensions for windows (fixed 16:10 screen), long titles wrap.
@@ -18,6 +18,7 @@ Last updated: 2026-10-16T15:20:00Z
 - ecc:browser-qa @ TASK-106 step 4, on the production build (npm run build && vite preview :3101) (14:20Z) -> smoke: 0 console errors/warnings on primary flow (F-console.txt; Lighthouse cold profile saw favicon.ico 404 = backend TASK-303); Lighthouse mobile perf 90 / a11y 100 / BP 96 / SEO 82, desktop 100/100/100/82, CLS 0 both; axe 4.14 WCAG 2.2 AA: 0 critical, 1 serious = label-content-name-mismatch on the 4 windows (contract-mandated aria-label vs visible URL -> CONTRACT CHANGE REQUEST), color-contrast incomplete over photos (covered by worst-pixel measurement); keyboard: 17 stops in visual order, 2px forest ring each, 100% visible below fixed nav; reduced motion: fade loader, 0 running animations, 0 fogged elements, drift none. Visual baseline: none committed before this run -> these captures ARE the baseline (INCONCLUSIVE as regression, by the skill's rule). Verdict: SHIP WITH FIXES (1 contract issue, 0 frontend blockers).
 - superpowers:requesting-code-review @ TASK-106 step 5 (14:35Z) -> dispatched independent general-purpose reviewer on 3ea91a0..cff7247 with requirements docs only. Verdict: WITH FIXES. 1 Critical (first-visit scroll lock never released), 1 Important (collage captions hidden under neighbouring prints once captions exist), 5 Minor (h3 name '01SagePlan'; W-03 black-at-rest ambiguity; no App mount-contract test; hero font not preloaded; clicks pass through opaque nav band).
 - superpowers:receiving-code-review @ TASK-106 step 5, before acting on findings (14:50Z) -> verified each against code/browser before fixing; one at a time.
+- superpowers:verification-before-completion @ TASK-106, immediately before HANDOFF-1 (15:55Z) -> fresh at 5a734ba: typecheck 0, lint 0 (0 problems), test 19 files / 103 passed, build 0 (JS 75.15 kB gz, CSS 5.40 kB gz), contract-test 0 (9 passed), dist U+2014/U+2013 0, slop-check 7 justified, secrets none, .env untracked, no files outside frontend-owned paths, 17/17 evidence present, 61 commits, 0 trailers. No implementation after it.
 
 ## Done
 - [x] Read protocol, routing, tasks 101–106, PRODUCT, DESIGN_BRIEF, DESIGN_CONSTRAINTS, API, ACCEPTANCE, approved spec, wireframes, background photos
@@ -36,11 +37,14 @@ Last updated: 2026-10-16T15:20:00Z
 - [x] TASK-104 Projects TDD (7 incl. 60-char title, contrast regression guard) 1be2c0d; in page f0e0bf3; contrast fix 5ede66f; backdrop containment e400237; evidence F-104-projects-{1440,1280,1024,768,390}
 - [x] TASK-105 PhotoSlot TDD (8) 0c08563; About TDD (7) e1f1fc2; in page 6fd6ba9; About lede contrast fix 8a88091; print hairline 24fb0f0; evidence 6fb3386 + fixture shots (fixture applied locally in content, reverted, git status clean)
 
-## In progress
+### Done after code review
 - [x] Review finding 1 (Critical) reproduced on prod build (wheel/PageDown scrollY 0 after ?loader=1 at 1440+390) -> fixed in global.css (:has(main:not([inert])) releases lock) + regression test; verified lock holds while loading (decode never settles: inert, hidden, wheel 0) and releases after (wheel 1200, PageDown 1988)
 - [x] Finding 3 h3 name '01 SagePlan' (bbfff1a, test RED->GREEN); finding 7 nav band takes clicks (f6ffa40, hit-test window->NAV); finding 6 name font preload, same hashed URL, 1 request each (d44012c); finding 5 App mount-contract test, mutation-checked (f4072bf); finding 2 captioned spreads flow, 0% captions covered at 1440/1024/768/390 with local 120-char fixture (reverted) (be15fe7); finding 4 = plan ambiguity -> question to manager in handoff
-- [ ] Next: rebuild; re-run QA on prod (wheel scroll after ?loader=1, Lighthouse, axe, keyboard, console incl. wheel steps, full-page evidence refresh) -> verification-before-completion -> handoff (CCR window label-in-name; scroll-lock ownership note; W-03 question; vite-patterns not invoked) -> tasks to REVIEW (103 BLOCKED on contract)
-- [ ] Final gate for all tasks happens at TASK-106 handoff (browser-qa, requesting-code-review, verification-before-completion); tasks move to REVIEW then
+- [x] Post-fix QA on prod build: wheel/PageDown/Home scroll after ?loader=1; Lighthouse mobile 90/100/100/82, desktop 100/100/100/82, CLS 0; axe 0 critical; 17 Tab stops 100% visible; console 0/0; evidence refreshed (5a734ba)
+- [x] HANDOFF-1 written: docs/handoffs/agent-frontend.md (CCR window name; W-03 question; skill gaps)
+
+## In progress
+- [ ] Waiting on: reviewer verdict; manager ruling on the CCR (TASK-103) and the W-03 question
 
 ## Verified
 - H-03 nav scroll + aria-current + Deep Forest -> CDP check (scratchpad qa/t101.mjs): each click -> hash, section top 72px, 1 aria-current, color rgb(15,46,36)
@@ -87,4 +91,4 @@ Last updated: 2026-10-16T15:20:00Z
 - superpowers:systematic-debugging was NOT invoked for two short debugs: (1) useActiveSection rAF throttle stuck under a synchronous rAF stub (root cause: frame id assigned after callback ran; fixed with a pending flag set before the request); (2) useAttention focus test order-dependence (root cause, probed: jsdom :focus-visible follows input modality, mouse events in earlier tests made programmatic focus not focus-visible; test now presses Tab first). Both diagnosed by hypothesis -> probe -> confirm. Will invoke the skill before the next non-trivial bug.
 
 ## Blocked on
-- nothing
+- TASK-103: contract (BrowserWindow accessible name vs WCAG 2.5.3 Label in Name). Implemented as written; CCR in docs/handoffs/agent-frontend.md. blocked_on: contract set in task frontmatter.
