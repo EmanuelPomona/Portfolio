@@ -1,0 +1,16 @@
+/* The last line of the book: one hairline, two small lines of type, nothing to click. */
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-6);
+  /* As wide as the content above it, so the rule starts and ends on the gutters. */
+  width: min(var(--page-max), 100% - 2 * var(--gutter));
+  margin-inline: auto;
+  padding-block: var(--space-5) var(--space-7);
+  border-block-start: 1px solid var(--color-hairline);
+  font-size: var(--step--1);
+  font-weight: 500;
+  color: var(--color-ink-2);
+  font-variant-numeric: tabular-nums;
+}
