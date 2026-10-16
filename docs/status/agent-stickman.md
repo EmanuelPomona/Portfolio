@@ -1,7 +1,7 @@
 # STATUS: agent/stickman
-Task: TASK-203 in progress (201/202 code-complete; 202 review pending), then TASK-204
+Task: TASK-204 next (201/202/203 implemented + verified at runtime; 203 code review to run together with 204)
 Round: 0
-Last updated: 2026-10-16T14:05:00Z
+Last updated: 2026-10-16T14:45:00Z
 
 ## Skills invoked so far
 - superpowers:test-driven-development @ TASK-201 step 1, before motion.ts -> RED/GREEN per module: motion.test.ts failed on missing module, then 17 pass; same for gestures (8) and pose (21); expectations hand-derived (scratchpad sim of the spike: 800px settles 1.083s, 50px peaks 198 px/s)
@@ -44,9 +44,12 @@ Last updated: 2026-10-16T14:05:00Z
 ## In progress
 - [x] TASK-202 review fixes 4016cea, e037194 (verification-before-completion + handoff still to do, together with 203/204 at the end)
 - [x] TASK-203 progress.ts ed02df6, scribble.ts 4d55458, follow.ts 0015de2, artist.ts b80ef99, Loader.tsx + loader.css c491861 (13 Loader tests GREEN, contract 9/9 vs real Loader), tip-on-line fix 291f1a7
-- [ ] TASK-203 NEXT: (1) FADE_MS 300 -> 250 (measured 305ms, L-05 needs <= 300); (2) scribble too sparse at 1.2s (one lazy curve; wireframe = dense ball): faster loop waves (target ~800-1100 px/s, more loops) - prototype variants visually first, keep scribble tests (<0.005/ms, extent > 0.5); (3) L-02 cap at runtime needs a HANGING hero request (Fetch.enable requestPaused, never continue) - blocking makes decode() reject = ready at once; (4) re-run docs/review evidence (F-203-loader*.png, F-203-results.txt exist but uncommitted and stale); (5) lab replay control; (6) then TASK-204
+- [x] TASK-203 done: fade 250ms b56c41b; circling-loop scribble 9e731d3 (wireframe ball verified visually); nav-relative cap ccd4710 (mutation-checked); lab replay control 4f1b072; evidence bb4904a
+- [ ] TASK-204 NEXT: touchWalker.ts TDD (touchTarget: tap clamp [16, vw-16], scroll walk min(|v|*0.25,180) px/s, turn at edges, no change w/o input), StickmanLayer touch mode (bottom line, ~24px, above safe-area, passive touchstart/scroll, cheer on target tap), lab toggle, evidence F-204-touch-walker.webm. flags.ts must stay unchanged.
+- [ ] THEN: requesting-code-review for 203+204 (range 06da8f4..HEAD), act on findings, verification-before-completion, HANDOFF-1 in docs/handoffs/agent-stickman.md (201-204), task statuses -> REVIEW, final commit
 
 ## Verified
+- TASK-203 final runtime (bb4904a, docs/review/F-203-results.txt): L-01 first paint ivory (100ms frame mean RGB 247.9,248.9,246.9); L-02 hero HANGS -> exit 4502ms after navigation start, gone 4957, page usable; hero BLOCKED (decode rejects = ready) -> exit at the 1.2s minimum; L-03 click -> exit 14ms, gone 467ms; L-04 reload -> no loader; L-05 fade 253ms, no canvas; L-06 progressbar + live valuenow, main inert, Tab reaches no link; L-07 1210ms; page scrolls after finish; F-203-loader-2500ms/4300ms show the dense ball
 - TASK-203 runtime (headless, before the density/fade tweaks): L-07 visible 1214ms; exit 455ms; L-03 skip -> exit 15ms, gone 472ms after click; L-04 reload shows no loader (skip); L-06 progressbar Loading/0/100 + live valuenow, main inert + aria-busy, Tab reaches no page link; page released (wheel scroll 392px after loader, was 0 before the fix); L-05 fade mode no canvas/meter, fade measured 305ms (to fix)
 - S-01 native cursor hidden, ring centred exactly at pointer (300.5,300.5 -> 300.5,300.5), click 2px inside "Projects" edge -> #projects -> docs/review/F-202-results.txt
 - S-04 point / cheer / sit -> docs/review/F-202-gestures.png; pixel parity incl. point, cheer, sit -> F-201-parity-exact.txt
