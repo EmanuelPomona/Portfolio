@@ -31,17 +31,17 @@ const one = (rule: RuleId, path: string) => [{ rule, path }];
 
 describe('copy rules', () => {
   it('C-01 flags an em dash in a class name', () => {
-    const c = variant((c) => (c.about.classes.items[1] = 'Data Structures — Algorithms'));
+    const c = variant((c) => (c.about.classes.items[1] = 'Data Structures \u2014 Algorithms'));
     expect(found(c)).toEqual(one('C-01', 'about.classes.items[1]'));
   });
 
   it('C-01 flags an em dash in a nested link label', () => {
-    const c = variant((c) => (c.projects[1]!.secondary[0]!.label = 'Devpost — 3rd place'));
+    const c = variant((c) => (c.projects[1]!.secondary[0]!.label = 'Devpost \u2014 3rd place'));
     expect(found(c)).toEqual(one('C-01', 'projects[1].secondary[0].label'));
   });
 
   it('C-01 allows an en dash', () => {
-    const c = variant((c) => (c.about.classes.items[1] = 'Data Structures – Algorithms'));
+    const c = variant((c) => (c.about.classes.items[1] = 'Data Structures \u2013 Algorithms'));
     expect(found(c)).toEqual([]);
   });
 

@@ -17,7 +17,7 @@ export interface ContentViolation {
   message: string;
 }
 
-const EM_DASH = '—';
+const EM_DASH = '\u2014';
 /** A sentence end followed by the start of another sentence. Decimals (0.13) and "e.g. the" do not match. */
 const SENTENCE_BREAK = /[.!?]\s+[A-Z]/g;
 /** Whole words, case-insensitive, with an optional plural "s" ("todos" is flagged, "photodocument" is not). */
