@@ -149,8 +149,8 @@ a:active {
   }
 }
 
-[data-fog='self'][data-revealed='false'],
-[data-fog='stagger'][data-revealed='false'] > * {
+[data-fog='self']:not([data-revealed='true']),
+[data-fog='stagger']:not([data-revealed='true']) > * {
   opacity: 0;
 }
 
@@ -173,8 +173,8 @@ a:active {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  [data-fog][data-revealed],
-  [data-fog][data-revealed] > * {
+  [data-fog],
+  [data-fog] > * {
     opacity: 1 !important;
     animation: none !important;
   }
@@ -187,8 +187,8 @@ a:active {
 }
 
 @media print {
-  [data-fog][data-revealed],
-  [data-fog][data-revealed] > * {
+  [data-fog],
+  [data-fog] > * {
     opacity: 1 !important;
     animation: none !important;
   }

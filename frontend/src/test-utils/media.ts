@@ -103,8 +103,11 @@ export function installIntersectionObserver() {
   window.IntersectionObserver = Fake as unknown as typeof IntersectionObserver;
 
   return {
-    intersect(el: Element, ratio: number, viewportHeight = window.innerHeight) {
-      const height = 1000;
+    intersect(
+      el: Element,
+      ratio: number,
+      { height = 1000, viewportHeight = window.innerHeight }: { height?: number; viewportHeight?: number } = {},
+    ) {
       const visible = height * ratio;
       const entry = {
         target: el,

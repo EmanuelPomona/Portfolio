@@ -1,11 +1,14 @@
-import { act, renderHook } from '@testing-library/react';
+import { act, cleanup, renderHook } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { installMatchMedia } from '../test-utils/media';
 import { REDUCED_MOTION_QUERY, usePrefersReducedMotion } from './usePrefersReducedMotion';
 
 describe('usePrefersReducedMotion', () => {
   let media: ReturnType<typeof installMatchMedia> | undefined;
-  afterEach(() => media?.restore());
+  afterEach(() => {
+    cleanup();
+    media?.restore();
+  });
 
   it('returns true when (prefers-reduced-motion: reduce) matches and updates on change', () => {
     media = installMatchMedia({ [REDUCED_MOTION_QUERY]: true });
