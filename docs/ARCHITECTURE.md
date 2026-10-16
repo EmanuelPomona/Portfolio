@@ -2,142 +2,229 @@
 
 ## Architecture Status
 
-Draft
+**Accepted, 2026-10-16** (manager). Decisions with lasting consequences are
+recorded in `docs/DECISIONS.md` (ADR-001 through ADR-006).
 
 ---
 
 ## System Overview
 
-Describe the overall application architecture.
+A **static single-page site**. There is no runtime server, no database, and no
+third-party runtime calls.
 
-Example:
+```text
+visitor ──HTTPS──▶ Vercel CDN ──▶ static files (index.html, JS, CSS, fonts, /media/*)
+                                   │
+            built from ──▶ Vite + React + TypeScript (frontend/)
+                                   │
+              content ──▶ typed data modules (frontend/src/content/*.ts)
+                media ──▶ npm run media (sharp) : media-src/ → public/media/ + media.generated.ts
+```
 
-User
-↓
-Next.js Frontend
-↓
-REST API
-↓
-FastAPI Backend
-↓
-PostgreSQL / Supabase
-↓
-External AI APIs
+The "API" is a set of **in-repo TypeScript module contracts**, described in
+`docs/API.md`. The "database" is the **content schema**, described in
+`docs/DATABASE.md`. Both are owned by the manager, exactly as HTTP and SQL
+contracts would be.
 
 ---
 
 ## Frontend
 
-Framework:
+| | |
+|---|---|
+| Framework | React 19 (`react@19.3`) |
+| Build | Vite 8 (`vite@8.3`, `@vitejs/plugin-react@6`) |
+| Language | TypeScript 6.0 (`typescript@6.0.3`, pinned below 6.1 because typescript-eslint does not support 7.x yet) |
+| Styling | Plain CSS: global tokens in `src/styles/tokens.css`, and CSS Modules (`*.module.css`) per component. No Tailwind, no CSS-in-JS, no UI kit. |
+| Motion | No animation library. CSS transitions and keyframes, IntersectionObserver, and `requestAnimationFrame` (the stickman, on canvas). |
+| State | Local React state only. One cross-cutting signal, "attention", is a hook (`useAttention`). |
+| Fonts | Self-hosted through `@fontsource/instrument-serif` and `@fontsource-variable/manrope`. No Google Fonts request. |
+| Auth | None. |
+| Deployment | Vercel static output (`frontend/dist`). |
 
-Language:
+**Responsibilities:** the page, its sections, the browser-window and collage
+components, the attention reveal, the fog drift and fog-clear reveals,
+responsive layouts, accessibility, and the interface states in protocol §8.
 
-Styling:
+### The stickman slice (inside `frontend/`)
 
-State Management:
+`frontend/src/stickman/` is an isolated module with a small public API
+(`docs/API.md` §2). It contains:
+- the loader;
+- the canvas rig and motion engine;
+- the desktop cursor layer;
+- the touch walker, behind a flag;
+- a dev-only lab page (`frontend/stickman-lab.html`).
 
-Authentication:
-
-Deployment:
-
-Primary responsibilities:
-
-- user interface
-- user input
-- API communication
-- loading states
-- error states
-
----
+It is a separate agent's slice. It can be demoed alone in the lab page without
+any section being finished.
 
 ## Backend
 
-Framework:
+**There is no runtime backend** (ADR-001). The `agent/backend` worktree owns the
+build-time and data side of the site:
 
-Language:
+- **The content module:** values plus invariant tests.
+- **The media pipeline:** `npm run media`, using sharp to produce AVIF, WebP, and
+  JPEG at several widths, plus a typed manifest.
+- **SEO and share metadata:** meta description, Open Graph image, favicon,
+  robots, sitemap, and Person JSON-LD.
+- **Vercel deployment config and headers:** CSP, cache rules.
+- **An owner guide** for editing content and adding images.
 
-Deployment:
-
-Primary responsibilities:
-
-- business logic
-- API endpoints
-- authentication verification
-- database access
-- external API calls
-
----
+The empty top-level `backend/` directory stays empty. Its README says why.
 
 ## Database
 
-Provider:
-
-Database:
-
-Primary entities:
-
----
+None. The content schema in `docs/DATABASE.md` plays the role of a database
+contract. The values live in `frontend/src/content/`.
 
 ## Authentication
 
-Provider:
-
-Authentication flow:
-
----
+None. There are no accounts and no forms.
 
 ## External Services
 
-### Service 1
+### Vercel (hosting)
 
-Purpose:
+- **Purpose:** static hosting, preview URLs, and HTTPS.
+- **Environment variables:** none at runtime. Deployment needs the owner's Vercel
+  login once (`vercel login`). That is a human step, so a deploy task may be
+  `BLOCKED` with `blocked_on: credential` until it is done.
+- **Failure behavior:** not applicable at runtime. If a deploy fails, the
+  previous deployment keeps serving.
 
-Environment variables:
-
-Failure behavior:
+Nothing else. No analytics in v1, no font CDN, no embeds.
 
 ---
 
-## Directory Structure
+## Directory Structure and Ownership
+
+Ownership decides who may edit a path. Anyone else changes it only through a
+`## CONTRACT CHANGE REQUEST` in their handoff (protocol §6).
 
 ```text
+package.json                     manager   npm workspaces ["frontend"]; root scripts proxy to it
+package-lock.json                regenerated at integration, never hand-merged
+vercel.json                      backend   build/output/headers
+backend/README.md                manager   "no runtime backend, see ADR-001"
 frontend/
-backend/
-tests/
-docs/
+  package.json                   manager   dependencies are pinned here (see below)
+  vite.config.ts                 manager   reads FRONTEND_PORT from the root .env
+  tsconfig.json, eslint.config.js manager
+  index.html                     frontend  must keep the loader gate + boot cover from API.md §2.4 verbatim
+  stickman-lab.html              stickman  dev-only; never in the production build
+  media-src/                     backend   ORIGINAL images (tracked). Owner drops new images here.
+  public/media/                  backend   GENERATED by `npm run media` (tracked; deterministic)
+  public/{favicon.svg,og.jpg,robots.txt,sitemap.xml}  backend
+  src/
+    main.tsx                     frontend
+    app/                         frontend  App.tsx: composes sections, mounts Loader + StickmanLayer (API.md §2.5)
+    sections/                    frontend  Hero, Projects, About, Connect, Footer
+    components/                  frontend  BrowserWindow, PhotoSlot, Picture, Nav, ...
+    hooks/                       frontend  useAttention, useFogReveal
+    styles/                      frontend  tokens.css, global.css
+    config/flags.ts              manager   feature flags (touchStickman: false)
+    content/types.ts             manager   THE CONTENT CONTRACT (types only)
+    content/media.ts             manager   media lookup helper over the generated manifest (contract)
+    content/{site,projects,about,contact}.ts  backend  values (approved copy)
+    content/media.generated.ts   backend   GENERATED manifest
+    content/index.ts             backend   re-exports; frontend imports only from here
+    content/*.test.ts            backend
+    stickman/index.ts            manager   THE STICKMAN CONTRACT (exports + types; stub bodies until replaced)
+    stickman/**                  stickman  everything else under stickman/
+docs/reference/                  manager   approved prototype + wireframes (read-only for agents)
+```
+
+**Dependencies.** All packages the plan needs are installed by the manager's
+scaffold:
+- runtime: react, react-dom, the two fontsource packages;
+- dev: vite, plugin-react, typescript, vitest, jsdom, Testing Library, ESLint with
+  typescript-eslint and react-hooks, sharp.
+
+An agent who truly needs another package adds it on their branch and lists it
+under `### Contracts` in their handoff. The manager resolves `package.json` at
+integration, and the lockfile is regenerated.
 
 ---
 
 ## Model Assignment
 
-Name where the risk actually lives on THIS project, and put the strongest model
-there. Do not inherit a default.
+Where the risk lives on **this** project:
+1. **Visual distinctiveness.** The previous attempt failed exactly here.
+2. **The stickman's feel.** It is subtle, procedural motion that the owner tuned
+   by hand, and that must survive scrolling, touch, and reduced motion.
+3. **Integration of the loader, the cursor, and the page** across two parallel
+   branches.
+
+The data and deploy side is small, mechanical, and fully specified.
 
 | Agent | Model | Effort | Why this project |
 |---|---|---|---|
-| manager | opus | high | |
-| frontend-engineer | | | |
-| backend-engineer | | | |
-| reviewer | sonnet | high | functional gate; visual findings are advisory |
+| manager | opus | high | Owns the contracts that let three branches merge cleanly, and integrates them. |
+| frontend-engineer on `agent/frontend` | opus | high | Visual quality decides the outcome. The brief must be interpreted, not transcribed. |
+| frontend-engineer on `agent/stickman` (slice) | opus | high | The signature element. Feel must match `docs/reference/stickman-cursor-spike.html`, with timing, physics, canvas performance, and a11y edge cases. |
+| backend-engineer on `agent/backend` | sonnet | high | Content tests, the sharp pipeline, metadata, and Vercel config are well specified and test-driven. A stronger model buys little here. |
+| reviewer | **opus** | high | The gate must judge the primary test ("could this be pasted onto another site?") and motion feel at runtime. This overrides the template default (sonnet): launch with `claude --agent reviewer --model opus`. |
 
-Opus-on-frontend is right when visual quality decides the outcome (demo-judged
-work). It is wrong when correctness does (backend-heavy, data-heavy, or
-integration-heavy projects). State the choice and the reason.
+Opus on frontend is right here because the outcome is judged visually, by
+recruiters and by the owner. It would be wrong on a correctness-heavy project;
+this is not one.
 
 ---
 
 ## Ports and Environment
 
-Assigned per worktree by `scripts/bootstrap.sh` so several agents can run at once.
-Never hardcode 3000 or 8000 — read `FRONTEND_PORT` and `BACKEND_PORT` from `.env`.
+Ports are assigned per worktree by `scripts/bootstrap.sh`.
+- `vite.config.ts` reads `FRONTEND_PORT` from the **root** `.env`, with
+  `strictPort: true`.
+- `BACKEND_PORT` and `VITE_API_BASE_URL` are unused (ADR-001). Nothing reads them.
+- Never hardcode 3000, 5173, or 8000.
+
+```bash
+scripts/bootstrap.sh && source .env
+npm run dev            # site on FRONTEND_PORT; the lab page is at /stickman-lab.html
+npm run build          # vite build -> frontend/dist
+npm test               # vitest (content invariants, stickman engine, components)
+npm run lint
+npm run typecheck
+npm run media          # regenerate public/media + media.generated.ts from media-src/
+npm run test:contract  # typecheck + contract tests (used by scripts/contract-test.sh)
+```
 
 ## Deployed Preview
 
-The reviewer prefers a deployed preview over a local worktree, because it removes
-install, ports, `.env`, and database state from the gate's path.
+The reviewer prefers it. `agent/backend` creates the Vercel project, and the
+manager records the URL here and as `PREVIEW_URL` in `.env.example` after
+integration.
 
-Preview URL (set as `PREVIEW_URL` in `.env`):
+Preview URL: _set at first integration_
 
 ## Demo Data
 
-Command that seeds a demonstrable, non-empty state:
+The content is static and committed, so the site is never empty and there is no
+seed step. `bootstrap.sh` will print "no 'seed' script"; that is expected here
+(ADR-001).
+
+## Performance Budget
+
+Checked by the reviewer against the preview:
+- Initial JS ≤ 110 KB gzip.
+- Total initial CSS ≤ 25 KB gzip.
+- Hero image ≤ 250 KB at 1440w, as AVIF.
+- No layout shift from fonts or images; CLS ≤ 0.05.
+- Mobile Lighthouse: Performance ≥ 90, Accessibility ≥ 95.
+- Below-the-fold images use `loading="lazy"` and `decoding="async"`.
+- The stickman's rAF loop does no layout reads per frame other than the cached
+  rects of hovered targets. It pauses when the tab is hidden.
+
+## Testing Strategy
+
+| Area | Kind | Owner |
+|---|---|---|
+| Content invariants: one sentence, no em dash, valid links, media ids exist, alt required, unique ids | vitest, node | backend |
+| Media manifest is current with `media-src/` | vitest, node | backend |
+| Stickman speed law, state machine, loader timing | vitest, TDD (protocol §14) | stickman |
+| Stickman public API surface (exports, prop types) | vitest + `tsc` | stickman |
+| `useAttention` and center-band logic; BrowserWindow and PhotoSlot states; reduced-motion paths | vitest + Testing Library (jsdom) | frontend |
+| Runtime: screenshots at 1440, 768, and 390, plus states and console | browser QA, evidence in `docs/review/` | frontend, then reviewer |
