@@ -114,6 +114,62 @@ describe('computePose', () => {
   });
 });
 
+// Golden angles, each derived by hand from the spike's draw(). [upper, lower] segment angles.
+describe('computePose gait and gesture angles', () => {
+  const seg = (l: Limb) => [angle(l.root, l.joint), angle(l.joint, l.end)];
+  const pose = (speed: number, phase: number, g: Partial<GestureState> = {}, clock = 0) =>
+    computePose({ ...STAND, speed, phase }, { ...NONE, ...g }, REST_POINT_ANGLE, clock);
+
+  it('walk (speed 120, phase π/2): swing 0.5, knee bend 0.15, arm swing 0.45 + rest offsets', () => {
+    // walk 1, run 0, swing 0.5. legs: a = ±0.5; lift = max(0, sin(π/2 ± π/2)) = 0 -> bend 0.15
+    // arms: a = ∓0.45 + (0.08 | −0.04); a2 = a + 0.25 + 0.12
+    const p = pose(120, Math.PI / 2);
+    seg(p.legs[0]).forEach((v, i) => expect(v).toBeCloseTo([0.5, 0.35][i]!, 9));
+    seg(p.legs[1]).forEach((v, i) => expect(v).toBeCloseTo([-0.5, -0.65][i]!, 9));
+    seg(p.arms[0]).forEach((v, i) => expect(v).toBeCloseTo([-0.37, 0][i]!, 9));
+    seg(p.arms[1]).forEach((v, i) => expect(v).toBeCloseTo([0.41, 0.78][i]!, 9));
+  });
+
+  it('full run (speed 720, phase 0): the lifting knee bends by 0.15 + (0.7 + 0.5)', () => {
+    const p = pose(720, 0);
+    seg(p.legs[0]).forEach((v, i) => expect(v).toBeCloseTo([0, -1.35][i]!, 9));
+    seg(p.legs[1]).forEach((v, i) => expect(v).toBeCloseTo([0, -0.15][i]!, 9));
+  });
+
+  it('full run (speed 720, phase π/2): swing 0.85 and the forearm opens by 0.25 + 0.5', () => {
+    // front thigh = 0.85; front arm a = −0.85·0.9 + 0.08 = −0.685, a2 = a + 0.75 + 0.12 = 0.185
+    const p = pose(720, Math.PI / 2);
+    expect(seg(p.legs[0])[0]).toBeCloseTo(0.85, 9);
+    expect(seg(p.arms[0])[1]).toBeCloseTo(0.185, 9);
+  });
+
+  it('slow walk (speed 30): blends by speed / 60', () => {
+    // walk 0.5: swing 0.25; bob = −1·1.4·0.5 = −0.7
+    const p = pose(30, Math.PI / 2);
+    expect(seg(p.legs[0])[0]).toBeCloseTo(0.25, 9);
+    expect(p.hip.y).toBeCloseTo(-16.7, 9);
+  });
+
+  it('seated arms rest at [0.35, 0.9] and [−0.25, 0.3]', () => {
+    const p = pose(0, 0, { sit: 1 });
+    seg(p.arms[0]).forEach((v, i) => expect(v).toBeCloseTo([0.35, 0.9][i]!, 9));
+    seg(p.arms[1]).forEach((v, i) => expect(v).toBeCloseTo([-0.25, 0.3][i]!, 9));
+  });
+
+  it('cheer raises the arms by min(1, cheer·4) and hops only above cheer 0.55', () => {
+    // cheer 0.1 -> c 0.4: front upper arm = 0.08 + (π − 0.5 − 0.08)·0.4
+    expect(seg(pose(0, 0, { cheer: 0.1 }).arms[0])[0]).toBeCloseTo(0.08 + (Math.PI - 0.58) * 0.4, 9);
+    expect(pose(0, 0, { cheer: 0.56 }).hip.y).toBeCloseTo(-16 - 5 * Math.sin((0.44 / 0.45) * Math.PI), 9);
+    expect(pose(0, 0, { cheer: 0.5 }).hip.y).toBeCloseTo(-16, 9);
+  });
+
+  it('the back arm waves in the opposite sense', () => {
+    // clock π/44 -> wave 0.35; back forearm = −(π − 0.5) − 0.35
+    const p = pose(0, 0, { cheer: 0.9 }, Math.PI / 44);
+    expect(seg(p.arms[1])[1]).toBeCloseTo(-(Math.PI - 0.5) - 0.35, 9);
+  });
+});
+
 describe('pointAngleTo', () => {
   // standing shoulder: hip (0,−16) + 11 up = (0,−27) in rig units; size 40 -> 1px per unit
   const s: MotionState = { ...STAND, pos: { x: 100, y: 200 } };
@@ -122,6 +178,15 @@ describe('pointAngleTo', () => {
     expect(pointAngleTo(s, NONE, 40, { x: 300, y: 173 })).toBeCloseTo(Math.PI / 2, 9);
     const left: MotionState = { ...s, facing: -1 };
     expect(pointAngleTo(left, NONE, 40, { x: -100, y: 173 })).toBeCloseTo(Math.PI / 2, 9);
+  });
+
+  it('mirrors the leaning shoulder when he faces left', () => {
+    // full run: lean 0.16, phase 0 so no bob; shoulder in rig units (sin(0.16)·11, −16 − cos(0.16)·11)
+    // facing −1 mirrors x on screen; a target 50 forward (left) and 50 below is π/4
+    const run: MotionState = { ...s, speed: 1150, facing: -1 };
+    const sx = 100 - Math.sin(0.16) * 11;
+    const sy = 200 - 16 - Math.cos(0.16) * 11;
+    expect(pointAngleTo(run, NONE, 40, { x: sx - 50, y: sy + 50 })).toBeCloseTo(Math.PI / 4, 9);
   });
 
   it('is 0 for a target straight below the shoulder and scales with size', () => {
