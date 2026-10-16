@@ -6,6 +6,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
 import { describe, expect, it } from 'vitest';
+import { meanColor, prepareSource } from '../../scripts/media-lib.mjs';
 import { content } from './index';
 import { mediaManifest } from './media.generated';
 
@@ -62,6 +63,23 @@ describe('C-21 media manifest is current', () => {
       if (entry.width !== expected) stale.push(`${id}: manifest says ${entry.width}px wide, the image needs ${expected}px`);
     }
     expect(stale, `These images changed since they were processed. ${RUN_MEDIA}`).toEqual([]);
+  });
+
+  // A replaced image of the same size keeps its width, so also recompute the placeholder (the mean color)
+  // from the current source with the pipeline's own decode recipe. This misses only a replacement with
+  // an identical mean color, such as a mirrored copy.
+  it('every entry was made from the current version of its image', { timeout: 60_000 }, async () => {
+    const stale: string[] = [];
+    for (const [id, file] of sources()) {
+      const entry = entries.find((e) => e.id === id);
+      if (!entry) continue; // reported by the first test
+      const { data, info } = await prepareSource(sharp(file)).raw().toBuffer({ resolveWithObject: true });
+      const placeholder = meanColor(data, info.channels);
+      if (entry.placeholder !== placeholder) {
+        stale.push(`${id}: the image changed (average color ${placeholder}; the manifest has ${entry.placeholder})`);
+      }
+    }
+    expect(stale, `These images were replaced since they were processed. ${RUN_MEDIA}`).toEqual([]);
   });
 
   it('every non-null image in the content points at a manifest entry', () => {
