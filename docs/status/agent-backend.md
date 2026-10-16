@@ -52,8 +52,17 @@ Last updated: 2026-10-16T18:00:00Z
 - [x] Console (?loader=1, headless Chrome 155, virtual 8s): gate ran (data-loader=show), boot cover removed, main not inert, 1 JSON-LD not executed; 1 CSP violation (data: font). Lighthouse mobile: Perf 96, A11y 94 (target-size, frontend), BP 92 (2 CSP violations), SEO n/a (robots fetch 302 behind SSO + Vercel preview noindex). Evidence 938f257.
 - [x] CCR-1 (font inlining vs font-src 'self') + CCR-2 (hash served style) written to docs/handoffs/agent-backend.md; fix for CCR-1 verified locally, NOT committed (vite.config.ts is manager-owned); TASK-304 -> BLOCKED blocked_on: contract
 
+- [x] Review #1 (Critical) fixed: rule tests run on 2 bases (real + owner-edited); RED 56e84e9 (63 fail on owner base) -> GREEN adbdfa6 (139 pass); reviewer's scenarios re-run on real files (updated+1, sec 2 screenshot, sec 3 photo-2, sec 3.4 sixth slot): 138/139, only the real-clock gate flags the future date (correct)
+- [x] Review #3 fixed: C-21 recomputes placeholder via shared prepareSource+meanColor (7a49400 refactor, real media run 0 written; e585ed7 test); same-size replacement now fails C-21 (#bcbcbd vs #e3e3e5..)
+- [x] Review #4 fixed: seo plugin only rewrites /index.html (test 7e..., fix 79564e3); dev server still injects on /
+- [x] Review #5 fixed: CLI hints "rename it to photo-2.jpg" when only the extension case is wrong (test + fix)
+- [x] Review #8 fixed: og.mjs checks budget before writing (8a7b57e), output byte-identical
+- [x] Review #6 verified, not a defect in Chrome: CSP header on the SVG response does not block its dark-mode <style> when used as an image (render identical with/without CSP, stroke #e3e8e5). Firefox/Safari not verified.
+- [x] Review #2 -> CCR-3 in handoff; #7 (Vite native config loader warning) -> known issue
+- [x] Owner guide: HEIC/.JPG advice, "push does not publish" (2003bfb)
+
 ## In progress
-- [ ] Pre-handoff: requesting-code-review over 301-304, fix findings, full verification, verification-before-completion, HANDOFF-1, push
+- [ ] Full verification (bootstrap, test, typecheck, lint, build, contract-test.sh, audit), verification-before-completion, HANDOFF-1, push
 - [ ] TASK-301: code review + verification deferred to the combined pre-handoff pass (status stays IN_PROGRESS until then)
 
 ## Verified

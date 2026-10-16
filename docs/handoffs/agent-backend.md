@@ -61,3 +61,27 @@ blocks. The gate script is served verbatim; Vite minifies the boot style."
 
 **What breaks if unchanged:** nothing today. If someone later "fixes" the test to hash the source, the
 deployed boot cover is blocked.
+
+## CONTRACT CHANGE REQUEST — CCR-3 (TASK-304, API.md §3): `/media` is immutable but its names are not content-hashed
+
+**Status:** open. `vercel.json` implements TASK-304 as written. Raised by the pre-handoff code review.
+
+**Current shape**
+- TASK-304: `Cache-Control: public, max-age=31536000, immutable` on `/media/(.*)`.
+- API.md §3: renditions are named `<id>-<w>.{avif,webp,jpg}`. The name depends only on the source's
+  path and the width, not on its content.
+
+**What breaks:** README §2 tells the owner how to replace a screenshot (for example, a new
+`projects/sageplan.png` of the same width). That keeps every rendition URL the same. Any browser that
+already has the old file, the owner's included, keeps showing it for up to a year without
+revalidating. Vercel's CDN is purged on deploy; browser caches are not.
+
+**Proposed shape**, either of:
+- (a) Preferred: add a short content hash to rendition names, such as `<id>-<w>.<hash8>.<ext>`. This
+  changes the API.md §3 naming, `media.mjs`, and its tests (backend), and nothing for consumers,
+  because the frontend reads URLs only from the manifest.
+- (b) Make `/media/(.*)` revalidating, for example `public, max-age=0, must-revalidate`, and keep
+  `immutable` for `/assets/(.*)`, which Vite does content-hash. This is a one-line change in
+  `vercel.json` plus the CSP test's expectation (backend).
+
+**Why:** `immutable` is only safe on content-addressed URLs.
