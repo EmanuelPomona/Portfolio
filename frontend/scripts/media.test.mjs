@@ -261,6 +261,27 @@ describe('npm run media (pipeline)', { timeout: 60_000 }, () => {
     await expect(readFile(ws.manifest)).rejects.toThrow();
   });
 
+  it('an uppercase extension gets a rename hint', async () => {
+    const ws = await workspace();
+    await flatPng(path.join(ws.src, 'life', 'photo-2.JPG'));
+
+    const failure = await ws.run().then(() => null, (error) => error);
+
+    expect(failure).toMatchObject({ code: 1 });
+    expect(failure.stderr).toContain('media-src/life/photo-2.JPG: name must be lowercase kebab-case');
+    expect(failure.stderr).toContain('rename it to photo-2.jpg');
+  });
+
+  it('gives no rename hint when the name itself is wrong too', async () => {
+    const ws = await workspace();
+    await flatPng(path.join(ws.src, 'My Photo.JPG'));
+
+    const failure = await ws.run().then(() => null, (error) => error);
+
+    expect(failure.stderr).toContain('media-src/My Photo.JPG: name must be lowercase kebab-case');
+    expect(failure.stderr).not.toContain('rename it to');
+  });
+
   it('an unsupported file type fails the run and names the file', async () => {
     const ws = await workspace();
     await writeFile(path.join(ws.src, 'photo-3.heic'), 'heic bytes');
