@@ -1,0 +1,70 @@
+/*
+ * A section is a page of the plate book: wide fog margins, one idea, the heading hung from the
+ * same gutter as the name. Its backdrop is the evergreen photograph dissolving into Mist on
+ * every edge (alpha masks only: the brief's justified gradient exception).
+ */
+.section {
+  position: relative;
+  isolation: isolate;
+  padding-block: var(--space-9);
+  padding-inline: var(--gutter);
+}
+
+.body {
+  max-width: var(--page-max);
+  margin-inline: auto;
+}
+
+.header {
+  margin-block-end: var(--space-8);
+}
+
+.heading {
+  font-family: var(--font-display);
+  font-size: var(--step-5);
+  line-height: 1;
+  letter-spacing: var(--tracking-display);
+  color: var(--color-ink);
+}
+
+.backdrop {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-end: 0;
+  z-index: -1;
+  width: min(100%, 72rem);
+  /* Never taller than its own section: the mask (in % of this box) then always finishes
+     dissolving inside the section, instead of the photo spilling into the next one. */
+  max-height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+  /* A section can mirror its photograph (-1) so the dense pines fall behind something opaque
+     rather than behind its text. The mask mirrors with it, so the inner edge still dissolves. */
+  transform: scaleX(var(--backdrop-flip, 1));
+  /*
+   * Fade in from the section above, hold through the pines, dissolve before the fog runs out.
+   * Horizontally the photo dissolves in from its inner edge (eased, so the ramp shows no band) and,
+   * when a section sets --backdrop-edge-far, out again at its far edge. All stops are % of this box.
+   */
+  --a: var(--backdrop-edge-from, 0%);
+  --b: var(--backdrop-edge-to, 38%);
+  --c: var(--backdrop-edge-far, 100%);
+  mask-image:
+    linear-gradient(to bottom, transparent 0, #000 14%, #000 52%, transparent 100%),
+    linear-gradient(
+      to right,
+      transparent var(--a),
+      rgb(0 0 0 / 0.12) calc(var(--a) + (var(--b) - var(--a)) * 0.25),
+      rgb(0 0 0 / 0.5) calc(var(--a) + (var(--b) - var(--a)) * 0.5),
+      rgb(0 0 0 / 0.88) calc(var(--a) + (var(--b) - var(--a)) * 0.75),
+      #000 var(--b),
+      #000 var(--c),
+      transparent 100%
+    );
+  mask-composite: intersect;
+}
+
+.backdrop img {
+  width: 100%;
+  height: auto;
+}

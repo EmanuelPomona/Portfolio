@@ -1,7 +1,7 @@
 ---
 id: TASK-106
 title: Connect section, footer, polish pass, and full-page evidence
-status: READY
+status: REVIEW
 owner: frontend
 branch: agent/frontend
 priority: HIGH

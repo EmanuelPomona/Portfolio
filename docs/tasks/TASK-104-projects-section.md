@@ -1,7 +1,7 @@
 ---
 id: TASK-104
 title: Projects section with alternating windows and captions
-status: READY
+status: REVIEW
 owner: frontend
 branch: agent/frontend
 priority: HIGH

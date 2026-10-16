@@ -1,15 +1,205 @@
-/* Owner: agent/frontend. Scaffold reset only; TASK-101 replaces it. */
+/* Owner: agent/frontend. Global base: reset, type, links, focus, and the fog-clear reveal. */
+
 *,
 *::before,
 *::after {
   box-sizing: border-box;
 }
+
+html {
+  color-scheme: light; /* the fog is a light page by design; no theme toggle (PRODUCT.md) */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  /* Anchor jumps and keyboard focus land below the fixed nav (WCAG 2.2 focus not obscured). */
+  scroll-padding-top: calc(var(--nav-h) + var(--space-4));
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
 html,
 body {
   margin: 0;
 }
+
+/*
+ * The index.html gate (API.md §2.4) locks scrolling while the loader is up, and nothing clears
+ * data-loader afterwards. <main> is inert exactly while the loader is up (mount contract), so
+ * release the lock as soon as it is not. Without this, first visits could not scroll by wheel,
+ * trackpad, touch, or keys. Specificity (0,2,3) beats the gate's (0,1,2).
+ */
+html[data-loader='show'] body:has(main:not([inert])) {
+  overflow: visible;
+}
+
 body {
-  background: #e3e8e5;
-  color: #242424;
-  font-family: 'Manrope Variable', system-ui, sans-serif;
+  min-height: 100svh;
+  background: var(--color-mist);
+  color: var(--color-ink);
+  font-family: var(--font-text);
+  font-size: var(--step-0);
+  line-height: var(--leading-body);
+  font-weight: 450;
+  font-kerning: normal;
+  font-synthesis: none; /* Instrument Serif has one weight: never fake a bold */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+h4,
+p,
+ul,
+ol,
+figure,
+blockquote {
+  margin: 0;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-weight: 400;
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+ul,
+ol {
+  padding: 0;
+  list-style: none;
+}
+
+img,
+picture,
+svg,
+canvas {
+  display: block;
+  max-width: 100%;
+}
+
+img {
+  height: auto;
+}
+
+::selection {
+  background: var(--color-forest);
+  color: var(--color-ivory);
+}
+
+/* ---- Links: charcoal with a hairline underline; Deep Forest on hover and focus. ---- */
+a {
+  color: inherit;
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-color: var(--color-hairline-strong);
+  text-underline-offset: 0.24em;
+  transition:
+    color var(--dur-hover) ease-out,
+    text-decoration-color var(--dur-hover) ease-out;
+}
+
+a:hover,
+a:focus-visible {
+  color: var(--color-forest);
+  text-decoration-color: currentColor;
+}
+
+a:active {
+  text-decoration-thickness: 2px;
+}
+
+/* ---- Focus: 2px Deep Forest, 3px offset, on every interactive element. ---- */
+:focus-visible {
+  outline: 2px solid var(--color-forest);
+  outline-offset: 3px;
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/*
+ * ---- Fog-clear reveal (useFogReveal sets data-revealed). ----
+ * data-fog="self": the element itself clears.
+ * data-fog="stagger": its direct children clear in sequence, 0.05s apart.
+ * The animation fills backwards only, so once it ends the element falls back to its base
+ * style: opacity 1 and no filter. Nothing depends on animationend.
+ */
+@keyframes fog-clear {
+  from {
+    opacity: 0;
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+[data-fog='self']:not([data-revealed='true']),
+[data-fog='stagger']:not([data-revealed='true']) > * {
+  opacity: 0;
+}
+
+[data-fog='self'][data-revealed='true'],
+[data-fog='stagger'][data-revealed='true'] > * {
+  animation: fog-clear var(--dur-reveal) var(--ease-out) backwards;
+}
+
+[data-fog='stagger'][data-revealed='true'] > :nth-child(2) {
+  animation-delay: calc(1 * var(--reveal-stagger));
+}
+[data-fog='stagger'][data-revealed='true'] > :nth-child(3) {
+  animation-delay: calc(2 * var(--reveal-stagger));
+}
+[data-fog='stagger'][data-revealed='true'] > :nth-child(4) {
+  animation-delay: calc(3 * var(--reveal-stagger));
+}
+[data-fog='stagger'][data-revealed='true'] > :nth-child(n + 5) {
+  animation-delay: calc(4 * var(--reveal-stagger));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-fog],
+  [data-fog] > * {
+    opacity: 1 !important;
+    animation: none !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media print {
+  [data-fog],
+  [data-fog] > * {
+    opacity: 1 !important;
+    animation: none !important;
+  }
 }

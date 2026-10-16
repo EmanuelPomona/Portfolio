@@ -1,0 +1,203 @@
+/*
+ * About (wireframe 3): a lede set like a book's introduction, this semester's two classes, then a
+ * loose overlapping scatter of prints. Not a grid.
+ */
+
+/*
+ * Stacked widths run the lede across the photo's pine cluster (measured 1.7:1 at 768px), so there
+ * the photograph dissolves before the pines. From 1024px the lede ends short of them and they stay.
+ */
+@media (width < 64rem) {
+  .section {
+    --backdrop-edge-far: 52%;
+  }
+}
+
+.intro {
+  max-width: 46rem;
+}
+
+.lede {
+  max-width: 22em;
+  font-family: var(--font-display);
+  font-size: var(--step-3);
+  line-height: 1.22;
+  letter-spacing: -0.005em;
+  text-wrap: pretty;
+}
+
+.classes {
+  margin-block-start: var(--space-7);
+}
+
+.label {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--color-ink-2);
+}
+
+.list {
+  margin-block-start: var(--space-3);
+  padding-block-start: var(--space-3);
+  border-block-start: 1px solid var(--color-hairline);
+  font-size: var(--step-1);
+  line-height: 1.5;
+}
+
+/*
+ * ---- The collage ----
+ * Each spread holds up to five prints, positioned by index from a recipe per breakpoint (phone,
+ * tablet, desktop). Coordinates are in hundredths of the collage width (cqw), so the scatter
+ * keeps its shape at any width inside a breakpoint. A spread is exactly as tall as its lowest
+ * print, computed from each print's own ratio (--r0..--r4, set inline), so a different aspect or
+ * a missing slot never spills into the next section. Overlap is a little, never a lot; the
+ * attended print rises above its neighbours, within the collage only.
+ */
+.collage {
+  container-type: inline-size;
+  margin-block-start: var(--space-8);
+}
+
+.spread {
+  /* Phone: an offset two-column arrangement, overlapping a little. */
+  --x0: 0;
+  --y0: 0;
+  --w0: 78;
+  --x1: 50;
+  --y1: 50;
+  --w1: 48;
+  --x2: 2;
+  --y2: 70;
+  --w2: 46;
+  --x3: 8;
+  --y3: 100;
+  --w3: 42;
+  --x4: 44;
+  --y4: 140;
+  --w4: 54;
+
+  --b0: calc(var(--y0) + var(--w0) / var(--r0));
+  --b1: calc(var(--y1) + var(--w1) / var(--r1));
+  --b2: calc(var(--y2) + var(--w2) / var(--r2));
+  --b3: calc(var(--y3) + var(--w3) / var(--r3));
+  --b4: calc(var(--y4) + var(--w4) / var(--r4));
+
+  position: relative;
+  isolation: isolate; /* the collage's own stacking: far below --z-nav */
+  height: calc(
+    max(var(--b0, 0), var(--b1, 0), var(--b2, 0), var(--b3, 0), var(--b4, 0)) * 1cqw + var(--room, 0px)
+  );
+}
+
+/*
+ * Prints overlap only while there is nothing under them to hide. Once a spread has captions they
+ * need the space beneath each print, so the spread loosens from the overlapping scatter into a
+ * staggered flow: same order, same widths, a small lift per position, no overlap, every caption
+ * readable under its own print (TASK-105: overlap must not hide captions).
+ */
+.spread[data-captioned='true'] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-6) var(--space-5);
+  height: auto;
+}
+
+.spread[data-captioned='true'] .place {
+  position: relative;
+  left: auto;
+  top: auto;
+  margin-block-start: calc(var(--lift) * 1cqw);
+}
+
+.spread + .spread {
+  margin-block-start: var(--space-8);
+}
+
+.place {
+  position: absolute;
+  left: calc(var(--x) * 1cqw);
+  top: calc(var(--y) * 1cqw);
+  width: calc(var(--w) * 1cqw);
+  z-index: 1;
+}
+
+.place:has([data-attended='true']),
+.place:focus-within {
+  z-index: 2;
+}
+
+/* --lift: the stagger a print keeps in a captioned (flowing) spread. */
+.p0 {
+  --x: var(--x0);
+  --y: var(--y0);
+  --w: var(--w0);
+  --lift: 0;
+}
+.p1 {
+  --x: var(--x1);
+  --y: var(--y1);
+  --w: var(--w1);
+  --lift: 4;
+}
+.p2 {
+  --x: var(--x2);
+  --y: var(--y2);
+  --w: var(--w2);
+  --lift: 1.5;
+}
+.p3 {
+  --x: var(--x3);
+  --y: var(--y3);
+  --w: var(--w3);
+  --lift: 5;
+}
+.p4 {
+  --x: var(--x4);
+  --y: var(--y4);
+  --w: var(--w4);
+  --lift: 2.5;
+}
+
+/* Tablet: the scatter opens up but keeps two loose rows. */
+@media (min-width: 48rem) {
+  .spread {
+    --x0: 0;
+    --y0: 0;
+    --w0: 52;
+    --x1: 60;
+    --y1: 6;
+    --w1: 34;
+    --x2: 4;
+    --y2: 36;
+    --w2: 36;
+    --x3: 38;
+    --y3: 46;
+    --w3: 26;
+    --x4: 56;
+    --y4: 64;
+    --w4: 40;
+  }
+}
+
+/* Desktop: wireframe 3. Large landscape, tall portrait, then small, tall, and wide below. */
+@media (min-width: 64rem) {
+  .spread {
+    --x0: 6;
+    --y0: 0;
+    --w0: 40;
+    --x1: 62;
+    --y1: 4;
+    --w1: 24;
+    --x2: 0;
+    --y2: 38;
+    --w2: 28;
+    --x3: 25;
+    --y3: 27;
+    --w3: 18;
+    --x4: 52;
+    --y4: 38;
+    --w4: 33;
+  }
+}

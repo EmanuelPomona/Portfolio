@@ -1,0 +1,163 @@
+/*
+ * Stock dark macOS browser chrome, simplified to the traffic lights and the address field
+ * (brief, "The browser-window reference"). "Black until you hover", in the owner's words.
+ * At rest: screen off, lights gray, URL dim (still 4.5:1). On attention (hover, keyboard focus,
+ * or the touch center band) the lights color in, the URL brightens, one elevation shadow appears
+ * (the brief's justified exception, windows only), and the screen lifts out of black.
+ * Transitions take --dur-attend in and --dur-release out: the destination state's duration wins.
+ */
+.window {
+  --light-size: clamp(9px, 0.4rem + 0.35vw, 12px);
+  --chrome-h: clamp(30px, 1.45rem + 0.85vw, 40px);
+  display: block;
+  border: 1px solid color-mix(in srgb, var(--color-chrome) 88%, var(--color-mist));
+  border-radius: var(--radius-window);
+  background: var(--color-chrome);
+  color: inherit;
+  text-decoration: none;
+  overflow: hidden; /* the screen's square corners follow the window's */
+  box-shadow: none;
+  transition: box-shadow var(--dur-release) var(--ease-out);
+}
+
+.chrome {
+  display: grid;
+  grid-template-columns: 1fr minmax(0, auto) 1fr;
+  align-items: center;
+  gap: var(--space-3);
+  height: var(--chrome-h);
+  padding-inline: calc(var(--chrome-h) * 0.38);
+}
+
+.lights {
+  display: flex;
+  gap: calc(var(--light-size) * 0.66);
+}
+
+.light {
+  width: var(--light-size);
+  height: var(--light-size);
+  border-radius: 50%;
+  background: var(--color-chrome-light);
+  transition: background-color var(--dur-release) var(--ease-out);
+}
+
+.address {
+  justify-self: center;
+  max-width: 100%;
+  padding: 0.28em 1.1em;
+  border-radius: var(--radius-field);
+  background: color-mix(in srgb, var(--color-screen-off) 70%, var(--color-chrome));
+  font-size: clamp(0.6875rem, 0.62rem + 0.2vw, 0.8125rem);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 1.4;
+  color: #9aa09d; /* dim, never illegible: 6.54:1 on the field */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color var(--dur-release) var(--ease-out);
+}
+
+.screen {
+  position: relative;
+  display: block;
+  aspect-ratio: 16 / 10;
+  background: var(--color-screen-off);
+  transition: background-color var(--dur-release) var(--ease-out);
+}
+
+/* The screen's glass: near-black at rest, gone on attention. Opacity only, so it composites. */
+.screen::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--color-screen-off);
+  opacity: 0.86;
+  pointer-events: none;
+  transition: opacity var(--dur-release) var(--ease-out);
+}
+
+.cover {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center; /* screenshots read from the top, like the page they show */
+  filter: grayscale(1);
+  transition: filter var(--dur-release) var(--ease-out);
+}
+
+.empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: var(--step--1);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: #8a8f8c; /* 5.5:1 on the screen at rest */
+  transition: color var(--dur-release) var(--ease-out);
+}
+
+/* The empty screen has no photograph to reveal, so its glass is the flat panel itself. */
+.screen:has(.empty)::after {
+  display: none;
+}
+
+/* ---- Attention ---- */
+.window[data-state='attention'] {
+  box-shadow: var(--shadow-window);
+  transition-duration: var(--dur-attend);
+}
+
+.window[data-state='attention'] .light,
+.window[data-state='attention'] .address,
+.window[data-state='attention'] .screen,
+.window[data-state='attention'] .screen::after,
+.window[data-state='attention'] .cover,
+.window[data-state='attention'] .empty {
+  transition-duration: var(--dur-attend);
+}
+
+.window[data-state='attention'] .light:nth-child(1) {
+  background: var(--color-light-red);
+}
+.window[data-state='attention'] .light:nth-child(2) {
+  background: var(--color-light-yellow);
+}
+.window[data-state='attention'] .light:nth-child(3) {
+  background: var(--color-light-green);
+}
+
+.window[data-state='attention'] .address {
+  color: var(--color-mist);
+}
+
+.window[data-state='attention'] .screen:has(.empty) {
+  background: var(--color-fog-panel); /* the flat fog-tone panel; never a photograph */
+}
+
+.window[data-state='attention'] .empty {
+  color: var(--color-ink-2);
+}
+
+.window[data-state='attention'] .screen::after {
+  opacity: 0;
+}
+
+.window[data-state='attention'] .cover {
+  filter: none;
+}
+
+/* Phones: no balancing spacer, so the address field gets the whole bar after the lights. */
+@media (max-width: 40rem) {
+  .chrome {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .address {
+    justify-self: stretch;
+    text-align: center;
+  }
+}
