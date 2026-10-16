@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stickman cursor spike (approved reference)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root { --ink:#242424; --ivory:#F8F9F7; --mist:#E3E8E5; --forest:#0F2E24; }
+  * { box-sizing:border-box; margin:0; }
+  html, body { height:100%; }
+  body { background:var(--mist); color:var(--ink); font-family:Manrope, system-ui, sans-serif; overflow:hidden; cursor:none; }
+  .hero { position:fixed; inset:0; background:url(../../frontend/public/media/backgrounds/alpine-valley.jpg) center/cover no-repeat; }
+  nav { position:absolute; top:30px; left:0; right:0; display:flex; justify-content:center; gap:44px; font-size:14px; letter-spacing:.02em; }
+  a { color:var(--ink); text-decoration:none; border-bottom:1px solid currentColor; padding-bottom:2px; cursor:none; }
+  .name { position:absolute; left:6vw; top:17vh; }
+  .name h1 { font-family:'Instrument Serif', serif; font-weight:400; font-size:clamp(52px,7.2vw,108px); line-height:.9; letter-spacing:-.02em; }
+  .name p { margin-top:16px; font-size:15px; }
+  .links { margin-top:22px; display:flex; gap:22px; font-size:14px; }
+  .work { position:absolute; right:6vw; bottom:12vh; display:flex; align-items:center; gap:28px; }
+  .work h2 { font-family:'Instrument Serif', serif; font-style:italic; font-weight:400; font-size:44px; }
+  .frame { width:min(400px,36vw); border-radius:10px; overflow:hidden; background:#1c1c1c; border:1px solid #0d0d0d; }
+  .chrome { height:30px; display:flex; align-items:center; gap:7px; padding:0 12px; background:#2a2a2a; }
+  .tl { width:10px; height:10px; border-radius:50%; background:#474747; transition:background .35s; }
+  .frame:hover .r { background:#ff5f57; } .frame:hover .y { background:#febc2e; } .frame:hover .g { background:#28c840; }
+  .url { margin-left:14px; flex:1; height:18px; border-radius:5px; background:#1d1d1d; color:#6f6f6f; font-size:11px; display:flex; align-items:center; padding-left:10px; }
+  .screen { aspect-ratio:16/10; background:#0e0e0e url(../../frontend/public/media/backgrounds/evergreen-forest.jpg) center/cover; filter:brightness(.14); transition:filter .7s ease; display:grid; place-items:center; font-size:12px; letter-spacing:.08em; text-transform:uppercase; }
+  .frame:hover .screen { filter:brightness(1); }
+  .screen span { opacity:0; transition:opacity .7s; color:#242424; background:rgba(248,249,247,.8); padding:4px 8px; border-radius:4px; }
+  .frame:hover .screen span { opacity:1; }
+
+  canvas#stick { position:fixed; inset:0; pointer-events:none; z-index:10; mix-blend-mode:difference; }
+  #mark { position:fixed; left:0; top:0; pointer-events:none; z-index:11; mix-blend-mode:difference; transform:translate(-100px,-100px); }
+  #mark.dot { width:4px; height:4px; margin:-2px 0 0 -2px; border-radius:50%; background:#fff; }
+  #mark.ring { width:11px; height:11px; margin:-5.5px 0 0 -5.5px; border-radius:50%; border:1.2px solid #fff; }
+  #mark.none { display:none; }
+  body.over-panel #mark { opacity:0; }
+
+  .panel { position:fixed; left:16px; bottom:16px; z-index:20; background:var(--ivory); border:1px solid #c9d0cc; border-radius:8px; padding:10px 12px 8px; font-size:11px; cursor:auto; }
+  .panel, .panel * { cursor:pointer; }
+  .row { display:flex; gap:6px; align-items:center; margin:5px 0; }
+  .row > span { width:70px; color:#5a605d; text-transform:uppercase; letter-spacing:.09em; font-size:10px; }
+  .row button { font:inherit; border:1px solid #bcc4c0; background:transparent; border-radius:4px; padding:3px 8px; color:var(--ink); }
+  .row button[aria-pressed="true"] { background:var(--ink); color:var(--ivory); border-color:var(--ink); }
+  .hint { position:fixed; right:16px; top:16px; z-index:20; max-width:270px; background:var(--ivory); border:1px solid #c9d0cc; border-radius:8px; padding:10px 12px; font-size:12px; line-height:1.5; cursor:auto; }
+  .hint b { font-weight:600; }
+</style>
+</head>
+<body>
+  <div class="hero">
+    <nav><a href="#">Home</a><a href="#">Projects</a><a href="#">About</a><a href="#">Contact</a></nav>
+    <div class="name">
+      <h1>Emanuel Ling</h1>
+      <p>CS + Math @ Pomona College</p>
+      <div class="links"><a href="#">LinkedIn</a><a href="#">Email</a></div>
+    </div>
+    <div class="work">
+      <h2>SagePlan</h2>
+      <div class="frame">
+        <div class="chrome"><i class="tl r"></i><i class="tl y"></i><i class="tl g"></i><div class="url">sageplan.app</div></div>
+        <div class="screen"><span>screenshot goes here</span></div>
+      </div>
+    </div>
+  </div>
+
+  <canvas id="stick" aria-hidden="true"></canvas>
+  <div id="mark" class="dot" aria-hidden="true"></div>
+
+  <div class="hint">
+    <b>Approved reference, 2026-10-16.</b> Owner-tuned: 32px, ring, hurries when far. Move your mouse and he walks to it.<br>
+    Click a link: he cheers.<br>
+    Rest on a link: he points at it.<br>
+    Leave him alone 5s: he sits down.
+  </div>
+
+  <div class="panel" id="panel">
+    <div class="row"><span>Size</span>
+      <button data-k="size" data-v="28" data-choice="size-28">28px</button>
+      <button data-k="size" data-v="32" data-choice="size-32">32px</button>
+      <button data-k="size" data-v="36" data-choice="size-36">36px</button>
+    </div>
+    <div class="row"><span>Pace</span>
+      <button data-k="speed" data-v="stroll" data-choice="pace-stroll">Stroll</button>
+      <button data-k="speed" data-v="walk" data-choice="pace-walk">Walk</button>
+      <button data-k="speed" data-v="hurry" data-choice="pace-hurry">Hurries when far</button>
+    </div>
+    <div class="row"><span>Click point</span>
+      <button data-k="mark" data-v="none" data-choice="mark-none">None</button>
+      <button data-k="mark" data-v="dot" data-choice="mark-dot">Tiny dot</button>
+      <button data-k="mark" data-v="ring" data-choice="mark-ring">Ring</button>
+    </div>
+  </div>
+
+<script>
+(() => {
+  const S = { size: 32, speed: 'hurry', mark: 'ring' };
+  const cv = document.getElementById('stick'), g = cv.getContext('2d');
+  const mark = document.getElementById('mark'), panel = document.getElementById('panel');
+  let W, H, dpr;
+  function resize() {
+    dpr = Math.min(2, window.devicePixelRatio || 1); W = innerWidth; H = innerHeight;
+    cv.width = W * dpr; cv.height = H * dpr; cv.style.width = W + 'px'; cv.style.height = H + 'px';
+  }
+  addEventListener('resize', resize); resize();
+
+  // ---- controls ----
+  function syncPanel() {
+    panel.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(String(S[b.dataset.k]) === b.dataset.v)));
+    mark.className = S.mark;
+  }
+  panel.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    S[b.dataset.k] = b.dataset.k === 'size' ? Number(b.dataset.v) : b.dataset.v; syncPanel();
+  });
+  panel.addEventListener('pointerenter', () => document.body.classList.add('over-panel'));
+  panel.addEventListener('pointerleave', () => document.body.classList.remove('over-panel'));
+  syncPanel();
+
+  // ---- input ----
+  const target = { x: W * 0.42, y: H * 0.7 };
+  const man = { x: W * 0.42, y: H * 0.7, spd: 0, face: 1, phase: 0, idle: 0, sit: 0, cheer: 0, point: 0, hoverEl: null };
+  const interactive = el => el && el.closest && el.closest('a, .frame') && !el.closest('.panel');
+  addEventListener('pointermove', e => {
+    target.x = e.clientX; target.y = e.clientY;
+    mark.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+    man.hoverEl = interactive(e.target) ? e.target.closest('a, .frame') : null;
+  }, { passive: true });
+  addEventListener('pointerdown', e => {
+    if (interactive(e.target)) { man.cheer = 1; man.idle = 0; }
+  });
+  document.querySelectorAll('a').forEach(a => a.addEventListener('click', e => e.preventDefault()));
+
+  // ---- motion ----
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const lerp = (a, b, t) => a + (b - a) * t;
+  function speedFor(dist) {
+    if (S.speed === 'stroll') return 85;
+    if (S.speed === 'walk') return 180;
+    return Math.min(1150, 150 + dist * 2.4);
+  }
+
+  let last = performance.now(), clock = 0;
+  function frame(now) {
+    const dt = Math.min(0.05, (now - last) / 1000); last = now; clock += dt;
+    const dx = target.x - man.x, dy = target.y - man.y, dist = Math.hypot(dx, dy);
+    let desired = dist > 1.2 ? Math.min(speedFor(dist), dist * 7) : 0;
+    man.spd += (desired - man.spd) * Math.min(1, dt * 10);
+    if (dist > 0.01) { const step = Math.min(dist, man.spd * dt); man.x += dx / dist * step; man.y += dy / dist * step; }
+    if (Math.abs(dx) > 1.5 && man.spd > 6) man.face = dx > 0 ? 1 : -1;
+    const moving = man.spd > 8;
+    man.phase += (man.spd * dt) / (S.size * 0.5);
+    man.idle = moving ? 0 : man.idle + dt;
+    man.sit += ((man.idle > 5 ? 1 : 0) - man.sit) * Math.min(1, dt * 4);
+    man.cheer = Math.max(0, man.cheer - dt * 1.4);
+    const wantPoint = man.hoverEl && !moving && man.cheer === 0 && dist < S.size * 1.5 ? 1 : 0;
+    man.point += (wantPoint - man.point) * Math.min(1, dt * 8);
+    draw();
+    requestAnimationFrame(frame);
+  }
+
+  // ---- rig (local units: figure is 40 units tall, feet at origin) ----
+  function limb(o, a1, l1, a2, l2) {
+    const k = { x: o.x + Math.sin(a1) * l1, y: o.y + Math.cos(a1) * l1 };
+    const f = { x: k.x + Math.sin(a2) * l2, y: k.y + Math.cos(a2) * l2 };
+    g.beginPath(); g.moveTo(o.x, o.y); g.lineTo(k.x, k.y); g.lineTo(f.x, f.y); g.stroke();
+  }
+  function draw() {
+    g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
+    const k = S.size / 40;
+    const linePx = S.size < 15 ? 1.15 : S.size < 22 ? 1.45 : 1.8;
+    g.save(); g.translate(man.x, man.y); g.scale(k * man.face, k);
+    g.strokeStyle = '#fff'; g.lineCap = 'round'; g.lineJoin = 'round'; g.lineWidth = linePx / k;
+
+    const walk = clamp(man.spd / 60, 0, 1), run = clamp((man.spd - 220) / 500, 0, 1) * walk;
+    const ph = man.phase, swing = (0.5 + 0.35 * run) * walk;
+    const sit = man.sit * (1 - walk);
+    const c = man.cheer > 0 ? Math.min(1, man.cheer * 4) : 0;
+    const hop = man.cheer > 0.55 ? Math.sin((1 - man.cheer) / 0.45 * Math.PI) * 5 : 0;
+    const bob = -Math.abs(Math.sin(ph)) * 1.4 * walk;
+    const lean = 0.16 * run;
+    const hip = { x: 0, y: -16 + bob + sit * 8 - hop };
+    const up = (len) => ({ x: hip.x + Math.sin(lean) * len, y: hip.y - Math.cos(lean) * len });
+    const shoulder = up(11), neck = up(13.2), head = up(17.4);
+
+    // legs
+    for (const s of [1, -1]) {
+      let a = s * Math.sin(ph) * swing;
+      let bend = (0.15 + Math.max(0, Math.sin(ph + (s > 0 ? Math.PI / 2 : -Math.PI / 2))) * (0.7 + 0.5 * run)) * walk;
+      let a2 = a - bend;
+      a = lerp(a, 1.45, sit); a2 = lerp(a2, 0.05, sit);
+      limb(hip, a, 8, a2, 8);
+    }
+    // torso + head
+    g.beginPath(); g.moveTo(hip.x, hip.y); g.lineTo(neck.x, neck.y); g.stroke();
+    g.beginPath(); g.arc(head.x, head.y, 3.9, 0, Math.PI * 2); g.stroke();
+
+    // arms
+    let pointAng = 1.2;
+    if (man.hoverEl) {
+      const r = man.hoverEl.getBoundingClientRect();
+      const sx = man.x + shoulder.x * k * man.face, sy = man.y + shoulder.y * k;
+      pointAng = Math.atan2((r.left + r.width / 2 - sx) * man.face, r.top + r.height / 2 - sy);
+    }
+    for (const s of [1, -1]) {
+      let a = -s * Math.sin(ph) * swing * 0.9 + (s > 0 ? 0.08 : -0.04);
+      let a2 = a + (0.25 + 0.5 * run) * walk + 0.12;
+      a = lerp(a, s > 0 ? 0.35 : -0.25, sit); a2 = lerp(a2, s > 0 ? 0.9 : 0.3, sit);
+      const upA = s > 0 ? Math.PI - 0.5 : -(Math.PI - 0.5);
+      const wave = Math.sin(clock * 22) * 0.35;
+      a = lerp(a, upA, c); a2 = lerp(a2, upA + (s > 0 ? wave : -wave), c);
+      if (s > 0) { a = lerp(a, pointAng, man.point); a2 = lerp(a2, pointAng, man.point); }
+      limb(shoulder, a, 6.4, a2, 6);
+    }
+    g.restore();
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
