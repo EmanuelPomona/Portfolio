@@ -202,7 +202,16 @@ The reviewer prefers it. `agent/backend` creates the Vercel project, and the
 manager records the URL here and as `PREVIEW_URL` in `.env.example` after
 integration.
 
-Preview URL: _set at first integration_
+Preview URL: https://emanuel-ling-mij8hp576-team-boh-buh.vercel.app (integration round 1,
+`main` @ `3977ba4`, deployment `dpl_3z5XCEwCBied9dY6Gm1xYofpY1K3`).
+
+- It is behind Vercel Authentication. Open it while logged in to Vercel, or use
+  `vercel curl <path> --deployment <url>`.
+- Vercel injects its Toolbar script into previews, which the CSP blocks. That is a
+  preview-only owner setting, not the site.
+- Production (`https://emanuel-ling.vercel.app`) still serves the walking skeleton from
+  the project's first deployment. Promoting is the owner's decision; nobody runs
+  `--prod` on their behalf.
 
 ## Demo Data
 

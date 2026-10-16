@@ -1,0 +1,143 @@
+M-304 CSP console evidence (TASK-304), main @ 3977ba4, integration round 1, 2026-10-16
+
+Preview:   https://emanuel-ling-mij8hp576-team-boh-buh.vercel.app (target preview, deployment
+           dpl_3z5XCEwCBied9dY6Gm1xYofpY1K3, built from a clean `git archive` of main @ 3977ba4)
+Served vs local (fetched with `vercel curl`, sha256):
+  assets/index-xE03CyjF.js    SAME as frontend/dist
+  assets/index-CNAHTJPp.css   SAME as frontend/dist; 0 data:font URIs (ADR-008)
+  index.html                  identical except one line Vercel injects into previews only:
+                              <script ... src="https://vercel.live/_next-live/feedback/feedback.js">
+                              (the Vercel Toolbar; owner setting, not the site; TASK-304 criterion amended)
+Browser run: the protected preview was NOT opened in a browser (that needs the project's bypass
+           secret, which the manager chose not to retrieve). Instead the identical frontend/dist was
+           served on localhost:4410 by a static server that applies vercel.json's headers verbatim
+           (CSP, nosniff, referrer, permissions, cache), and driven in headless Chrome 155 over CDP:
+           ?loader=1 at 1440 (loader, stickman, window hover, wheel, nav click, full-page reveal),
+           768, 390 with touch emulation, reduced motion (?loader=1), forced colors.
+securitypolicyviolation events (listener installed before any page script): 0
+Console entries (console API, exceptions, Log domain, failed or >=400 requests): 0
+
+== Console log ==
+(no entries)
+
+== Results ==
+{
+  "loader": {
+    "mode": "show",
+    "progressbar": true,
+    "valuenow": "100",
+    "mainInert": true,
+    "mainReleasedMsAfterLoad": 1217,
+    "msSinceNavigate": 1718
+  },
+  "afterLoader": {
+    "mode": "skip",
+    "bootCover": false,
+    "mainInert": false,
+    "ariaBusy": "false",
+    "seen": "1",
+    "h1": "Emanuel Ling",
+    "h2": [
+      "Projects",
+      "About",
+      "Contact"
+    ],
+    "sections": [
+      "home",
+      "projects",
+      "about",
+      "contact"
+    ]
+  },
+  "stickmanBeforeMove": false,
+  "stickmanAfterMove": {
+    "cls": true,
+    "canvas": 1,
+    "ring": true,
+    "canvasHidden": "true",
+    "hit": "DIV"
+  },
+  "windows": [
+    {
+      "label": "SagePlan, Live site, sageplan.vercel.app",
+      "href": "https://sageplan.vercel.app/",
+      "target": "_blank",
+      "rel": "noopener noreferrer",
+      "visible": "sageplan.vercel.appscreenshot soon",
+      "labelInName": true,
+      "state": "rest"
+    },
+    {
+      "label": "StreetSafe: LA, Code, github.com/EmanuelPomona/Street-Safe-LA",
+      "href": "https://github.com/EmanuelPomona/Street-Safe-LA",
+      "target": "_blank",
+      "rel": "noopener noreferrer",
+      "visible": "github.com/EmanuelPomona/Street-Safe-LAscreenshot soon",
+      "labelInName": true,
+      "state": "rest"
+    },
+    {
+      "label": "Revelation Youth, Live site, revelation-youth.vercel.app",
+      "href": "https://revelation-youth.vercel.app/",
+      "target": "_blank",
+      "rel": "noopener noreferrer",
+      "visible": "revelation-youth.vercel.appscreenshot soon",
+      "labelInName": true,
+      "state": "rest"
+    },
+    {
+      "label": "Snake AI, Code, github.com/EmanuelPomona/Snake-AI",
+      "href": "https://github.com/EmanuelPomona/Snake-AI",
+      "target": "_blank",
+      "rel": "noopener noreferrer",
+      "visible": "github.com/EmanuelPomona/Snake-AIscreenshot soon",
+      "labelInName": true,
+      "state": "rest"
+    }
+  ],
+  "attention": "attention",
+  "restAfterLeave": "rest",
+  "wheel": {
+    "scrollY": 1200,
+    "bodyOverflowY": "visible"
+  },
+  "navClick": {
+    "hash": "#about",
+    "current": [
+      "About"
+    ]
+  },
+  "desktop1440": {
+    "pageHeight": 6460,
+    "overflow": 0
+  },
+  "csp1440": [],
+  "tablet768": {
+    "mode": "skip",
+    "pageHeight": 6671,
+    "overflow": 0
+  },
+  "mobile390": {
+    "coarse": true,
+    "stickmanClass": false,
+    "stickmanCanvas": 0,
+    "navOneLine": {
+      "tops": [
+        6
+      ],
+      "minHeight": 44,
+      "right": 334.140625
+    },
+    "pageHeight": 5301,
+    "overflow": 0
+  },
+  "reduced": {
+    "mode": "fade",
+    "releasedMs": 265,
+    "stickmanClass": false,
+    "runningAnimations": 0
+  },
+  "forcedColors": {
+    "stickmanClass": false
+  }
+}
