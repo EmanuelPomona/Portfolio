@@ -111,6 +111,14 @@ describe('StickmanLayer', () => {
     expect(html.classList.contains('stickman-cursor')).toBe(false);
   });
 
+  it('on a coarse pointer with touch=true runs the walker: a canvas, no ring, native touch untouched', () => {
+    liveMedia({ [COARSE]: true });
+    const { container } = render(<StickmanLayer touch={true} />);
+    expect(container.querySelector('canvas.stickman-canvas')).toHaveAttribute('aria-hidden', 'true');
+    expect(container.querySelector('.stickman-ring')).toBeNull();
+    expect(html.classList.contains('stickman-cursor')).toBe(false);
+  });
+
   it('keeps the native cursor when the browser has no 2D canvas', () => {
     delete g.CanvasRenderingContext2D;
     liveMedia({ [FINE]: true });

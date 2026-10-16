@@ -5,6 +5,7 @@ import type { StickmanLayerProps } from '../types';
 import { ACTIVATION_MEDIA, resolveActivation, type Activation } from './activation';
 import { createCursorController } from './controller';
 import { registerCursorHandoff } from './cursorChannel';
+import { TOUCH_SIZE, createTouchWalker } from './touchWalker';
 import './stickman.css';
 
 /** The owner's verdict: "for computers in full screen 32 px is perfect". */
@@ -49,8 +50,13 @@ export function StickmanLayer({ touch }: StickmanLayerProps) {
   const ringRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (mode !== 'desktop') return;
     const canvas = canvasRef.current;
+    if (mode === 'touch' && canvas) {
+      const walker = createTouchWalker(canvas, { size: TOUCH_SIZE });
+      walker.start();
+      return () => walker.stop();
+    }
+    if (mode !== 'desktop') return;
     const ring = ringRef.current;
     if (!canvas || !ring) return;
     const cursor = createCursorController(canvas, ring, { size: DESKTOP_SIZE });
@@ -62,11 +68,11 @@ export function StickmanLayer({ touch }: StickmanLayerProps) {
     };
   }, [mode]);
 
-  if (mode !== 'desktop') return null;
+  if (mode === 'off') return null;
   return (
     <>
       <canvas ref={canvasRef} className="stickman-canvas" aria-hidden="true" />
-      <div ref={ringRef} className="stickman-ring" aria-hidden="true" />
+      {mode === 'desktop' && <div ref={ringRef} className="stickman-ring" aria-hidden="true" />}
     </>
   );
 }
