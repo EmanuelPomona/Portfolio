@@ -63,6 +63,21 @@ async function listFiles(dir) {
     .sort();
 }
 
+/**
+ * Phones and cameras save `.JPG`. When the extension's case is the only problem, say so, so the
+ * owner is not told to fix a name that is already kebab-case. Otherwise no hint.
+ */
+function uppercaseExtensionHint(rel) {
+  const lowered = rel.replace(/\.[^./]+$/, (ext) => ext.toLowerCase());
+  if (lowered === rel) return '';
+  try {
+    mediaIdFromPath(lowered);
+  } catch {
+    return ''; // the name itself is wrong too; the plain message covers it
+  }
+  return ` (only the extension is uppercase: rename it to ${path.posix.basename(lowered)})`;
+}
+
 /** Sources to process, sorted by id, plus every naming problem found. */
 async function discover(srcDir) {
   const sources = [];
@@ -79,7 +94,7 @@ async function discover(srcDir) {
     try {
       id = mediaIdFromPath(rel);
     } catch (error) {
-      problems.push(error.message);
+      problems.push(error.message + uppercaseExtensionHint(rel));
       continue;
     }
     if (byId.has(id)) {
