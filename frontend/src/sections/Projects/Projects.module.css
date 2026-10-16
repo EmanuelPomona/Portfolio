@@ -1,0 +1,120 @@
+/*
+ * The plate book (brief, "Information density"): about one window and its caption per screen
+ * height. No cards around captions, no pills for meta: the meta line is plain small text.
+ *
+ * Below 1024px each plate stacks window, title, caption (R-02).
+ * From 1024px the plates alternate on a 12-column grid. Plate widths vary (7 columns on the
+ * left, 6 offset on the right) so the alternation reads as a book's rhythm, not a zigzag
+ * template. The caption sits on the window's bottom edge, the way a plate's caption sits low on
+ * the facing page: row 1 is a flexible spacer the window spans.
+ */
+.list {
+  display: grid;
+  row-gap: var(--space-9);
+}
+
+.plate {
+  display: grid;
+  grid-template-areas:
+    'window'
+    'title'
+    'caption';
+}
+
+.window {
+  grid-area: window;
+  align-self: start;
+}
+
+.title {
+  grid-area: title;
+  margin-block-start: var(--space-5);
+  font-family: var(--font-display);
+  font-size: var(--step-4);
+  line-height: var(--leading-italic);
+  letter-spacing: -0.01em;
+  padding-block-end: 0.08em; /* italic descenders */
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+
+.number,
+.slash {
+  color: var(--color-ink-2);
+}
+
+.name {
+  font-style: italic;
+}
+
+.caption {
+  grid-area: caption;
+  max-width: var(--measure);
+  margin-block-start: var(--space-3);
+}
+
+.meta {
+  margin-block-start: var(--space-4);
+  font-size: var(--step--1);
+  font-weight: 560;
+  line-height: 1.5;
+  letter-spacing: var(--tracking-meta);
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink-2);
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: var(--space-5);
+  margin-block-start: var(--space-2);
+}
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px; /* tap target */
+  font-size: 0.9375rem;
+  font-weight: 540;
+}
+
+@media (min-width: 64rem) {
+  .plate {
+    grid-template-areas: none;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    grid-template-rows: 1fr auto auto;
+    column-gap: clamp(1.5rem, 0.5rem + 1.6vw, 2.5rem);
+  }
+
+  .window {
+    grid-row: 1 / 4;
+  }
+
+  .title {
+    grid-row: 2;
+    margin-block-start: 0;
+  }
+
+  .caption {
+    grid-row: 3;
+  }
+
+  .plate[data-side='left'] .window {
+    grid-column: 1 / 8;
+  }
+
+  .plate[data-side='left'] .title,
+  .plate[data-side='left'] .caption {
+    grid-column: 9 / 13;
+  }
+
+  .plate[data-side='right'] .window {
+    grid-column: 7 / 13;
+  }
+
+  .plate[data-side='right'] .title,
+  .plate[data-side='right'] .caption {
+    grid-column: 2 / 6;
+  }
+}
