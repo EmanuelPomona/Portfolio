@@ -1,7 +1,7 @@
 # STATUS: main
 Task: PLANNING (Mode A)
 Round: 0
-Last updated: 2026-10-16T08:40:00Z
+Last updated: 2026-10-16T10:05:00Z
 
 ## Inputs inventory (docs/inputs/, read 2026-10-16)
 - `Personal project idea_.pdf` (4 pp) -> reference URLs (redoyanulhaque.me, 7sadakonr.xyz/project, wallofportfolios: frances-zhao, micah-hoang, rachel-chen, keerthi-gurram; learn-from: taniarascia.com/me, wallofportfolios index); feature list (minimal, double-exposure photo technique, loading screen, "moving thingy", ONE page only, scroll animation, projects in a Mac browser frame, fun cursor, stickman that moves along the site); process (loader = stickman scribbling random loops with pencil; one stickman follows cursor and moves arms on button press); content tree (Projects: Revelation Youth Website [black until hover], SagePlan, SnakeAI, StreetSafe: LA; About: classes, life updates, photo collage, hobbies; Connect: LinkedIn, email); fonts ranked (1 Instrument Serif fav, 2 Cormorant Garamond, 3 Manrope); colors (Deep Forest #0F2E24, Dark Charcoal #242424, Soft Ivory #F8F9F7, Mist Gray #E3E8E5).
@@ -16,6 +16,8 @@ Last updated: 2026-10-16T08:40:00Z
 - ecc:contract-first @ step 6, before API.md/DATABASE.md (2026-10-16) -> canonical artifacts are TS files (shared build): frontend/src/content/types.ts + media.ts, frontend/src/stickman/types.ts + index.ts (re-exports only), frontend/src/config/flags.ts; prose docs carry semantics/invariants only and point at the TS (no duplicate shapes); openapi.yaml declares x-no-http-api; contract-test.sh routes to `npm run test:contract`; stickman contract test written by manager so stub and real impl pass the same artifact; consumer jobs drove fields (null image => empty state; null caption => not written yet; primary link = window click target).
 - superpowers:writing-plans @ step 10, before docs/tasks/ (2026-10-16) -> plan header (goal, global constraints, review focus) at docs/superpowers/plans/2026-10-16-portfolio-v1.md; 14 task files (TASK-101..106 frontend, 201..204 stickman, 301..304 backend) with Files/Interfaces/TDD steps; review-focus tests assigned to owning tasks; execution method = separate worktree sessions per protocol (no subagent execution).
 - ecc:architecture-decision-records @ step 12, after tasks (2026-10-16) -> ADR-001..007 written to docs/DECISIONS.md (protocol location overrides skill's docs/adr/; owner's "finish the rest of your task" taken as approval to write; listed in final summary for review).
+- superpowers:verification-before-completion @ step 13, immediately before the final commit (2026-10-16) -> fresh run of typecheck/lint/test/build/contract-test, CI invariant greps, secrets grep, index freshness, Mode A deliverable checklist; no implementation after it.
+- superpowers:verification-before-completion @ step 13 (re-invoked) -> first pass FAILED the CI design-constraint duplicate check (handoff quoted the marker string); handoff reworded; full verification re-run before final commit.
 - ecc:product-lens @ step 2, Mode 1 diagnostic, after content questions and before the design doc/PRODUCT.md (2026-10-16) -> primary user = internship recruiter/engineer (LinkedIn/resume link, often phone, <60s); why-now = fall 2026 recruiting for summer 2027 => ship v1 fast; anti-goals (no blog/CMS/multi-page/case studies/theme toggle/contact form/chatbot/logo walls); risks R1 loader+cursor friction, R2 mobile hover, R3 empty image slots look broken, R4 photo weight, R5 a11y of custom cursor; success metrics (mobile Lighthouse perf>=90, project links reachable <=10s after loader, owner share test). Verdict GO. Folded into PRODUCT.md, no separate PRODUCT-BRIEF.md (avoid duplicate source of truth).
 
 ## Done
@@ -44,9 +46,24 @@ Last updated: 2026-10-16T08:40:00Z
 - Visual companion accepted ("sure"). Server: port 50981, session dir .superpowers/brainstorm/98004-1792140630 (gitignored). Screen 1: stickman-cursor.html (throwaway spike: canvas rig, size 12/18/26, pace stroll/walk/hurry, click-point none/dot/ring; cheer on click, point on rest, sit after 5s; mix-blend difference).
 
 ## In progress
-- [ ] Step 1: superpowers:brainstorming
+- [ ] Step 13: verification-before-completion, then final commit. Then STOP (Mode A ends).
+
+## Planning deliverables (done)
+- [x] docs/superpowers/specs/2026-10-16-portfolio-design.md (approved: "looks right to me")
+- [x] PRODUCT, DESIGN_BRIEF, ARCHITECTURE (model assignment), API + openapi (x-no-http-api), DATABASE (C-01..C-21), ACCEPTANCE (IDs), DECISIONS (ADR-001..007)
+- [x] Plan + 14 tasks (INDEX regenerated); reference: stickman spike + masked wireframes
+- [x] Scaffold on main: typecheck 0, lint 0, test 9/9, build OK (70.85 KB gz JS), contract-test.sh OK
+- [x] Slice worktree: ../Portfolio-Stickman on agent/stickman; all 5 branches level at bd676ba
+- [x] docs/handoffs/main.md HANDOFF-1
 
 ## Verified
+- scaffold builds/tests -> commands in docs/handoffs/main.md HANDOFF-1 Verification
+- loader gate + stub + skeleton at runtime -> chrome-devtools eval on localhost:3000 (data-loader=show, boot-cover removed, seen=1, 4 articles)
+
+## Next session (Mode B, FRESH session)
+- Owner launches: frontend (agent/frontend), stickman (agent/stickman, frontend-engineer), backend (agent/backend); reviewer later with --model opus.
+- On owner approval of the touch walker in /stickman-lab.html: flip flags.touchStickman, record approval here (ADR-006).
+- After TASK-304: record PREVIEW_URL in .env.example + ARCHITECTURE.md.
 
 ## Blocked on
-- nothing
+- nothing for planning. Owner actions needed before agents run: `sudo chown -R 501:20 ~/.npm` (npm cache EACCES); `npx vercel login` before TASK-304.
