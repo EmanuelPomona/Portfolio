@@ -49,3 +49,6 @@ temp/*~
 # Kept local on purpose: the distilled specs in docs/ are what gets committed.
 docs/inputs/*
 !docs/inputs/README.md
+
+# Brainstorming visual companion (local mockups)
+.superpowers/
