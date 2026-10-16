@@ -20,6 +20,14 @@ Mode A record archived to `docs/archive/status-main-mode-a.md`.
 - "Change the format of contacts ... put them all in one line like this: Contact: linkedin, email, github."
 - "implement this by assigning tasks to the other terminal agents that are up right now ... Finish all task before getting back."
 
+- superpowers:writing-plans @ round 2, before task files -> plan header docs/superpowers/plans/2026-10-16-round-2.md (global constraints, 5 review-focus failure modes each pinned to a named test); TASK-107/108/109 (frontend), TASK-206 (stickman)
+
+## Round 2 progress
+- [x] Contracts: 0f43d36 (DESIGN_BRIEF motion rows, API.md §2.2 min 2.2s, ACCEPTANCE M-01..M-05, K-01, L-07, ADR-011)
+- [x] Plan + tasks: 35a945c
+- [ ] Sync main to worktrees, dispatch: frontend (portfolio-frontend-7c) 109 -> 107 -> 108; stickman (portfolio-stickman-50) 206
+- [ ] Integrate, add the 2.2s contract clause, verify, hand off
+
 ## Done
 - [x] Read set; status.sh; overlap check (0 shared files); audit-skills (12/12, 15/15, 14/14 corroborated)
 - [x] Step 4: contracts amended before merging (6a1726d, 3252304, 4ed6303)
