@@ -47,7 +47,7 @@ jobs:
 
       # ---- project code: skipped cleanly while the template is empty ----
       - uses: actions/setup-node@v4
-        with: { node-version: 20 }
+        with: { node-version: 24 }
       - name: Frontend build
         run: |
           if [ -f package.json ]; then
