@@ -49,5 +49,8 @@ Last updated: 2026-10-16T11:32:00Z
 - Loader contract stub with ?loader=1 -> main released only after hero img complete; boot-cover removed
 - Browser tooling note: chrome-devtools MCP profile locked by another session -> using own headless Chrome via CDP (scratchpad qa/cdp.mjs), port 9333, isolated profile
 
+## Protocol gaps (honest record)
+- superpowers:systematic-debugging was NOT invoked for two short debugs: (1) useActiveSection rAF throttle stuck under a synchronous rAF stub (root cause: frame id assigned after callback ran; fixed with a pending flag set before the request); (2) useAttention focus test order-dependence (root cause, probed: jsdom :focus-visible follows input modality, mouse events in earlier tests made programmatic focus not focus-visible; test now presses Tab first). Both diagnosed by hypothesis -> probe -> confirm. Will invoke the skill before the next non-trivial bug.
+
 ## Blocked on
 - nothing
