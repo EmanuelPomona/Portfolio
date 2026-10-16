@@ -5,6 +5,17 @@ set -uo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.." || exit 1
 SPEC="docs/openapi.yaml"
 [ -f "$SPEC" ] || { echo "NOT VERIFIED: $SPEC does not exist yet"; exit 2; }
+
+# A project with no HTTP surface says so in the spec (x-no-http-api: true). Its contracts are
+# in-repo module contracts, enforced by `npm run test:contract` (typecheck + *contract* tests).
+if grep -q '^x-no-http-api: true' "$SPEC"; then
+  echo "no HTTP API declared in $SPEC (x-no-http-api); running module contract tests"
+  [ -f package.json ] || { echo "NOT VERIFIED: no package.json"; exit 2; }
+  [ -d node_modules ] || { echo "NOT VERIFIED: dependencies not installed (run scripts/bootstrap.sh)"; exit 2; }
+  npm run --silent test:contract
+  exit $?
+fi
+
 [ -f .env ] && set -a && . ./.env && set +a
 BASE="${1:-http://localhost:${BACKEND_PORT:-8000}}"
 

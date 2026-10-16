@@ -1,35 +1,17 @@
 openapi: 3.1.0
 info:
-  title: Project API
-  version: 0.1.0
+  title: emanuel-ling portfolio
+  version: 1.0.0
   description: |
-    Machine-readable twin of docs/API.md. This file is what
-    scripts/contract-test.sh checks the implementation against, so it is the
-    contract that actually gets enforced — keep it in step with the prose.
-    Manager owns it. Backend proposes changes via AGENT_PROTOCOL section 6.
-servers:
-  - url: http://localhost:8000
-    description: local (BACKEND_PORT from .env)
-paths:
-  /api/health:
-    get:
-      summary: Liveness probe
-      responses:
-        '200':
-          description: service is up
-          content:
-            application/json:
-              schema:
-                type: object
-                required: [status]
-                properties:
-                  status: { type: string, enum: [ok] }
-components:
-  schemas:
-    Error:
-      type: object
-      required: [error]
-      properties:
-        error:   { type: string, description: machine-readable code }
-        message: { type: string, description: human-readable detail }
-        field:   { type: string, description: offending field, when applicable }
+    This project has NO HTTP API (docs/DECISIONS.md, ADR-001). It is a static site.
+
+    The cross-agent contracts are in-repo TypeScript modules, documented in docs/API.md:
+      - content: frontend/src/content/types.ts and media.ts
+      - stickman: frontend/src/stickman/types.ts and index.ts
+      - flags: frontend/src/config/flags.ts
+
+    `x-no-http-api: true` tells scripts/contract-test.sh to run `npm run test:contract`
+    (typecheck plus every *contract* test) instead of probing a server.
+    Adding a real endpoint means removing that flag and documenting it here and in docs/API.md.
+x-no-http-api: true
+paths: {}
