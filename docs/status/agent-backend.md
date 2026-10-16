@@ -10,6 +10,7 @@ Last updated: 2026-10-16T17:25:00Z
 - ecc:backend-patterns @ TASK-302 start, before pipeline design -> pure helpers (media-lib.mjs) split from I/O (media.mjs); run is transaction-like: validate all names + encode everything in memory, touch disk only if every source succeeded, manifest written last via temp+rename; decode each source once
 - ecc:error-handling @ TASK-302 start (re-invoked; harness answered "already loaded, instructions unchanged", applied from that load) -> known failures print `media-src/<rel>: <reason>` to stderr without stack + exit 1; unexpected errors print stack; all sources attempted so one run lists every problem
 - superpowers:systematic-debugging @ TASK-302 step 3 (browser probe stuck "pending") -> root cause: img.decode() never resolves in headless Chrome here (no display link, CVDisplayLinkCreateWithCGDisplay failed); onload works. Environmental, not a product bug.
+- ecc:seo @ TASK-303 start, before renderHead -> self-referencing canonical `${origin}/` only when origin set; robots allows all + Sitemap line only with origin; sitemap = the one public URL with lastmod=site.updated; Person JSON-LD limited to facts on the page; og:image with explicit 1200x630
 - (probe, scratchpad only) all 3 formats byte-stable across 3 processes on this mac; hero 1600w AVIF q50=53.6KB, q60=73.9KB -> chose AVIF q60/effort 4, WebP q80/effort 4, JPEG q80 mozjpeg
 
 ## Done
@@ -30,8 +31,12 @@ Last updated: 2026-10-16T17:25:00Z
 - [x] TASK-302 step 4: C-21 media.contract.test.ts (a2296dd): 5 checks (listed 3 + orphaned entry + source width changed), each proven to fail by a real state mutation (new unprocessed image / removed source / missing rendition / resized source / dangling content image), restored, tree clean
 - [x] Owner guide explains C-21 (9e88b05)
 
+- [x] TASK-303 step 1: renderHead/buildJsonLd/robots/sitemap TDD (9a5f16f red -> 5c9d504 green), parsed with DOMParser in jsdom
+- [x] TASK-303 step 2: plugin hooks TDD via real `vite build` of a temp site (2247bcf red -> green); real `npm run build` dist/index.html has every B-03 tag, one JSON-LD block, robots.txt without Sitemap (origin empty)
+
 ## In progress
-- [ ] TASK-303: head metadata plugin. Next: invoke ecc:seo, TDD renderHead/buildJsonLd
+- [ ] TASK-303 step 3: favicon.svg (standing pose, rig proportions; slight leg/arm stance for 16px legibility = visual call to flag)
+- [ ] FINDING for TASK-304: Vite MINIFIES the inline boot-cover <style> in dist/index.html (source text != served text) -> a CSP hash computed from source index.html (as TASK-304 specifies) would not match the served style. Gate <script> survives verbatim. Must resolve in TASK-304 (hash what is served, or contract change request).
 - [ ] TASK-301: code review + verification deferred to the combined pre-handoff pass (status stays IN_PROGRESS until then)
 
 ## Verified
