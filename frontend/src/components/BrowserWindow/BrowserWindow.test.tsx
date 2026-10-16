@@ -38,13 +38,23 @@ describe('BrowserWindow', () => {
     media.restore();
   });
 
-  it('is one link to primary.href in a new tab, named "<title>, <label>"', () => {
+  it('is one link to primary.href in a new tab, named "<title>, <label>, <addressBar>" (W-05, ADR-010)', () => {
     render(<BrowserWindow project={sageplan} sizes={SIZES} />);
-    const link = screen.getByRole('link', { name: 'SagePlan, Live site' });
+    const link = screen.getByRole('link', { name: 'SagePlan, Live site, sageplan.vercel.app' });
     expect(link).toHaveAttribute('href', 'https://sageplan.vercel.app');
     expect(link).toHaveAttribute('target', '_blank');
     expect(link).toHaveAttribute('rel', 'noopener noreferrer');
     expect(screen.getAllByRole('link')).toHaveLength(1);
+  });
+
+  it('names every shipped window with text it visibly shows (WCAG 2.5.3 Label in Name)', () => {
+    for (const project of projects) {
+      const { unmount } = render(<BrowserWindow project={project} sizes={SIZES} />);
+      const link = screen.getByRole('link');
+      expect(link.getAttribute('aria-label')).toContain(project.addressBar);
+      expect(link.textContent).toContain(project.addressBar);
+      unmount();
+    }
   });
 
   it('shows exactly project.addressBar in the address field', () => {

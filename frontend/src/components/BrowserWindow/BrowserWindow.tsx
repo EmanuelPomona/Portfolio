@@ -23,7 +23,7 @@ export function BrowserWindow({ project, sizes }: BrowserWindowProps) {
       href={primary.href}
       target="_blank"
       rel="noopener noreferrer"
-      aria-label={`${project.title}, ${primary.label}`}
+      aria-label={`${project.title}, ${primary.label}, ${project.addressBar}`}
       data-state={attended ? 'attention' : 'rest'}
     >
       <span className={styles.chrome} aria-hidden="true">
