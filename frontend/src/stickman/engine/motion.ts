@@ -29,17 +29,35 @@ const SPEED_EASE = 10;
 const FACE_DEADZONE_PX = 1.5;
 const FACE_MIN_SPEED = 6;
 
-export function desiredSpeed(distance: number): number {
+/** Cruise speed (px/s) for a distance, before the near-target 7·d clamp. */
+export type Pace = (distance: number) => number;
+
+/** The spike's three paces. The owner approved `hurry` ("hurries when far"); the others are lab-only. */
+export const PACES = {
+  stroll: () => 85,
+  walk: () => 180,
+  hurry: (d: number) => Math.min(MAX_SPEED, BASE_SPEED + SPEED_PER_PX * d),
+} as const satisfies Record<string, Pace>;
+
+export type PaceName = keyof typeof PACES;
+
+export function desiredSpeed(distance: number, pace: Pace = PACES.hurry): number {
   if (distance <= ARRIVE_PX) return 0;
-  return Math.min(Math.min(MAX_SPEED, BASE_SPEED + SPEED_PER_PX * distance), NEAR_GAIN * distance);
+  return Math.min(pace(distance), NEAR_GAIN * distance);
 }
 
-export function stepMotion(s: MotionState, target: Vec2, dt: number, size: number): MotionState {
+export function stepMotion(
+  s: MotionState,
+  target: Vec2,
+  dt: number,
+  size: number,
+  pace: Pace = PACES.hurry,
+): MotionState {
   const dx = target.x - s.pos.x;
   const dy = target.y - s.pos.y;
   const dist = Math.hypot(dx, dy);
 
-  const speed = approach(s.speed, desiredSpeed(dist), SPEED_EASE, dt);
+  const speed = approach(s.speed, desiredSpeed(dist, pace), SPEED_EASE, dt);
 
   let pos = s.pos;
   if (dist > 0.01) {

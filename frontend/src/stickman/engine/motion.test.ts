@@ -1,7 +1,7 @@
 // Owner: agent/stickman. TASK-201 (S-03, S-10). Expected values are hand-derived from the
 // owner-approved prototype (docs/reference/stickman-cursor-spike.html), never from motion.ts.
 import { describe, expect, it } from 'vitest';
-import { desiredSpeed, stepMotion, type MotionState } from './motion';
+import { PACES, desiredSpeed, stepMotion, type MotionState } from './motion';
 
 const FRAME = 1 / 60;
 const SIZE = 32;
@@ -22,6 +22,29 @@ describe('desiredSpeed', () => {
     [10000, 1150],
   ])('desiredSpeed table: d=%s -> %s px/s', (d, expected) => {
     expect(desiredSpeed(d)).toBeCloseTo(expected, 9);
+  });
+});
+
+describe('lab paces (the spike\'s Stroll / Walk / Hurries when far)', () => {
+  // desired = d > 1.2 ? min(pace(d), 7d) : 0; stroll is a flat 85, walk a flat 180
+  it.each([
+    ['stroll', 100, 85],
+    ['stroll', 10, 70], // still clamped by 7d near the target
+    ['walk', 100, 180],
+    ['walk', 1, 0],
+    ['hurry', 100, 390],
+  ] as const)('%s at d=%s -> %s px/s', (pace, d, expected) => {
+    expect(desiredSpeed(d, PACES[pace])).toBeCloseTo(expected, 9);
+  });
+
+  it('hurry is the default pace', () => {
+    expect(desiredSpeed(400)).toBe(desiredSpeed(400, PACES.hurry));
+  });
+
+  it('stepMotion honours the pace it is given', () => {
+    // stroll: desired 85; 0 + 85 * min(1, 0.2 * 10) = 85
+    const s = stepMotion(at(0, 0), { x: 1000, y: 0 }, 0.2, SIZE, PACES.stroll);
+    expect(s.speed).toBeCloseTo(85, 9);
   });
 });
 
