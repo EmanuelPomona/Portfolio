@@ -1,0 +1,23 @@
+# F-202 runtime checks: main page, headless Chrome 1440x900 (+ a 390x844 touch page), 2026-10-16T18:04:07.594Z
+S-01 html.stickman-cursor after load                       true
+S-01 computed cursor on body / nav link                    ["none","none"]
+RF2 ring hidden before first pointermove                   hidden
+S-01 ring centre vs pointer (300.5, 300.5)                 {"cx":300.5,"cy":300.5,"w":11,"visibility":"visible"}
+S-08 elementFromPoint at ring                              H3
+S-08 canvas/ring pointer-events, aria-hidden               ["none/true","none/true"]
+S-01 nav "Projects" rect                                   {"l":43.296875,"t":0,"r":105.078125,"b":22,"href":"#projects"}
+S-01 elementFromPoint 2px inside the link edge             Projects
+S-01 click 2px inside the edge -> location.hash            #projects
+S-08 selection after drag (expect paragraph text)          CS + Math @ Pomona College
+S-08 paragraph text                                        CS + Math @ Pomona College
+S-09 pointermoves sent in 5s                               300
+S-09 long tasks (>50ms) during 5s of movement              []
+S-09 rAF frame intervals: p50 / p99 / max ms               ["16.7","16.8","16.8","300 frames"]
+S-05 focused element after Tab                             {"text":"LinkedIn","focusVisible":true,"l":40,"b":168.875}
+S-07 reduced motion (live): class / canvas present         [false,false,"auto"]
+S-07 motion allowed again (live): class                    true
+S-07 forced colors (live): class / canvas present          [false,false]
+console errors/warnings                                    ["[error] Failed to load resource: the server responded with a status of 404 (Not Found) http://localhost:3009/favicon.ico"]
+S-07 coarse pointer (touch emulation): pointer:coarse matches true
+S-07 coarse pointer: class / canvas present                [false,false]
+S-09 at 4x CPU throttle: long tasks / rAF p50 p99 max ms   {"pointermoves":300,"longTasks":[],"frames":300,"p50":"16.7","p99":"16.8","max":"16.8"}
