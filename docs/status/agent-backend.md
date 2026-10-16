@@ -11,6 +11,9 @@ Last updated: 2026-10-16T17:25:00Z
 - ecc:error-handling @ TASK-302 start (re-invoked; harness answered "already loaded, instructions unchanged", applied from that load) -> known failures print `media-src/<rel>: <reason>` to stderr without stack + exit 1; unexpected errors print stack; all sources attempted so one run lists every problem
 - superpowers:systematic-debugging @ TASK-302 step 3 (browser probe stuck "pending") -> root cause: img.decode() never resolves in headless Chrome here (no display link, CVDisplayLinkCreateWithCGDisplay failed); onload works. Environmental, not a product bug.
 - ecc:seo @ TASK-303 start, before renderHead -> self-referencing canonical `${origin}/` only when origin set; robots allows all + Sitemap line only with origin; sitemap = the one public URL with lastmod=site.updated; Person JSON-LD limited to facts on the page; og:image with explicit 1200x630
+- ecc:security-review @ TASK-304 start, before CSP/headers -> strict hash-only CSP (no unsafe-inline/eval) hashing the bytes actually served (built, minified style) not the source; .vercel/ must stay uncommitted; run npm audit; JSON-LD escaping (TASK-303) is the XSS boundary
+- vercel:vercel-cli @ TASK-304 step 2, before any CLI use -> check auth with `vercel whoami --format json`; never auto-link or start login myself; verify target with `vercel project inspect --non-interactive`; protected previews via `vercel curl`, never disable protection
+- vercel:deploy @ TASK-304 step 2 -> preflight (CLI, link, git status clean); PREVIEW only, never --prod; post-deploy `vercel inspect` + smoke check
 - (probe, scratchpad only) all 3 formats byte-stable across 3 processes on this mac; hero 1600w AVIF q50=53.6KB, q60=73.9KB -> chose AVIF q60/effort 4, WebP q80/effort 4, JPEG q80 mozjpeg
 
 ## Done
@@ -38,8 +41,11 @@ Last updated: 2026-10-16T17:25:00Z
 - [x] TASK-303 step 4: og.jpg 1200x630, 64,338 B, deterministic (same sha256 twice); NO TEXT: Pango ignored Instrument Serif fontfile (WOFF and fontTools-converted TTF both byte-identical to a nonexistent-family render) -> shipped without text per task rule
 - [x] Real build: dist has favicon.svg, og.jpg, robots.txt, index.html with 1 JSON-LD block
 
+- [x] TASK-304 step 1: CSP contract test (9482449 red) -> vercel.json (21d0f69 green); hashes computed independently with openssl from built index.html; mutation: +1 space in gate -> test red; source style hash JYAd9.. != served Wd3nS.. (why we hash the build)
+- [x] Vercel auth OK (whoami: emanuelling27-2425, team-boh-buh, hobby). Created project emanuel-ling (no Git connection: avoids auto prod deploys on push), linked; removed CLI-created .env.local (OIDC token); .gitignore += .vercel only (e5974b3)
+
 ## In progress
-- [ ] TASK-304: invoke security-review + vercel skills; CSP contract test must hash the SERVED (built, minified) boot style, see finding below
+- [ ] TASK-304 step 3: preview deploy from a clean `git archive HEAD` export (no untracked/ignored local files uploaded); then set site.origin, redeploy, verify
 - [ ] FINDING for TASK-304: Vite MINIFIES the inline boot-cover <style> in dist/index.html (source text != served text) -> a CSP hash computed from source index.html (as TASK-304 specifies) would not match the served style. Gate <script> survives verbatim. Must resolve in TASK-304 (hash what is served, or contract change request).
 - [ ] TASK-301: code review + verification deferred to the combined pre-handoff pass (status stays IN_PROGRESS until then)
 
