@@ -76,6 +76,8 @@ Last updated: 2026-10-16T18:40:00Z
 - Hero AVIF 1600w = 75,638 bytes (budget 250 KB)
 - B-03/B-04/B-05 -> dist/index.html head tags; preview via vercel curl: headers + 4 files 200 + immutable /media,/assets
 - F-01 -> docs/review/B-304-lighthouse-mobile.html: Perf 96, A11y 94, BP 92, SEO n/a (protected preview)
+- scripts/audit-skills.sh . -> exit 0, all 12 claimed skills corroborated
+- GitHub CI `ci` on pushed HEAD 2c08ebb -> success (run 38946354450)
 
 ## Blocked on
 - TASK-304 zero-CSP-violation criterion: CCR-1 (manager: vite.config.ts assetsInlineLimit for fonts, or alternative). Toolbar violation on previews needs an OWNER setting (Vercel Toolbar off for previews).
