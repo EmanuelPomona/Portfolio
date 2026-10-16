@@ -21,6 +21,8 @@ const EM_DASH = '—';
 const SENTENCE_BREAK = /[.!?]\s+[A-Z]/g;
 /** Whole words, case-insensitive, with an optional plural "s" ("todos" is flagged, "photodocument" is not). */
 const PLACEHOLDER = /\b(?:lorem|ipsum|todo|tbd|placeholder)s?\b|\bcoming\s+soon\b/i;
+const KEBAB = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+const TRAILING_PUNCTUATION = /[.,;:!?]$/;
 
 /** Length in characters as a reader counts them (code points, not UTF-16 units). */
 const length = (s: string) => [...s].length;
@@ -66,6 +68,40 @@ export function validateContent(
     }
   });
 
+  // C-03, C-04, C-07, C-08: project structure.
+  const projectIds = new Set<string>();
+  c.projects.forEach((p, i) => {
+    const at = `projects[${i}]`;
+
+    if (!KEBAB.test(p.id)) {
+      add('C-03', `${at}.id`, `The project id "${p.id}" must be lowercase words joined by hyphens, like "street-safe".`);
+    }
+    if (projectIds.has(p.id)) add('C-03', `${at}.id`, `The project id "${p.id}" is already used by another project.`);
+    projectIds.add(p.id);
+
+    if (p.meta.length < 1 || p.meta.length > 4) {
+      add('C-04', `${at}.meta`, `The meta line has ${p.meta.length} items; it needs 1 to 4.`);
+    }
+    p.meta.forEach((item, j) => {
+      if (length(item) > 40) add('C-04', `${at}.meta[${j}]`, `"${item}" is ${length(item)} characters; each meta item is at most 40.`);
+      if (TRAILING_PUNCTUATION.test(item)) add('C-04', `${at}.meta[${j}]`, `"${item}" ends with punctuation; remove it.`);
+    });
+
+    const address = p.primary.href.replace(/^https:\/\//, '').replace(/^www\./, '').replace(/\/+$/, '');
+    if (p.addressBar !== address) {
+      add('C-07', `${at}.addressBar`, `The address bar must read "${address}": the main link without https://, www., or a trailing slash.`);
+    }
+
+    if (p.primary.kind !== 'live' && p.primary.kind !== 'code') {
+      add('C-08', `${at}.primary.kind`, `The main link must be the live site or the code, not "${p.primary.kind}".`);
+    }
+    p.secondary.forEach((link, j) => {
+      if (link.kind === 'live') {
+        add('C-08', `${at}.secondary[${j}].kind`, 'A live site link must be the main link (primary), not a secondary one.');
+      }
+    });
+  });
+
   // C-16: the about description is one or two complete sentences and at most 320 characters.
   {
     const path = 'about.description';
@@ -82,5 +118,6 @@ export function validateContent(
     if (hit) add('C-20', path, `Contains the placeholder word "${hit[0]}". Replace it with real text, or remove the entry.`);
   }
 
-  return out;
+  // Stable sort: rule order first, then the order the content was walked.
+  return out.sort((a, b) => a.rule.localeCompare(b.rule));
 }
