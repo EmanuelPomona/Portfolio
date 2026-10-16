@@ -3,15 +3,26 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { installIntersectionObserver, installMatchMedia } from '../test-utils/media';
 import { App } from './App';
 
-// Mount contract (docs/API.md §2.5) exercised through the scaffold's stickman stubs, which honour
-// the Loader timing contract: done when `ready` settles, or at the 4.5s cap.
+// App's side of the mount contract (docs/API.md §2.5), independent of how the Loader animates.
+// The stickman module is replaced by a controllable Loader: the real one's timing (1.2s minimum,
+// 4.5s cap, exit) is the stickman slice's, covered by src/stickman/contract.test.tsx.
+const loader = vi.hoisted(() => ({
+  ready: null as Promise<unknown> | null,
+  done: null as (() => void) | null,
+}));
 
-function setLoaderMode(mode: 'show' | 'fade' | 'skip') {
-  document.documentElement.dataset.loader = mode;
-  const cover = document.createElement('div');
-  cover.id = 'boot-cover';
-  document.body.prepend(cover);
-}
+vi.mock('../stickman', async (importActual) => {
+  const actual = await importActual<typeof import('../stickman')>();
+  return {
+    ...actual, // loaderMode and LOADER_SEEN_KEY stay real: they read the gate's data-loader
+    Loader: ({ ready, onDone }: { ready: Promise<unknown>; onDone: () => void }) => {
+      loader.ready = ready;
+      loader.done = onDone;
+      return <div data-testid="loader" />;
+    },
+    StickmanLayer: ({ touch }: { touch: boolean }) => <div data-testid="stickman-layer" data-touch={String(touch)} />,
+  };
+});
 
 function mockDecode(impl: () => Promise<void>) {
   Object.defineProperty(HTMLImageElement.prototype, 'decode', { configurable: true, value: impl });
@@ -23,65 +34,76 @@ describe('App mount contract', () => {
   beforeEach(() => {
     io = installIntersectionObserver();
     media = installMatchMedia();
-    sessionStorage.clear();
+    loader.ready = null;
+    loader.done = null;
   });
   afterEach(() => {
     cleanup();
     io.restore();
     media.restore();
-    vi.useRealTimers();
     Reflect.deleteProperty(HTMLImageElement.prototype, 'decode');
-    document.getElementById('boot-cover')?.remove();
     delete document.documentElement.dataset.loader;
   });
 
-  it('keeps <main> inert and busy while the hero image has not decoded', () => {
-    vi.useFakeTimers();
-    setLoaderMode('show');
-    mockDecode(() => new Promise(() => {})); // never settles: only the cap could end the loader
+  it('mounts the loader while loading, with <main> inert and busy, and the stickman layer always', () => {
+    document.documentElement.dataset.loader = 'show';
+    mockDecode(() => new Promise(() => {}));
     render(<App />);
     const main = screen.getByRole('main', { hidden: true });
+    expect(screen.getByTestId('loader')).toBeInTheDocument();
     expect(main).toHaveAttribute('inert');
     expect(main).toHaveAttribute('aria-busy', 'true');
-    act(() => vi.advanceTimersByTime(3000));
-    expect(main).toHaveAttribute('inert');
-    expect(document.getElementById('boot-cover')).not.toBeNull();
+    expect(screen.getByTestId('stickman-layer')).toHaveAttribute('data-touch', 'false'); // flags.touchStickman
   });
 
-  it('releases <main> once the hero image the page renders has decoded', async () => {
-    setLoaderMode('show');
+  it('hands the loader a ready that settles when the rendered hero image decodes', async () => {
+    document.documentElement.dataset.loader = 'show';
     let decoded!: () => void;
     mockDecode(() => new Promise<void>((resolve) => (decoded = resolve)));
     render(<App />);
-    const main = screen.getByRole('main', { hidden: true });
-    expect(main).toHaveAttribute('inert');
+    const settled = vi.fn();
+    void loader.ready!.then(settled, settled);
+    await act(async () => {});
+    expect(settled).not.toHaveBeenCalled();
     await act(async () => decoded());
-    expect(main).not.toHaveAttribute('inert');
-    expect(main).toHaveAttribute('aria-busy', 'false');
-    expect(document.getElementById('boot-cover')).toBeNull();
-    expect(sessionStorage.getItem('el:loader-seen')).toBe('1');
+    expect(settled).toHaveBeenCalledTimes(1);
   });
 
-  it('counts a failed hero decode as ready, without an unhandled rejection', async () => {
-    setLoaderMode('show');
+  it('rejects ready when the hero decode fails, without an unhandled rejection', async () => {
+    document.documentElement.dataset.loader = 'show';
     const unhandled = vi.fn();
     window.addEventListener('unhandledrejection', unhandled);
     let fail!: () => void;
     mockDecode(() => new Promise<void>((_, reject) => (fail = () => reject(new Error('decode failed')))));
     render(<App />);
+    const ready = loader.ready!;
     await act(async () => fail());
-    expect(screen.getByRole('main')).not.toHaveAttribute('inert');
+    await expect(ready).rejects.toThrow('decode failed');
     await act(async () => new Promise((r) => setTimeout(r, 0)));
     expect(unhandled).not.toHaveBeenCalled();
     window.removeEventListener('unhandledrejection', unhandled);
   });
 
-  it('mounts no loader and leaves <main> interactive in skip mode', () => {
-    setLoaderMode('skip');
-    mockDecode(() => new Promise(() => {}));
+  it('releases <main> and unmounts the loader when the loader calls onDone', () => {
+    document.documentElement.dataset.loader = 'show';
+    mockDecode(() => Promise.resolve());
     render(<App />);
+    act(() => loader.done!());
     const main = screen.getByRole('main');
     expect(main).not.toHaveAttribute('inert');
     expect(main).toHaveAttribute('aria-busy', 'false');
+    expect(screen.queryByTestId('loader')).toBeNull();
+    expect(screen.getByTestId('stickman-layer')).toBeInTheDocument(); // still mounted
+  });
+
+  it('mounts no loader and leaves <main> interactive in skip mode', () => {
+    document.documentElement.dataset.loader = 'skip';
+    mockDecode(() => new Promise(() => {}));
+    render(<App />);
+    expect(screen.queryByTestId('loader')).toBeNull();
+    const main = screen.getByRole('main');
+    expect(main).not.toHaveAttribute('inert');
+    expect(main).toHaveAttribute('aria-busy', 'false');
+    expect(screen.getByTestId('stickman-layer')).toBeInTheDocument();
   });
 });
