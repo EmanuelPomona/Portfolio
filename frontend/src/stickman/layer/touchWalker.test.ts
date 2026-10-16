@@ -2,7 +2,15 @@
 // motion engine stepping toward each target.
 import { describe, expect, it } from 'vitest';
 import { stepMotion, type MotionState } from '../engine/motion';
-import { touchTarget } from './touchWalker';
+import { isTap, touchTarget } from './touchWalker';
+
+describe('isTap', () => {
+  it('a touch that ends within 10px of where it began is a tap; a drag-scroll is not', () => {
+    expect(isTap({ x: 100, y: 500 }, { x: 104, y: 507 })).toBe(true); // 8.06px
+    expect(isTap({ x: 100, y: 500 }, { x: 100, y: 380 })).toBe(false); // a scroll
+    expect(isTap({ x: 100, y: 500 }, { x: 108, y: 506 })).toBe(false); // exactly 10px: not a tap
+  });
+});
 
 const VW = 390;
 const SIZE = 24;

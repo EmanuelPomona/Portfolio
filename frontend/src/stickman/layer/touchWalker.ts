@@ -44,6 +44,14 @@ export function touchTarget(s: MotionState, input: TouchInput, _dt: number): Vec
   return { x: clamp(s.pos.x + dir * lead, lo, hi), y: s.pos.y };
 }
 
+/** Farther than this between touchstart and touchend is a drag (a scroll), not a tap. */
+const TAP_SLOP = 10;
+
+/** A touch that ends where it began is a tap; anything that travelled was a scroll. */
+export function isTap(start: Vec2, end: Vec2): boolean {
+  return Math.hypot(end.x - start.x, end.y - start.y) < TAP_SLOP;
+}
+
 export interface TouchWalker {
   start(): void;
   stop(): void;
@@ -83,6 +91,9 @@ export function createTouchWalker(canvas: HTMLCanvasElement, opts: { size?: numb
     canvas.style.width = `${vw}px`;
     canvas.style.height = `${vh}px`;
     safeBottom = probe ? parseFloat(getComputedStyle(probe).paddingBottom) || 0 : 0;
+    // A rotation can leave him off-screen; keep him inside the new width.
+    const x = clamp(fig.motion.pos.x, EDGE, Math.max(EDGE, vw - EDGE));
+    fig = { ...fig, motion: { ...fig.motion, pos: { x, y: fig.motion.pos.y } } };
   };
 
   const onScroll = () => {
@@ -94,11 +105,24 @@ export function createTouchWalker(canvas: HTMLCanvasElement, opts: { size?: numb
     lastScrollAt = now;
   };
 
+  let touchFrom: { at: Vec2; onTarget: boolean } | null = null;
   const onTouchStart = (e: TouchEvent) => {
     const t = e.touches[0];
-    if (!t) return;
+    touchFrom = t
+      ? { at: { x: t.clientX, y: t.clientY }, onTarget: findTarget(e.target instanceof Element ? e.target : null) !== null }
+      : null;
+  };
+  // Commit on touchend, and only for a tap: every drag-scroll also begins with a touchstart.
+  const onTouchEnd = (e: TouchEvent) => {
+    const t = e.changedTouches[0];
+    const from = touchFrom;
+    touchFrom = null;
+    if (!t || !from || !isTap(from.at, { x: t.clientX, y: t.clientY })) return;
     tapX = t.clientX;
-    if (findTarget(e.target instanceof Element ? e.target : null)) pressed = true;
+    if (from.onTarget) pressed = true;
+  };
+  const onTouchCancel = () => {
+    touchFrom = null;
   };
 
   const onVisibility = () => {
@@ -153,6 +177,8 @@ export function createTouchWalker(canvas: HTMLCanvasElement, opts: { size?: numb
       lastScrollY = window.scrollY;
       window.addEventListener('scroll', onScroll, { passive: true });
       window.addEventListener('touchstart', onTouchStart, { passive: true, capture: true });
+      window.addEventListener('touchend', onTouchEnd, { passive: true, capture: true });
+      window.addEventListener('touchcancel', onTouchCancel, { passive: true, capture: true });
       window.addEventListener('resize', measure, { passive: true });
       document.addEventListener('visibilitychange', onVisibility);
       last = performance.now();
@@ -165,6 +191,8 @@ export function createTouchWalker(canvas: HTMLCanvasElement, opts: { size?: numb
       rafId = 0;
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('touchstart', onTouchStart, { capture: true });
+      window.removeEventListener('touchend', onTouchEnd, { capture: true });
+      window.removeEventListener('touchcancel', onTouchCancel, { capture: true });
       window.removeEventListener('resize', measure);
       document.removeEventListener('visibilitychange', onVisibility);
       probe?.remove();
