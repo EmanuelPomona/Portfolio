@@ -335,3 +335,75 @@ describe('image and photo rules', () => {
     expect(found(c)).toEqual(one('C-17', 'about.photos[4].id'));
   });
 });
+
+describe('site rules', () => {
+  it('C-12 flags nav sections in the wrong order', () => {
+    const c = variant((c) => ([c.site.nav[1], c.site.nav[2]] = [c.site.nav[2]!, c.site.nav[1]!]));
+    expect(found(c)).toEqual(one('C-12', 'site.nav'));
+  });
+
+  it('C-12 flags a missing nav section', () => {
+    const c = variant((c) => c.site.nav.pop());
+    expect(found(c)).toEqual(one('C-12', 'site.nav'));
+  });
+
+  it('C-13 flags a title longer than 70 characters', () => {
+    const c = variant((c) => (c.site.title = `E${'e'.repeat(70)}`)); // 71 characters
+    expect(found(c)).toEqual(one('C-13', 'site.title'));
+  });
+
+  it('C-13 accepts a title of exactly 70 characters', () => {
+    const c = variant((c) => (c.site.title = `E${'e'.repeat(69)}`));
+    expect(found(c)).toEqual([]);
+  });
+
+  it('C-13 flags a description longer than 160 characters', () => {
+    const c = variant((c) => (c.site.description = `E${'e'.repeat(159)}.`)); // 161 characters
+    expect(found(c)).toEqual(one('C-13', 'site.description'));
+  });
+
+  it('C-14 flags a date that does not exist', () => {
+    const c = variant((c) => (c.site.updated = '2026-02-30'));
+    expect(found(c)).toEqual(one('C-14', 'site.updated'));
+  });
+
+  it('C-14 flags a date not written as YYYY-MM-DD', () => {
+    const c = variant((c) => (c.site.updated = '10/16/2026'));
+    expect(found(c)).toEqual(one('C-14', 'site.updated'));
+  });
+
+  it('C-14 flags a date after today', () => {
+    const c = variant((c) => (c.site.updated = '2026-10-17'));
+    expect(found(c, { today: '2026-10-16' })).toEqual(one('C-14', 'site.updated'));
+  });
+
+  it('C-14 accepts a leap day', () => {
+    const c = variant((c) => (c.site.updated = '2024-02-29'));
+    expect(found(c)).toEqual([]);
+  });
+
+  it('C-14 defaults today to the current UTC date', () => {
+    const c = variant((c) => (c.site.updated = '2999-01-01'));
+    expect(validateContent(c).map(({ rule, path }) => ({ rule, path }))).toEqual(one('C-14', 'site.updated'));
+  });
+
+  it('C-15 flags an origin with a trailing slash', () => {
+    const c = variant((c) => (c.site.origin = 'https://emanuel-ling.vercel.app/'));
+    expect(found(c)).toEqual(one('C-15', 'site.origin'));
+  });
+
+  it('C-15 flags an origin with a path', () => {
+    const c = variant((c) => (c.site.origin = 'https://emanuel-ling.vercel.app/portfolio'));
+    expect(found(c)).toEqual(one('C-15', 'site.origin'));
+  });
+
+  it('C-15 flags an http origin', () => {
+    const c = variant((c) => (c.site.origin = 'http://emanuel-ling.vercel.app'));
+    expect(found(c)).toEqual(one('C-15', 'site.origin'));
+  });
+
+  it('C-15 accepts an https origin', () => {
+    const c = variant((c) => (c.site.origin = 'https://emanuel-ling.vercel.app'));
+    expect(found(c)).toEqual([]);
+  });
+});
