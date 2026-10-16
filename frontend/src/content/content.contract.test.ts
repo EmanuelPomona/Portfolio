@@ -407,3 +407,11 @@ describe('site rules', () => {
     expect(found(c)).toEqual([]);
   });
 });
+
+describe('the real content', () => {
+  it('satisfies every invariant C-01 to C-20', () => {
+    const violations = validateContent(content);
+    const report = violations.map((v) => `  ${v.rule} at ${v.path}: ${v.message}`).join('\n');
+    expect(violations, `The content has problems. Fix each one, then run npm run test:contract again.\n${report}\n`).toEqual([]);
+  });
+});
