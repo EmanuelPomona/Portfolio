@@ -13,6 +13,7 @@ Last updated: 2026-10-16T08:40:00Z
 
 ## Skills invoked so far
 - superpowers:brainstorming @ step 1, before product decisions (2026-10-16T08:42Z) -> recon of reference sites + clarifying questions before PRODUCT.md
+- ecc:contract-first @ step 6, before API.md/DATABASE.md (2026-10-16) -> canonical artifacts are TS files (shared build): frontend/src/content/types.ts + media.ts, frontend/src/stickman/types.ts + index.ts (re-exports only), frontend/src/config/flags.ts; prose docs carry semantics/invariants only and point at the TS (no duplicate shapes); openapi.yaml declares x-no-http-api; contract-test.sh routes to `npm run test:contract`; stickman contract test written by manager so stub and real impl pass the same artifact; consumer jobs drove fields (null image => empty state; null caption => not written yet; primary link = window click target).
 - ecc:product-lens @ step 2, Mode 1 diagnostic, after content questions and before the design doc/PRODUCT.md (2026-10-16) -> primary user = internship recruiter/engineer (LinkedIn/resume link, often phone, <60s); why-now = fall 2026 recruiting for summer 2027 => ship v1 fast; anti-goals (no blog/CMS/multi-page/case studies/theme toggle/contact form/chatbot/logo walls); risks R1 loader+cursor friction, R2 mobile hover, R3 empty image slots look broken, R4 photo weight, R5 a11y of custom cursor; success metrics (mobile Lighthouse perf>=90, project links reachable <=10s after loader, owner share test). Verdict GO. Folded into PRODUCT.md, no separate PRODUCT-BRIEF.md (avoid duplicate source of truth).
 
 ## Done
