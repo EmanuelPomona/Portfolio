@@ -97,11 +97,8 @@ function torso(s: MotionState, g: GestureState): Torso {
  * pointAngle. `s.pos` is his feet on screen.
  */
 export function pointAngleTo(s: MotionState, g: GestureState, size: number, target: Vec2): number {
-  const k = size / RIG_UNITS;
-  const { shoulder } = torso(s, g);
-  const sx = s.pos.x + shoulder.x * k * s.facing;
-  const sy = s.pos.y + shoulder.y * k;
-  return Math.atan2((target.x - sx) * s.facing, target.y - sy);
+  const shoulder = rigToScreen(torso(s, g).shoulder, s.pos, size, s.facing);
+  return Math.atan2((target.x - shoulder.x) * s.facing, target.y - shoulder.y);
 }
 
 export function computePose(
