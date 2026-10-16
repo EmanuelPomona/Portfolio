@@ -1,7 +1,7 @@
 /*
  * Small, centered, always reachable, visually subordinate (brief, "Content hierarchy").
- * Below the hero it sits in a band of fog that dissolves downward. The fade is an alpha mask,
- * the brief's justified gradient exception; the band itself is flat Mist.
+ * Below the hero it sits on a flat band of Mist closed by one hairline rule: a running head,
+ * the way a plate book carries its title across the top of the page.
  */
 .nav {
   position: fixed;
@@ -17,10 +17,10 @@
 .nav::before {
   content: '';
   position: absolute;
-  inset: 0 0 calc(-1 * var(--space-6));
+  inset: 0;
   z-index: -1;
   background: var(--color-mist);
-  mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - var(--space-6) - var(--space-3)), transparent 100%);
+  border-block-end: 1px solid var(--color-hairline);
   opacity: 1;
   transition: opacity var(--dur-release) var(--ease-out);
 }
