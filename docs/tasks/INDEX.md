@@ -8,6 +8,7 @@ Do not edit by hand — edit the task files and regenerate.
 | TASK-301 | IN_PROGRESS | backend | 0 | Content validator, invariant contract tests, and owner editing guide |
 | TASK-302 | IN_PROGRESS | backend | 0 | Deterministic media pipeline (npm run media) and manifest freshness test |
 | TASK-303 | IN_PROGRESS | backend | 0 | Head metadata plugin, favicon, Open Graph image, robots, sitemap |
+| TASK-304 | IN_PROGRESS | backend | 0 | Vercel config, security headers, and the preview deployment |
 | TASK-101 | READY | frontend | 0 | Design system, page shell, nav, and fog-clear reveal |
 | TASK-102 | READY | frontend | 0 | Hero section and responsive Picture component |
 | TASK-103 | READY | frontend | 0 | Attention system and the dark macOS BrowserWindow |
@@ -18,6 +19,5 @@ Do not edit by hand — edit the task files and regenerate.
 | TASK-202 | READY | stickman | 0 | StickmanLayer desktop cursor (fine pointer) |
 | TASK-203 | READY | stickman | 0 | Scribbling loader with progress, timing rules, and cursor handoff |
 | TASK-204 | READY | stickman | 0 | Touch walker for coarse pointers (behind flag, off in production) |
-| TASK-304 | READY | backend | 0 | Vercel config, security headers, and the preview deployment |
 
-**Counts:** IN_PROGRESS 3, READY 11
+**Counts:** IN_PROGRESS 4, READY 10

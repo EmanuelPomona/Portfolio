@@ -1,7 +1,7 @@
 ---
 id: TASK-304
 title: Vercel config, security headers, and the preview deployment
-status: READY
+status: IN_PROGRESS
 owner: backend
 branch: agent/backend
 priority: HIGH

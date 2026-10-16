@@ -34,8 +34,12 @@ Last updated: 2026-10-16T17:25:00Z
 - [x] TASK-303 step 1: renderHead/buildJsonLd/robots/sitemap TDD (9a5f16f red -> 5c9d504 green), parsed with DOMParser in jsdom
 - [x] TASK-303 step 2: plugin hooks TDD via real `vite build` of a temp site (2247bcf red -> green); real `npm run build` dist/index.html has every B-03 tag, one JSON-LD block, robots.txt without Sitemap (origin empty)
 
+- [x] TASK-303 step 3: favicon.svg (bb0f3b9): rig proportions, stroke 2.25u (=1.8px@32), charcoal via presentation attrs (survives a CSP that blocks inline style), dark via @media; slight stance = VISUAL CALL to flag; rendered 16/32/128 light+dark and viewed
+- [x] TASK-303 step 4: og.jpg 1200x630, 64,338 B, deterministic (same sha256 twice); NO TEXT: Pango ignored Instrument Serif fontfile (WOFF and fontTools-converted TTF both byte-identical to a nonexistent-family render) -> shipped without text per task rule
+- [x] Real build: dist has favicon.svg, og.jpg, robots.txt, index.html with 1 JSON-LD block
+
 ## In progress
-- [ ] TASK-303 step 3: favicon.svg (standing pose, rig proportions; slight leg/arm stance for 16px legibility = visual call to flag)
+- [ ] TASK-304: invoke security-review + vercel skills; CSP contract test must hash the SERVED (built, minified) boot style, see finding below
 - [ ] FINDING for TASK-304: Vite MINIFIES the inline boot-cover <style> in dist/index.html (source text != served text) -> a CSP hash computed from source index.html (as TASK-304 specifies) would not match the served style. Gate <script> survives verbatim. Must resolve in TASK-304 (hash what is served, or contract change request).
 - [ ] TASK-301: code review + verification deferred to the combined pre-handoff pass (status stays IN_PROGRESS until then)
 
