@@ -18,11 +18,11 @@ const TABLE: Array<[boolean, boolean, boolean, boolean, boolean, 'desktop' | 'to
   [T, F, T, F, T, 'off'],
   [T, F, T, T, F, 'off'],
   [T, F, T, T, T, 'off'],
-  // coarse pointer: the touch walker only when allowed and motion is allowed
+  // coarse pointer: the touch walker only when allowed, motion is allowed, and colors are not forced
   [F, T, F, F, F, 'off'],
   [F, T, F, F, T, 'touch'],
   [F, T, F, T, F, 'off'],
-  [F, T, F, T, T, 'touch'], // API.md's touch row does not exclude forced colors (raised in handoff)
+  [F, T, F, T, T, 'off'], // forced colors exclude the walker too (API.md §2.3, integration round 1)
   [F, T, T, F, F, 'off'],
   [F, T, T, F, T, 'off'],
   [F, T, T, T, F, 'off'],
@@ -40,7 +40,7 @@ const TABLE: Array<[boolean, boolean, boolean, boolean, boolean, 'desktop' | 'to
   [T, T, F, F, F, 'desktop'],
   [T, T, F, F, T, 'desktop'],
   [T, T, F, T, F, 'off'],
-  [T, T, F, T, T, 'touch'],
+  [T, T, F, T, T, 'off'],
   [T, T, T, F, F, 'off'],
   [T, T, T, F, T, 'off'],
   [T, T, T, T, F, 'off'],

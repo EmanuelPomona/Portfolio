@@ -25,6 +25,6 @@ export const ACTIVATION_MEDIA = {
 
 export function resolveActivation(q: ActivationQuery): Activation {
   if (q.fine && !q.reducedMotion && !q.forcedColors) return 'desktop';
-  if (q.coarse && q.touch && !q.reducedMotion) return 'touch';
+  if (q.coarse && q.touch && !q.reducedMotion && !q.forcedColors) return 'touch';
   return 'off';
 }
