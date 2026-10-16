@@ -1,0 +1,21 @@
+{
+  "name": "emanuel-ling-portfolio",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "frontend"
+  ],
+  "engines": {
+    "node": ">=22.22.2"
+  },
+  "scripts": {
+    "dev": "npm run dev -w frontend",
+    "build": "npm run build -w frontend",
+    "preview": "npm run preview -w frontend",
+    "test": "npm run test -w frontend",
+    "test:contract": "npm run test:contract -w frontend",
+    "typecheck": "npm run typecheck -w frontend",
+    "lint": "npm run lint -w frontend",
+    "media": "npm run media -w frontend"
+  }
+}

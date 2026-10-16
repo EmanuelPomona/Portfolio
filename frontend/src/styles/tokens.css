@@ -1,0 +1,10 @@
+/*
+ * Owner: agent/frontend (TASK-101 builds the design tokens here).
+ * The three z-index tokens below are CONTRACT values (docs/API.md §2.6): the stickman slice
+ * reads them. Do not rename or reorder them without a contract change request.
+ */
+:root {
+  --z-nav: 100;
+  --z-stickman: 900;
+  --z-loader: 1000;
+}

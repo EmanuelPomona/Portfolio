@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Fallback title. plugins/seo.ts (agent/backend) owns every other head tag. -->
+    <title>Emanuel Ling</title>
+
+    <!-- LOADER GATE: contract, docs/API.md §2.4. Keep verbatim. Runs before paint so returning
+         visitors never see a flash of the loader. -->
+    <script>
+      (function () {
+        var mode = 'skip';
+        try {
+          var forced = /[?&]loader=1(&|$)/.test(location.search);
+          var seen = sessionStorage.getItem('el:loader-seen') === '1';
+          var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          if (forced || !seen) mode = reduced ? 'fade' : 'show';
+        } catch (e) {
+          mode = 'skip';
+        }
+        document.documentElement.dataset.loader = mode;
+      })();
+    </script>
+    <style>
+      /* BOOT COVER: contract, docs/API.md §2.4. Removed by the Loader when it mounts. */
+      #boot-cover { display: none; }
+      html[data-loader='show'] #boot-cover,
+      html[data-loader='fade'] #boot-cover {
+        display: block; position: fixed; inset: 0; z-index: 1000; background: #f8f9f7;
+      }
+      html[data-loader='show'] body { overflow: hidden; }
+    </style>
+  </head>
+  <body>
+    <div id="boot-cover" aria-hidden="true"></div>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

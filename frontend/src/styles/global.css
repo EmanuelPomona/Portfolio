@@ -1,0 +1,15 @@
+/* Owner: agent/frontend. Scaffold reset only; TASK-101 replaces it. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+}
+body {
+  background: #e3e8e5;
+  color: #242424;
+  font-family: 'Manrope Variable', system-ui, sans-serif;
+}
