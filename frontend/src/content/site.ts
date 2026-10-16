@@ -5,7 +5,7 @@ import type { Site } from './types';
 export const site: Site = {
   name: 'Emanuel Ling',
   tagline: 'CS + Math @ Pomona College',
-  origin: '',
+  origin: 'https://emanuel-ling.vercel.app',
   title: 'Emanuel Ling · CS + Math @ Pomona College',
   description:
     'Emanuel Ling studies computer science and math at Pomona College and builds software for his classmates, Los Angeles pedestrians, and his church.',
