@@ -1,7 +1,11 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { cleanup, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { site } from '../../content';
 import { Nav } from './Nav';
+
+const css = readFileSync(join(__dirname, 'Nav.module.css'), 'utf8');
 
 describe('Nav', () => {
   afterEach(cleanup);
@@ -21,6 +25,12 @@ describe('Nav', () => {
     expect(current).toHaveLength(1);
     expect(current[0]).toHaveTextContent('About');
     expect(current[0]).toHaveAttribute('aria-current', 'true');
+  });
+
+  it('takes the clicks that land on its band, so nothing hidden beneath it activates', () => {
+    // Regression: with pointer-events: none, a click on the opaque band opened the project window
+    // scrolled underneath it.
+    expect(css).not.toMatch(/pointer-events:\s*none/);
   });
 
   it('moves aria-current when the active section changes', () => {
