@@ -17,6 +17,12 @@
   transition: background-color var(--dur-release) var(--ease-out);
 }
 
+/* Empty prints are one flat tone, so overlapping ones would merge into a single shape: a hairline
+   keeps each print its own (the brief's hairline, ink at reduced alpha). Photos carry their own edge. */
+.slot[data-empty='true'] .frame {
+  border: 1px solid var(--color-hairline);
+}
+
 .image {
   display: block;
   width: 100%;
