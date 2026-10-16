@@ -1,7 +1,7 @@
 # STATUS: agent/backend
-Task: TASK-301 (then 302, 303, 304 in order)
+Task: TASK-301, 302, 303 (REVIEW); TASK-304 (BLOCKED, contract)
 Round: 0
-Last updated: 2026-10-16T18:00:00Z
+Last updated: 2026-10-16T18:40:00Z
 
 ## Skills invoked so far
 - ecc:contract-first @ TASK-301 start, before validator -> shapes imported from types.ts (no redeclared copies); DATABASE.md is the invariant source; provider check = validate the real exported `content`; fixtures JSON-cloned because heroLinks/contact.links share refs (structuredClone would double-count)
@@ -16,6 +16,7 @@ Last updated: 2026-10-16T18:00:00Z
 - vercel:deploy @ TASK-304 step 2 -> preflight (CLI, link, git status clean); PREVIEW only, never --prod; post-deploy `vercel inspect` + smoke check
 - superpowers:requesting-code-review @ pre-handoff, after implementation of 301-304 (range 3ea91a0..255dc97) -> dispatched a read-only general-purpose reviewer with the 4 task specs, DATABASE/API sections, and the known deviations; findings pending
 - superpowers:receiving-code-review @ after review verdict (With fixes) -> verified each finding against code before acting; #1 reproduced (updated +1 day => 64/69 content tests fail); plan: #1 fix, #3 C-21 placeholder check, #4 index.html guard, #5 .JPG hint, #8 og check-then-write, #6 verify in Chrome, #2 -> CCR-3, #7 known issue
+- superpowers:verification-before-completion @ immediately before HANDOFF-1 -> re-ran every check fresh on 43bdcc9; no implementation after it
 - (probe, scratchpad only) all 3 formats byte-stable across 3 processes on this mac; hero 1600w AVIF q50=53.6KB, q60=73.9KB -> chose AVIF q60/effort 4, WebP q80/effort 4, JPEG q80 mozjpeg
 
 ## Done
@@ -61,8 +62,11 @@ Last updated: 2026-10-16T18:00:00Z
 - [x] Review #2 -> CCR-3 in handoff; #7 (Vite native config loader warning) -> known issue
 - [x] Owner guide: HEIC/.JPG advice, "push does not publish" (2003bfb)
 
+- [x] Fresh verification on 43bdcc9 (after superpowers:verification-before-completion): npm test exit 0 209/209 (8 files); typecheck 0; lint 0; build ok; contract-test.sh exit 0 159/159; media x2 clean; hero 75638 B; preview headers/assets re-checked; preview build == HEAD build except Vercel's injected toolbar script
+- [x] HANDOFF-1 written; 301/302/303 -> REVIEW; 304 stays BLOCKED (contract)
+
 ## In progress
-- [ ] Full verification (bootstrap, test, typecheck, lint, build, contract-test.sh, audit), verification-before-completion, HANDOFF-1, push
+- [ ] nothing; awaiting manager (CCR-1/2/3), owner decisions (prod deploy, preview toolbar, bypass secret), reviewer
 - [ ] TASK-301: code review + verification deferred to the combined pre-handoff pass (status stays IN_PROGRESS until then)
 
 ## Verified
@@ -70,6 +74,8 @@ Last updated: 2026-10-16T18:00:00Z
 - B-01 -> `npm run test:contract`: tsc ok, 3 files, 83 passed (69 content + 9 stickman + 5 C-21)
 - B-02 -> second real `npm run media`: "0 written, 0 stale removed, manifest unchanged"; `git status` clean; temp-dir add/delete covered by media.test.mjs
 - Hero AVIF 1600w = 75,638 bytes (budget 250 KB)
+- B-03/B-04/B-05 -> dist/index.html head tags; preview via vercel curl: headers + 4 files 200 + immutable /media,/assets
+- F-01 -> docs/review/B-304-lighthouse-mobile.html: Perf 96, A11y 94, BP 92, SEO n/a (protected preview)
 
 ## Blocked on
 - TASK-304 zero-CSP-violation criterion: CCR-1 (manager: vite.config.ts assetsInlineLimit for fonts, or alternative). Toolbar violation on previews needs an OWNER setting (Vercel Toolbar off for previews).
