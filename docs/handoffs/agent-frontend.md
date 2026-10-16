@@ -299,3 +299,52 @@ Run fresh at HEAD `5a734ba`, from the repo root:
 ### Commit
 
 `agent/frontend` at `5a734ba` (implementation and evidence), followed by this handoff's docs commit. There are 61 commits since `3ea91a0`, with no attribution trailers. The branch is pushed to `origin/agent/frontend`, so the contract change request is visible outside this session (protocol §6).
+
+## HANDOFF-2 — agent/frontend — 2026-10-16
+
+### Summary
+The owner asked to see the stickman on the page. It lives on `agent/stickman` (TASK-201 to TASK-204, handed off), so I built a **throwaway combined preview**. No branch was merged; integration stays with the manager.
+- **How:** a detached worktree of `agent/frontend` in the session scratchpad, with `agent/stickman`'s `frontend/src/stickman/**` and `frontend/stickman-lab.html` checked out on top. It was served at http://localhost:3201/.
+- **Overlap:** the two branches change no file in common, so the combined tree has no conflicts.
+- **Integration finding:** the combined tree had **3 failing tests**, all in my `App.test.tsx`.
+  - They asserted the scaffold stub's timing: `#boot-cover` still present while loading, and release the instant `ready` settles.
+  - The real Loader correctly removes the cover on mount (API.md §2.2, show mode step 1) and holds at least 1.2s.
+  - **Fixed** by testing App's wiring against a controllable Loader mock. Loader timing remains covered by `src/stickman/contract.test.tsx`.
+  - Merging the branches would otherwise have turned CI red.
+
+### Tasks Completed
+No new task. Test fix for TASK-102 (mount contract, rule 4) and TASK-106 (review finding 5).
+
+### Files Changed
+- `frontend/src/app/App.test.tsx`
+
+### Contracts
+None changed.
+
+### Skills Used
+| Skill | Stage invoked | What it actually changed |
+|---|---|---|
+| superpowers:verification-before-completion | Re-invoked after the App.test change | Fresh runs (below). No implementation after it. |
+
+### Verification
+- **`agent/frontend` @ cf153dc:** typecheck 0, lint 0, `npm test` 19 files / **104 passed**, build unchanged (JS 75.15 kB gzip, CSS 5.40 kB gzip), `scripts/contract-test.sh` 9 passed.
+- **Mutation check:** unwiring `onHeroDecode` turns 2 App tests red, as expected.
+- **Combined preview** (my branch plus the stickman files, uncommitted): typecheck ok, **35 files / 321 tests passed**.
+- **In the browser** (1440, real mouse, `?loader=1`, fresh session):
+  - the loader shows progress (75, then 100) and releases `<main>` at about 2.0s;
+  - `html.stickman-cursor` is set and the stickman canvas is present;
+  - the stickman walks to and stands over a project window, which comes alive;
+  - the hero copy is revealed;
+  - a 1200px wheel scrolls the page (the scroll-lock release works with the real Loader);
+  - the console has 0 errors.
+
+### What Was NOT Verified
+- The full stickman acceptance set (S-01 to S-10, T-01 to T-04) on the combined page. That is the stickman slice's evidence and the reviewer's gate.
+- Phones and reduced motion on the combined preview.
+- The preview is not a merge: `scripts/integrate.sh` has not been run, and the manager still owns integration.
+
+### Known Issues
+Unchanged from HANDOFF-1.
+
+### Commit
+`cf153dc` (test), followed by this docs commit, pushed to `origin/agent/frontend`.

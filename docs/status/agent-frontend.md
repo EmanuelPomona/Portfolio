@@ -1,7 +1,7 @@
 # STATUS: agent/frontend
 Task: TASK-101..106 handed off (HANDOFF-1). 101/102/104/105/106 REVIEW; 103 BLOCKED on contract (window accessible name, WCAG 2.5.3)
 Round: 0
-Last updated: 2026-10-16T16:05:00Z
+Last updated: 2026-10-16T16:40:00Z
 
 ## Skills invoked so far
 - ecc:frontend-design-direction @ TASK-101 step 1 (2026-10-16T10:16Z) -> direction: purpose = name→4 live project links in one scroll; tone = editorial/calm plate book, mostly fog; memorable detail = stickman (slice) + color-earned-by-attention (mine); scan order name→italic titles→sentence→links. Deliberate departure: skill's 'avoid one-hue palette' overridden by brief (monochrome is the point; content supplies color on attention). Constraint: stable dimensions for windows (fixed 16:10 screen), long titles wrap.
@@ -45,6 +45,7 @@ Last updated: 2026-10-16T16:05:00Z
 
 ## In progress
 - [ ] Waiting on: reviewer verdict; manager ruling on the CCR (TASK-103) and the W-03 question
+- [x] Owner asked to see the stickman: throwaway combined preview (scratchpad/preview, detached, uncommitted) at http://localhost:3201/; found + fixed App.test coupling to stub timing (cf153dc); combined suite 321/321; HANDOFF-2
 
 ## Verified
 - H-03 nav scroll + aria-current + Deep Forest -> CDP check (scratchpad qa/t101.mjs): each click -> hash, section top 72px, 1 aria-current, color rgb(15,46,36)
