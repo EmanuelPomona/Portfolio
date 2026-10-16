@@ -1,5 +1,5 @@
 # STATUS: main
-Task: PLANNING (Mode A)
+Task: PLANNING (Mode A) complete
 Round: 0
 Last updated: 2026-10-16T10:05:00Z
 
@@ -65,5 +65,7 @@ Last updated: 2026-10-16T10:05:00Z
 - On owner approval of the touch walker in /stickman-lab.html: flip flags.touchStickman, record approval here (ADR-006).
 - After TASK-304: record PREVIEW_URL in .env.example + ARCHITECTURE.md.
 
+- Owner actions before agents run: `sudo chown -R 501:20 ~/.npm` (npm cache EACCES); `npx vercel login` before TASK-304.
+
 ## Blocked on
-- nothing for planning. Owner actions needed before agents run: `sudo chown -R 501:20 ~/.npm` (npm cache EACCES); `npx vercel login` before TASK-304.
+- nothing
