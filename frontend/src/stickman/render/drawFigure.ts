@@ -1,6 +1,6 @@
 // Owner: agent/stickman. Canvas renderer, ported from the prototype's limb() and draw().
 // It does not clear or set the device-pixel transform: the caller owns the canvas.
-import { holdPencil, type Limb, type Pose } from '../engine/pose';
+import { RIG_UNITS, holdPencil, type Limb, type Pose } from '../engine/pose';
 import type { Vec2 } from '../engine/vec';
 
 export interface DrawOptions {
@@ -14,7 +14,6 @@ export interface DrawOptions {
   pencil?: boolean;
 }
 
-const RIG_UNITS = 40;
 const PENCIL_HALF_WIDTH = 3;
 const PENCIL_CONE = 7;
 const PENCIL_FERRULE = 6;

@@ -11,6 +11,7 @@ import {
   holdPencil,
   lineWidthFor,
   pointAngleTo,
+  rigToScreen,
   runBlend,
   type Limb,
 } from './pose';
@@ -196,7 +197,27 @@ describe('pointAngleTo', () => {
   });
 });
 
+describe('rigToScreen', () => {
+  it('scales rig units by size/40 from his feet and mirrors x by facing', () => {
+    // size 32 -> k 0.8: the pencil tip (10, 0) lands 8px ahead of his feet
+    expect(rigToScreen(PENCIL_TIP, { x: 100, y: 200 }, 32, 1)).toEqual({ x: 108, y: 200 });
+    expect(rigToScreen(PENCIL_TIP, { x: 100, y: 200 }, 32, -1)).toEqual({ x: 92, y: 200 });
+    // size 40 -> k 1: a point 40 units up is 40px up
+    expect(rigToScreen({ x: 0, y: -40 }, { x: 100, y: 200 }, 40, -1)).toEqual({ x: 100, y: 160 });
+  });
+});
+
 describe('holdPencil', () => {
+  it('never aims the hand past the top of the pencil when the shaft is out of reach', () => {
+    // A shoulder far above the pencil: the reachable grip is clamped to the shaft's top end,
+    // not to a point beyond it.
+    const base = computePose(STAND, NONE, REST_POINT_ANGLE, 0);
+    const p = holdPencil({ ...base, shoulder: { x: 0, y: -200 } });
+    const hand = p.arms[0].end;
+    const toTop = angle(p.shoulder, p.pencil.top);
+    expect(angle(p.shoulder, hand)).toBeCloseTo(toTop, 2);
+  });
+
   it('plants the tip on the ground ahead of his feet and keeps the front hand on the shaft', () => {
     for (const speed of [0, 200, 1100]) {
       for (const phase of [0, 0.7, 2.4]) {

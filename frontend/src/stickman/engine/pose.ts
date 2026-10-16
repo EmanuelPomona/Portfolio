@@ -19,7 +19,7 @@ export interface Pose {
   neck: Vec2;
   head: Vec2;
   headRadius: number;
-  /** [front, back] */
+  /** [side +1, side −1]. They alternate with the stride, so neither is always in front. */
   legs: readonly [Limb, Limb];
   /** [front, back]. The front arm points and holds the pencil. */
   arms: readonly [Limb, Limb];
@@ -32,7 +32,15 @@ export interface PencilPose extends Pose {
 /** The relaxed front-arm angle the prototype uses when nothing is being pointed at. */
 export const REST_POINT_ANGLE = 1.2;
 
-const RIG_UNITS = 40;
+/** The rig is this many units tall; a figure `size` px tall scales it by size / RIG_UNITS. */
+export const RIG_UNITS = 40;
+
+/** A rig-space point on screen, for a figure whose feet are at `at`, `size` px tall, facing `facing`. */
+export function rigToScreen(p: Readonly<Vec2>, at: Vec2, size: number, facing: 1 | -1): Vec2 {
+  const k = size / RIG_UNITS;
+  return { x: at.x + p.x * k * facing, y: at.y + p.y * k };
+}
+
 const THIGH = 8;
 const SHIN = 8;
 const UPPER_ARM = 6.4;
@@ -172,7 +180,9 @@ export function holdPencil(pose: Pose): PencilPose {
   const foot = at(u0);
   const h = Math.hypot(S.x - foot.x, S.y - foot.y);
   const w = h < reach ? Math.sqrt(reach * reach - h * h) : 0;
-  const u = clamp(GRIP_FROM_TIP, Math.max(0, u0 - w), Math.min(PENCIL_LENGTH, u0 + w));
+  // The final clamp keeps the grip on the shaft even when the reachable stretch lies beyond it.
+  const reachable = clamp(GRIP_FROM_TIP, Math.max(0, u0 - w), Math.min(PENCIL_LENGTH, u0 + w));
+  const u = clamp(reachable, 0, PENCIL_LENGTH);
   const grip = at(u);
 
   const d = clamp(
