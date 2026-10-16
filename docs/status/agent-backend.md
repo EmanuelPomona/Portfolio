@@ -15,6 +15,7 @@ Last updated: 2026-10-16T18:00:00Z
 - vercel:vercel-cli @ TASK-304 step 2, before any CLI use -> check auth with `vercel whoami --format json`; never auto-link or start login myself; verify target with `vercel project inspect --non-interactive`; protected previews via `vercel curl`, never disable protection
 - vercel:deploy @ TASK-304 step 2 -> preflight (CLI, link, git status clean); PREVIEW only, never --prod; post-deploy `vercel inspect` + smoke check
 - superpowers:requesting-code-review @ pre-handoff, after implementation of 301-304 (range 3ea91a0..255dc97) -> dispatched a read-only general-purpose reviewer with the 4 task specs, DATABASE/API sections, and the known deviations; findings pending
+- superpowers:receiving-code-review @ after review verdict (With fixes) -> verified each finding against code before acting; #1 reproduced (updated +1 day => 64/69 content tests fail); plan: #1 fix, #3 C-21 placeholder check, #4 index.html guard, #5 .JPG hint, #8 og check-then-write, #6 verify in Chrome, #2 -> CCR-3, #7 known issue
 - (probe, scratchpad only) all 3 formats byte-stable across 3 processes on this mac; hero 1600w AVIF q50=53.6KB, q60=73.9KB -> chose AVIF q60/effort 4, WebP q80/effort 4, JPEG q80 mozjpeg
 
 ## Done
