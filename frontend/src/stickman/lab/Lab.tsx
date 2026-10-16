@@ -4,6 +4,8 @@
 import { useEffect, useRef, useState, type MouseEvent } from 'react';
 import { PACES, type PaceName } from '../engine/motion';
 import { createCursorController, type CursorController } from '../layer/controller';
+import { registerCursorHandoff } from '../layer/cursorChannel';
+import { Loader } from '../loader/Loader';
 import '../layer/stickman.css';
 import './lab.css';
 
@@ -18,6 +20,25 @@ interface Settings {
 const SIZES: readonly Size[] = [28, 32, 36];
 const PACE_LABELS: Record<PaceName, string> = { stroll: 'Stroll', walk: 'Walk', hurry: 'Hurries when far' };
 const MARK_LABELS: Record<Mark, string> = { ring: 'Ring', dot: 'Tiny dot' };
+
+/** How long the pretend hero image takes to decode when replaying the loader. */
+type HeroDelay = 'instant' | 'slow' | 'never';
+const HERO_DELAYS: readonly HeroDelay[] = ['instant', 'slow', 'never'];
+const HERO_LABELS: Record<HeroDelay, string> = { instant: 'Hero ready', slow: 'Hero in 2s', never: 'Hero never' };
+const heroReady = (d: HeroDelay): Promise<void> =>
+  d === 'never' ? new Promise(() => {}) : new Promise((r) => setTimeout(r, d === 'slow' ? 2000 : 0));
+
+interface Replay {
+  key: number;
+  ready: Promise<void>;
+}
+let replays = 0;
+/** Called from a click: set what the index.html gate sets on a first visit, then mount a Loader. */
+function startReplay(d: HeroDelay): Replay {
+  document.documentElement.dataset.loader = 'show';
+  replays += 1;
+  return { key: replays, ready: heroReady(d) };
+}
 
 function Choice<T extends string | number>(props: {
   label: string;
@@ -43,6 +64,7 @@ const noJump = (e: MouseEvent) => e.preventDefault();
 export function Lab() {
   const [settings, setSettings] = useState<Settings>({ size: 32, pace: 'hurry', mark: 'ring' });
   const [overPanel, setOverPanel] = useState(false);
+  const [replay, setReplay] = useState<Replay | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const markRef = useRef<HTMLDivElement>(null);
   const readoutRef = useRef<HTMLOutputElement>(null);
@@ -59,6 +81,7 @@ export function Lab() {
     // Start where the spike starts him, so a side-by-side comparison begins identically.
     cursor.handoff({ x: innerWidth * 0.42, y: innerHeight * 0.7 });
     cursorRef.current = cursor;
+    const release = registerCursorHandoff((at) => cursor.handoff(at)); // the loader hands him over
 
     // A tuning readout, a few times a second; never per frame and never through React state.
     const timer = setInterval(() => {
@@ -70,6 +93,7 @@ export function Lab() {
 
     return () => {
       clearInterval(timer);
+      release();
       cursor.stop();
       cursorRef.current = null;
     };
@@ -143,8 +167,18 @@ export function Lab() {
           name={(v) => MARK_LABELS[v]}
           onPick={set('mark')}
         />
+        <div className="lab-row" role="group" aria-label="Replay the loader">
+          <span>Loader</span>
+          {HERO_DELAYS.map((d) => (
+            <button key={d} type="button" onClick={() => setReplay(startReplay(d))}>
+              {HERO_LABELS[d]}
+            </button>
+          ))}
+        </div>
         <output ref={readoutRef} className="lab-readout" aria-live="off" />
       </div>
+
+      {replay && <Loader key={replay.key} ready={replay.ready} onDone={() => setReplay(null)} />}
 
       <canvas ref={canvasRef} className="lab-canvas" aria-hidden="true" />
       <div ref={markRef} className={`lab-mark lab-mark--${settings.mark}`} aria-hidden="true" />
