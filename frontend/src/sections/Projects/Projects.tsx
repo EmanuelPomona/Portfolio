@@ -26,10 +26,11 @@ function Plate({ project, index }: { readonly project: Project; readonly index: 
       data-fog="stagger"
     >
       <h3 className={styles.title}>
-        <span className={styles.number}>{number}</span>
+        {/* The spaces stay outside the hidden slash, so the heading is named "01 SagePlan". */}
+        <span className={styles.number}>{number}</span>{' '}
         <span className={styles.slash} aria-hidden="true">
-          {' / '}
-        </span>
+          /
+        </span>{' '}
         <em className={styles.name}>{project.title}</em>
       </h3>
       <div className={styles.window}>

@@ -37,6 +37,14 @@ describe('Projects', () => {
     expect(screen.getByRole('region', { name: 'Projects' })).toHaveAttribute('id', 'projects');
   });
 
+  it('names each heading with its number and title, separated, without the decorative slash', () => {
+    render(<Projects projects={projects} heading="Projects" />);
+    for (const [i, p] of projects.entries()) {
+      const number = String(i + 1).padStart(2, '0');
+      expect(screen.getByRole('heading', { level: 3, name: `${number} ${p.title}` })).toBeInTheDocument();
+    }
+  });
+
   it('sets each title in italics as the title of a work', () => {
     const { container } = render(<Projects projects={projects} heading="Projects" />);
     for (const [i, a] of articles(container).entries()) {
