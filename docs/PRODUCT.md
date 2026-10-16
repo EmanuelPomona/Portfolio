@@ -81,7 +81,8 @@ All of this must work on a phone and with reduced motion.
    emanuelling27@gmail.com.
 7. **Phone.** On a 390px phone the same flow works:
    - project windows come alive as they reach the middle of the screen;
-   - the stickman walks along the bottom edge and runs to taps.
+   - once the owner has approved the touch mode, the stickman walks along the
+     bottom edge and runs to taps.
 8. **Reduced motion.** With reduced motion turned on, there is a 300ms fade
    instead of the loader animation, and the normal cursor is used. All content is
    still present.
@@ -93,6 +94,9 @@ All of this must work on a phone and with reduced motion.
 - [ ] Stickman cursor on fine pointers, matching `docs/reference/stickman-cursor-spike.html`
       (32px, ring, walk/run, point, cheer, sit).
 - [ ] Stickman touch mode: bottom edge, scroll walking, runs to taps.
+      - Built and demoable in the lab page.
+      - It sits behind the `touchStickman` flag, which stays **off in production**
+        until the owner tunes it (approved design §5.14).
 - [ ] Hero with the alpine photograph, name, subtitle, centered nav, and fog drift.
 - [ ] Projects: four dark macOS browser windows that alternate sides, with
       one-sentence copy, a meta line, a primary link, and a code link.
@@ -124,8 +128,12 @@ Only after every must-have is verified.
 ## Explicitly out of scope
 
 Blog, case-study pages, extra routes, CMS or admin, contact form, theme toggle,
-analytics dashboard, chatbot, résumé download, sound, i18n, comments, and
-AI-generated imagery of any kind.
+analytics dashboard, chatbot, résumé download, sound, i18n, comments.
+
+Also out of scope: any generated or stock stand-in for a project screenshot or a
+personal photo. Empty slots stay honestly empty until the owner supplies the real
+image. The two background photographs are the owner's chosen assets and are not
+affected by this rule.
 
 ## Success criteria
 

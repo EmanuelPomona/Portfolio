@@ -175,6 +175,43 @@ These are open to the owner's change.
 10. **GitHub.** It appears as a third link in Connect, because every project points
     there.
 
+The following calls resolve the builder check (2026-10-16):
+
+11. **Empty project windows.** An empty project window's screen is a flat
+    fog-tone panel with the line "screenshot soon". It never contains a
+    photograph, because a landscape under a `sageplan.vercel.app` address bar
+    would read as fake project art.
+    - The dark-to-color pipeline is still built now.
+    - It is verified with a fixture image in tests and the lab page, never in
+      shipped content.
+    - The owner said "for now just leave spaces for it".
+12. **Collage slots.** The collage has five slots, matching wireframe p3:
+    - 4:3 landscape;
+    - 2:3 tall;
+    - small 4:3;
+    - 9:16 tall;
+    - 4:3 landscape.
+
+    The slots are data-driven, so adding or removing a photo is a content edit.
+13. **The intro.** The intro is About's "brief description", not a hero line.
+    - It is drafted from verified facts only: CS + Math at Pomona, and software
+      built for his classmates (SagePlan), his city (StreetSafe: LA), and his
+      church (Revelation Youth, where he is music director).
+    - It ships flagged for the owner's edit, and launch does not wait on that edit.
+    - Classes are labeled "This semester": the owner listed them when asked what
+      he is taking this semester.
+14. **Touch stickman.** It is built in v1 behind a flag that is **off in
+    production** until the owner tunes it in the lab page, as he did for desktop.
+    Phones are complete without it: native touch, every reveal driven by the
+    center band.
+15. **Hero.** The hero holds the name and subtitle, plus a small
+    LinkedIn · Email · GitHub row under the subtitle. That matches the prototype
+    the owner saw, and puts contact on the first screen for screeners. No project
+    window appears in the hero; the prototype's window was only a hover target.
+16. **Wireframes.** They are binding for structure and order. Exact geometry is
+    left to the builder. Copies are in `docs/reference/wireframes/`, with the
+    owner's personal photos masked on page 3.
+
 ## 6. Left to the builder
 
 - Exact type scale, spacing, and motion curves.
