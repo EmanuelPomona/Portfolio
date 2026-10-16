@@ -1,7 +1,7 @@
 ---
 id: TASK-204
 title: Touch walker for coarse pointers (behind flag, off in production)
-status: IN_PROGRESS
+status: REVIEW
 owner: stickman
 branch: agent/stickman
 priority: MEDIUM

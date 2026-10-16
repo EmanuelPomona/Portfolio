@@ -1,7 +1,7 @@
 ---
 id: TASK-201
 title: Stickman motion engine, canvas rig, and lab page
-status: IN_PROGRESS
+status: REVIEW
 owner: stickman
 branch: agent/stickman
 priority: HIGH

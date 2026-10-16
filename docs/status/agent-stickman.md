@@ -1,7 +1,7 @@
 # STATUS: agent/stickman
-Task: 201-204 implemented + runtime-verified; final review (203+204) pending; then verification + handoff
+Task: TASK-201..204 -> REVIEW (handed off: docs/handoffs/agent-stickman.md HANDOFF-1)
 Round: 0
-Last updated: 2026-10-16T15:20:00Z
+Last updated: 2026-10-16T15:45:00Z
 
 ## Skills invoked so far
 - superpowers:test-driven-development @ TASK-201 step 1, before motion.ts -> RED/GREEN per module: motion.test.ts failed on missing module, then 17 pass; same for gestures (8) and pose (21); expectations hand-derived (scratchpad sim of the spike: 800px settles 1.083s, 50px peaks 198 px/s)
@@ -24,7 +24,8 @@ Last updated: 2026-10-16T15:20:00Z
 - ecc:frontend-design-direction / frontend-design:frontend-design / ui-ux-pro-max:ui-ux-pro-max / design-taste-frontend @ TASK-203, before the Loader view (re-invoked for the loader) -> centered wireframe composition; tokens Ivory/Charcoal/Forest/#4F5552; outline pill (no grey track); tiny % only; one moving thing; ux: aria-busy + progressbar, accelerate-on-leave for the pencil drop
 - ecc:motion-patterns @ TASK-203, exit curve -> paper opacity 450ms cubic-bezier(0.22,1,0.36,1); pencil drop ease-in (gravity) rotating about the tip; fade mode 300ms opacity only (API wins over the skill's 200ms preference)
 
-- superpowers:requesting-code-review @ 203+204, after runtime evidence -> reviewer dispatched on 06da8f4..9976039 (pending)
+- superpowers:requesting-code-review @ 203+204, after runtime evidence -> reviewer on 06da8f4..9976039: "With fixes", 0 critical; Important: lab replay ignored hero delay (nav-offset cap), every touchstart counted as a tap -> both fixed 0080355, 642b1b4 (TDD, RED first); minors 4,5 fixed; 3,6,7,8 recorded in handoff Known Issues; 9 (handoff uncommitted) fixed in the final commit
+- superpowers:verification-before-completion @ immediately before the final commit -> fresh: test 226/226 (17 files), contract-test.sh 9/9, typecheck 0, lint 0, build ok (JS 78.14 KB gz, CSS 4.24 KB gz, dist has only index.html, 0 U+2014), manager files + flags.ts unchanged vs 3ea91a0, no secrets. No implementation after it.
 - slop-check run before handoff -> 10 'pure white' hits, all #fff difference-blend ink (figure/ring); justification requested from manager (DESIGN_BRIEF is manager-owned)
 
 ## Done
@@ -49,7 +50,7 @@ Last updated: 2026-10-16T15:20:00Z
 - [x] TASK-203 progress.ts ed02df6, scribble.ts 4d55458, follow.ts 0015de2, artist.ts b80ef99, Loader.tsx + loader.css c491861 (13 Loader tests GREEN, contract 9/9 vs real Loader), tip-on-line fix 291f1a7
 - [x] TASK-203 done: fade 250ms b56c41b; circling-loop scribble 9e731d3 (wireframe ball verified visually); nav-relative cap ccd4710 (mutation-checked); lab replay control 4f1b072; evidence bb4904a
 - [x] TASK-204 done: touchWalker 33a50dc (6 tests), StickmanLayer touch mode 8742364, lab toggle c225be7 + phone layout 2141fb2, evidence 9976039 (390px touch: scrolled 1200px, link got the tap as a click, elementFromPoint = link); flags.ts unchanged
-- [ ] IN PROGRESS: requesting-code-review for 203+204 dispatched (06da8f4..9976039); handoff drafted (docs/handoffs/agent-stickman.md, uncommitted). After review:, act on findings, verification-before-completion, HANDOFF-1 in docs/handoffs/agent-stickman.md (201-204), task statuses -> REVIEW, final commit
+- [x] Final review handled; verification-before-completion run; HANDOFF-1 written; TASK-201..204 status REVIEW. Done:, act on findings, verification-before-completion, HANDOFF-1 in docs/handoffs/agent-stickman.md (201-204), task statuses -> REVIEW, final commit
 
 ## Verified
 - TASK-203 final runtime (bb4904a, docs/review/F-203-results.txt): L-01 first paint ivory (100ms frame mean RGB 247.9,248.9,246.9); L-02 hero HANGS -> exit 4502ms after navigation start, gone 4957, page usable; hero BLOCKED (decode rejects = ready) -> exit at the 1.2s minimum; L-03 click -> exit 14ms, gone 467ms; L-04 reload -> no loader; L-05 fade 253ms, no canvas; L-06 progressbar + live valuenow, main inert, Tab reaches no link; L-07 1210ms; page scrolls after finish; F-203-loader-2500ms/4300ms show the dense ball
