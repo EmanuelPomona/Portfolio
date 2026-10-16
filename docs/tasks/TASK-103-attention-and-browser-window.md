@@ -1,7 +1,7 @@
 ---
 id: TASK-103
 title: Attention system and the dark macOS BrowserWindow
-status: READY
+status: IN_PROGRESS
 owner: frontend
 branch: agent/frontend
 priority: HIGH

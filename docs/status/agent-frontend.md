@@ -1,7 +1,7 @@
 # STATUS: agent/frontend
-Task: TASK-102 (101 implemented + verified; then 103 → 104, 105 → 106)
+Task: TASK-103 (101, 102 implemented + verified; then 104, 105 → 106)
 Round: 0
-Last updated: 2026-10-16T10:58:00Z
+Last updated: 2026-10-16T11:32:00Z
 
 ## Skills invoked so far
 - ecc:frontend-design-direction @ TASK-101 step 1 (2026-10-16T10:16Z) -> direction: purpose = name→4 live project links in one scroll; tone = editorial/calm plate book, mostly fog; memorable detail = stickman (slice) + color-earned-by-attention (mine); scan order name→italic titles→sentence→links. Deliberate departure: skill's 'avoid one-hue palette' overridden by brief (monochrome is the point; content supplies color on attention). Constraint: stable dimensions for windows (fixed 16:10 screen), long titles wrap.
@@ -12,6 +12,7 @@ Last updated: 2026-10-16T10:58:00Z
 - ecc:react-patterns @ TASK-101 step 2, before hook code (10:37Z) -> useSyncExternalStore for matchMedia; cleanup on every observer/listener; derive in render (reduced-motion latch via setState-during-render, not effect); no memo by default.
 - ecc:frontend-a11y @ TASK-101 step 5, before Nav/Section (10:48Z) -> nav[aria-label=Sections] with real anchors, aria-current="true" (contract value), section aria-labelledby its h2, backdrop alt="" + aria-hidden wrapper, nav kept inside <main> so inert covers it during loader (L-06).
 - vercel:react-best-practices @ TASK-101 after TSX edits (10:57Z) -> moved useActiveSection into ActiveNav leaf (rerender-defer-reads: section change no longer re-renders the page); ternary for optional heading (rendering-conditional-render). Passive listeners + functional setState + primitive deps already satisfied. Resource hints deferred to TASK-102 (hero LCP).
+- ecc:react-performance @ TASK-102, hero LCP (11:25Z) -> client-only SPA waterfall: React DOM preload() of best hero source (type + imagesrcset/imagesizes, fetchPriority high) called in main.tsx before render; verified 1 request at High priority (preload matched). Re-render risk checked: Hero re-renders only on drift visibility flips + once on ready. Accepted: drift copy = second decoded bitmap of same cached URL.
 
 ## Done
 - [x] Read protocol, routing, tasks 101–106, PRODUCT, DESIGN_BRIEF, DESIGN_CONSTRAINTS, API, ACCEPTANCE, approved spec, wireframes, background photos
@@ -22,8 +23,13 @@ Last updated: 2026-10-16T10:58:00Z
 - [x] TASK-101 hooks TDD -> d3b4bb4, 755c6b0, fb61099; Nav c7e7d11 (+81a86f2 hairline band); Section 80e5633; App 46afe52, ad826d1
 - [x] TASK-101 evidence -> docs/review/F-101-{desktop-1440,tablet-768,mobile-390,focus-ring}.png (e3098ee)
 
+- [x] TASK-102 Picture TDD (6 tests) -> 93f5009; Section backdrop via Picture cee4d23
+- [x] TASK-102 Hero TDD (6 tests: h1/tagline/links order, new-tab rel, onHeroDecode once, drift running/paused by IO+visibility, reduced motion paused, copy waits for ready) -> 5e78339
+- [x] TASK-102 App: deferred ready settled by rendered hero img decode (+ handled rejection) -> 05086bc; drift timing/amplitude 5446b67; preload 4932ee6
+- [x] TASK-102 evidence -> docs/review/F-102-hero-{1440,768,390}.png (1d878e9)
+
 ## In progress
-- [ ] TASK-102: Picture (TDD) -> Hero (TDD) -> fog drift -> onHeroDecode wiring -> evidence F-102-hero-{1440,768,390}
+- [ ] TASK-103: centerBand (TDD table) -> useAttention (TDD) -> BrowserWindow (TDD) -> CSS -> evidence F-103-window-{rest,attention}
 - [ ] Final gate for all tasks happens at TASK-106 handoff (browser-qa, requesting-code-review, verification-before-completion); tasks move to REVIEW then
 
 ## Verified
@@ -35,6 +41,12 @@ Last updated: 2026-10-16T10:58:00Z
 - D-04 -> document.fonts loaded: Instrument Serif 400, Manrope Variable 200-800 only
 - D-03 slop-check -> 2 hits, both Section backdrop alpha masks (photo edge into Mist = brief justified exception); nav fade hit removed (81a86f2)
 - Console (dev, after first load) -> no errors; first load shows favicon.ico 404 (backend TASK-303)
+- H-01 -> 1440: name Instrument Serif 128px top-left (x 55, y 171), nav centered (offset 0), photo full-bleed; matches wireframe-1 structure (F-102-hero-1440.png)
+- H-02 -> drift moved 42px in 10s at 1440, 28px at 390; 45s alternate (90s cycle); transform only; scrolled away -> play-state paused + transform frozen; reduced motion -> animation-name none; hidden tab -> unit test
+- R-02 (hero) -> 390: name 60px, 1 line; hero links 44px tall
+- F-03 (hero) -> layout-shift observer: 1440 0.00005, 768 0.0001, 390 0
+- X-02 (hero) -> worst bg pixel under each glyph run (text hidden, sharp sampling): name >= 11.69, tagline >= 9.59, links >= 10.41, dots (#4f5552) >= 5.05 across 390/768/1024/1280/1440
+- Loader contract stub with ?loader=1 -> main released only after hero img complete; boot-cover removed
 - Browser tooling note: chrome-devtools MCP profile locked by another session -> using own headless Chrome via CDP (scratchpad qa/cdp.mjs), port 9333, isolated profile
 
 ## Blocked on
