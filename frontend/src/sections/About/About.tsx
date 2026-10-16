@@ -68,7 +68,7 @@ export function About({ about, heading }: AboutProps) {
   for (let i = 0; i < about.photos.length; i += PER_SPREAD) spreads.push(about.photos.slice(i, i + PER_SPREAD));
 
   return (
-    <Section id="about" heading={heading} backdrop="evergreen">
+    <Section id="about" heading={heading} backdrop="evergreen" className={styles.section}>
       <div ref={ref} className={styles.intro} data-fog="stagger">
         <p className={styles.lede}>{about.description}</p>
         <div className={styles.classes}>

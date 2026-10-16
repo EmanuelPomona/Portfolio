@@ -2,6 +2,17 @@
  * About (wireframe 3): a lede set like a book's introduction, this semester's two classes, then a
  * loose overlapping scatter of prints. Not a grid.
  */
+
+/*
+ * Stacked widths run the lede across the photo's pine cluster (measured 1.7:1 at 768px), so there
+ * the photograph dissolves before the pines. From 1024px the lede ends short of them and they stay.
+ */
+@media (width < 64rem) {
+  .section {
+    --backdrop-edge-far: 52%;
+  }
+}
+
 .intro {
   max-width: 46rem;
 }
