@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40">
+  <!-- The stickman standing, from the cursor rig (TASK-201): legs 8+8, torso 13.2, head r 3.9 at 17.4
+       above the hip, arms 6.4+6, in a 40-unit box. Stroke 2.25 units = the cursor's 1.8px at 32px.
+       Legs and arms are spread slightly so the figure reads as a person at 16px. -->
+  <style>@media (prefers-color-scheme: dark) { g { stroke: #e3e8e5; } }</style>
+  <g transform="translate(20 38.75)" fill="none" stroke="#242424" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M0 -16 L1.27 -8.1 L2.55 -0.2 M0 -16 L-1.27 -8.1 L-2.55 -0.2"/>
+    <path d="M0 -16 L0 -29.2"/>
+    <circle cx="0" cy="-33.4" r="3.9"/>
+    <path d="M0 -27 L2.61 -21.16 L4.38 -15.42 M0 -27 L-2.61 -21.16 L-4.38 -15.42"/>
+  </g>
+</svg>
