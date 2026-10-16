@@ -17,7 +17,7 @@
 
 /* Reduced motion: no scribble, an opacity-only fade. */
 .stickman-loader[data-mode='fade'] {
-  transition: opacity 300ms linear;
+  transition: opacity 250ms linear;
 }
 
 /* While the paper is up, show the native "working" cursor over it (the stickman's ring sits

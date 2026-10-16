@@ -8,8 +8,8 @@ export const CAP_MS = 4500;
 export const SPRINT_MS = 250;
 /** Show-mode exit: pencil drops, paper clears. ≤ 600 (L-03) and CAP_MS + EXIT_MS ≤ 5000 (contract). */
 export const EXIT_MS = 450;
-/** Fade-mode exit under reduced motion (L-05). */
-export const FADE_MS = 300;
+/** Fade-mode exit under reduced motion (L-05: 300ms or less, with margin for timer latency). */
+export const FADE_MS = 250;
 
 const HOLD = 90;
 
