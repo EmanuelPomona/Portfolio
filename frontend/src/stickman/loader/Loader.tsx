@@ -42,9 +42,11 @@ export function Loader({ ready, onDone }: LoaderProps) {
     const elapsed = () => Date.now() - t0;
     // The cap is 4.5s from mount (API.md) and, more strictly, from navigation start (ACCEPTANCE L-02):
     // honour both by subtracting the time the page took to mount, but never cut below the minimum.
+    // Only a fresh page load counts; a later mount (the lab's replay) gets the full cap from mount.
+    const now = typeof performance !== 'undefined' ? performance.now() : 0;
     const sinceNavigation =
-      typeof performance !== 'undefined' && performance.getEntriesByType?.('navigation').length
-        ? performance.now()
+      now < CAP_MS && typeof performance !== 'undefined' && performance.getEntriesByType?.('navigation').length
+        ? now
         : 0;
     const capAt = Math.max(MIN_MS, CAP_MS - sinceNavigation);
     let readyAt: number | null = null;

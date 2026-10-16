@@ -93,6 +93,26 @@ describe('Loader timing (show mode)', () => {
     expect(leaving()).toBe(true);
   });
 
+  it('a replay long after the page loaded gets the full 4.5s cap (the lab replay)', async () => {
+    vi.spyOn(performance, 'getEntriesByType').mockReturnValue([{} as PerformanceEntry]);
+    vi.spyOn(performance, 'now').mockReturnValue(20_000);
+    render(<Loader ready={new Promise(() => {})} onDone={vi.fn()} />);
+    await advance(CAP_MS - 1);
+    expect(leaving()).toBe(false);
+    await advance(1);
+    expect(leaving()).toBe(true);
+  });
+
+  it('still finishes once when sessionStorage throws (private mode)', async () => {
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new Error('QuotaExceededError');
+    });
+    const onDone = vi.fn();
+    render(<Loader ready={Promise.resolve()} onDone={onDone} />);
+    await advance(MIN_MS + EXIT_MS);
+    expect(onDone).toHaveBeenCalledTimes(1);
+  });
+
   it('a very slow mount still shows the loader for the minimum', async () => {
     vi.spyOn(performance, 'getEntriesByType').mockReturnValue([{} as PerformanceEntry]);
     vi.spyOn(performance, 'now').mockReturnValue(4000);
