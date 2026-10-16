@@ -238,3 +238,27 @@
 .lab--over-panel .lab-mark {
   opacity: 0;
 }
+
+/* Phones: the lab's note would cover the nav, and the panel must fit the width. */
+@media (max-width: 600px) {
+  .lab-note {
+    display: none;
+  }
+  .lab-nav {
+    gap: 22px;
+  }
+  /* The bottom edge is the touch walker's: controls go to the top, the nav just above his line. */
+  .lab-panel {
+    left: 8px;
+    right: 8px;
+    top: 8px;
+    bottom: auto;
+  }
+  .lab-nav {
+    top: auto;
+    bottom: 72px;
+  }
+  .lab-row {
+    flex-wrap: wrap;
+  }
+}

@@ -114,6 +114,7 @@ export function Lab() {
   const set = <K extends keyof Settings>(k: K) => (v: Settings[K]) => setSettings((s) => ({ ...s, [k]: v }));
 
   return (
+    <>
     <div className={`lab${overPanel ? ' lab--over-panel' : ''}`}>
       <nav className="lab-nav" aria-label="Sample targets">
         {['Home', 'Projects', 'About', 'Contact'].map((l) => (
@@ -190,14 +191,16 @@ export function Lab() {
             </button>
           ))}
         </div>
-        <output ref={readoutRef} className="lab-readout" aria-live="off" />
+        {!touch && <output ref={readoutRef} className="lab-readout" aria-live="off" />}
       </div>
 
       {replay && <Loader key={replay.key} ready={replay.ready} onDone={() => setReplay(null)} />}
-      {touch && <div className="lab-scroll" aria-hidden="true" />}
 
       <canvas ref={canvasRef} className="lab-canvas" aria-hidden="true" />
       <div ref={markRef} className={`lab-mark lab-mark--${settings.mark}`} aria-hidden="true" />
     </div>
+    {/* Outside the fixed scene so the document grows and the window scrolls. */}
+    {touch && <div className="lab-scroll" aria-hidden="true" />}
+    </>
   );
 }
