@@ -1,11 +1,10 @@
 // Owner: agent/stickman. Dev-only tuning lab (docs/API.md §2.7). Reproduces the approved spike's
 // page so the port can be compared with docs/reference/stickman-cursor-spike.html side by side.
+// The figure is the production cursor controller; the lab only adds tuning controls.
 import { useEffect, useRef, useState, type MouseEvent } from 'react';
-import { stepGestures, type GestureState } from '../engine/gestures';
-import { MAX_DT, MOVING_SPEED, PACES, stepMotion, type MotionState, type PaceName } from '../engine/motion';
-import { REST_POINT_ANGLE, computePose, lineWidthFor, pointAngleTo } from '../engine/pose';
-import type { Vec2 } from '../engine/vec';
-import { drawFigure } from '../render/drawFigure';
+import { PACES, type PaceName } from '../engine/motion';
+import { createCursorController, type CursorController } from '../layer/controller';
+import '../layer/stickman.css';
 import './lab.css';
 
 type Size = 28 | 32 | 36;
@@ -19,97 +18,6 @@ interface Settings {
 const SIZES: readonly Size[] = [28, 32, 36];
 const PACE_LABELS: Record<PaceName, string> = { stroll: 'Stroll', walk: 'Walk', hurry: 'Hurries when far' };
 const MARK_LABELS: Record<Mark, string> = { ring: 'Ring', dot: 'Tiny dot' };
-
-const TARGETS = 'a[href], button:not([disabled]), [data-stickman="target"]';
-
-/**
- * The lab's own frame loop, a straight port of the spike's. TASK-202 replaces it with
- * createCursorController from ../layer/controller.
- */
-function startLabFigure(canvas: HTMLCanvasElement, mark: HTMLElement, read: () => Settings) {
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return () => {};
-
-  let dpr = 1;
-  const resize = () => {
-    dpr = Math.min(2, window.devicePixelRatio || 1);
-    canvas.width = Math.round(innerWidth * dpr);
-    canvas.height = Math.round(innerHeight * dpr);
-    canvas.style.width = `${innerWidth}px`;
-    canvas.style.height = `${innerHeight}px`;
-  };
-  resize();
-
-  const target: Vec2 = { x: innerWidth * 0.42, y: innerHeight * 0.7 };
-  let s: MotionState = { pos: { ...target }, speed: 0, facing: 1, phase: 0, idle: 0 };
-  let g: GestureState = { cheer: 0, point: 0, sit: 0 };
-  let hover: Element | null = null;
-  let hoverCenter: Vec2 | null = null;
-  let pressed = false;
-
-  const resolve = (el: EventTarget | null) => {
-    const hit = el instanceof Element ? el.closest(TARGETS) : null;
-    hover = hit && !hit.closest('[data-stickman="ignore"]') ? hit : null;
-    if (hover) {
-      const r = hover.getBoundingClientRect();
-      hoverCenter = { x: r.left + r.width / 2, y: r.top + r.height / 2 };
-    } else hoverCenter = null;
-  };
-  const onMove = (e: PointerEvent) => {
-    target.x = e.clientX;
-    target.y = e.clientY;
-    mark.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
-    resolve(e.target);
-  };
-  const onDown = (e: PointerEvent) => {
-    resolve(e.target);
-    if (hover) pressed = true;
-  };
-  addEventListener('resize', resize);
-  addEventListener('pointermove', onMove, { passive: true });
-  addEventListener('pointerdown', onDown, { passive: true });
-
-  let raf = 0;
-  let last = performance.now();
-  let clock = 0;
-  const frame = (now: number) => {
-    const { size, pace } = read();
-    const dt = Math.min(MAX_DT, (now - last) / 1000);
-    last = now;
-    clock += dt;
-
-    if (pressed) s = { ...s, idle: 0 };
-    // The spike judges "arrived" on the distance before this frame's step.
-    const dist = Math.hypot(target.x - s.pos.x, target.y - s.pos.y);
-    s = stepMotion(s, target, dt, size, PACES[pace]);
-    g = stepGestures(
-      g,
-      s,
-      { moving: s.speed > MOVING_SPEED, arrived: dist < 1.5 * size, onTarget: hover !== null, pressed },
-      dt,
-    );
-    pressed = false;
-
-    const angle = hoverCenter ? pointAngleTo(s, g, size, hoverCenter) : REST_POINT_ANGLE;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.clearRect(0, 0, innerWidth, innerHeight);
-    drawFigure(ctx, computePose(s, g, angle, clock), s.pos, {
-      size,
-      facing: s.facing,
-      lineWidth: lineWidthFor(size),
-      color: '#fff',
-    });
-    raf = requestAnimationFrame(frame);
-  };
-  raf = requestAnimationFrame(frame);
-
-  return () => {
-    cancelAnimationFrame(raf);
-    removeEventListener('resize', resize);
-    removeEventListener('pointermove', onMove);
-    removeEventListener('pointerdown', onDown);
-  };
-}
 
 function Choice<T extends string | number>(props: {
   label: string;
@@ -135,25 +43,46 @@ const noJump = (e: MouseEvent) => e.preventDefault();
 export function Lab() {
   const [settings, setSettings] = useState<Settings>({ size: 32, pace: 'hurry', mark: 'ring' });
   const [overPanel, setOverPanel] = useState(false);
-  const settingsRef = useRef(settings);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const markRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    settingsRef.current = settings;
-  }, [settings]);
+  const readoutRef = useRef<HTMLOutputElement>(null);
+  const cursorRef = useRef<CursorController | null>(null);
+  const initial = useRef(settings);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     const mark = markRef.current;
     if (!canvas || !mark) return;
-    return startLabFigure(canvas, mark, () => settingsRef.current);
+    const { size, pace } = initial.current;
+    const cursor = createCursorController(canvas, mark, { size, pace: PACES[pace] });
+    cursor.start();
+    // Start where the spike starts him, so a side-by-side comparison begins identically.
+    cursor.handoff({ x: innerWidth * 0.42, y: innerHeight * 0.7 });
+    cursorRef.current = cursor;
+
+    // A tuning readout, a few times a second; never per frame and never through React state.
+    const timer = setInterval(() => {
+      const r = readoutRef.current;
+      if (!r) return;
+      const { speed, gestures: g } = cursor.inspect();
+      r.textContent = `${Math.round(speed)} px/s | point ${g.point.toFixed(2)} | cheer ${g.cheer.toFixed(2)} | sit ${g.sit.toFixed(2)}`;
+    }, 200);
+
+    return () => {
+      clearInterval(timer);
+      cursor.stop();
+      cursorRef.current = null;
+    };
   }, []);
+
+  useEffect(() => {
+    cursorRef.current?.configure({ size: settings.size, pace: PACES[settings.pace] });
+  }, [settings.size, settings.pace]);
 
   const set = <K extends keyof Settings>(k: K) => (v: Settings[K]) => setSettings((s) => ({ ...s, [k]: v }));
 
   return (
-    <div className={`lab lab--own-cursor${overPanel ? ' lab--over-panel' : ''}`}>
+    <div className={`lab${overPanel ? ' lab--over-panel' : ''}`}>
       <nav className="lab-nav" aria-label="Sample targets">
         {['Home', 'Projects', 'About', 'Contact'].map((l) => (
           <a key={l} href={`#${l.toLowerCase()}`} onClick={noJump}>
@@ -190,7 +119,7 @@ export function Lab() {
         docs/reference/stickman-cursor-spike.html at 32px, Hurries when far, Ring.
         <br />
         Move the mouse and he walks to the ring. Rest on a link and he points. Click one and he cheers.
-        Leave him alone for 5s and he sits.
+        Leave him alone for 5s and he sits. Tab through the links and he follows the focus.
       </aside>
 
       <div
@@ -214,6 +143,7 @@ export function Lab() {
           name={(v) => MARK_LABELS[v]}
           onPick={set('mark')}
         />
+        <output ref={readoutRef} className="lab-readout" aria-live="off" />
       </div>
 
       <canvas ref={canvasRef} className="lab-canvas" aria-hidden="true" />
