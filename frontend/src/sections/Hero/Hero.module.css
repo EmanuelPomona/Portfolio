@@ -87,7 +87,9 @@
   line-height: var(--leading-display);
   letter-spacing: var(--tracking-display);
   padding-block-end: 0.06em; /* descender of the g */
-  margin-inline-start: -0.035em; /* optical: the E's side bearing, so its stem sits on the gutter */
+  /* Optical: cancels most of the E's side bearing so its ink lines up with the tagline's ink
+     (measured: tagline ink at 60.1px, name ink at 60.0px on a 1440px screen). */
+  margin-inline-start: -0.015em;
 }
 
 .tagline {
