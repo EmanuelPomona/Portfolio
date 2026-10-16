@@ -90,9 +90,25 @@
   );
 }
 
-/* Captions hang below their prints: leave room under the lowest one. */
+/*
+ * Prints overlap only while there is nothing under them to hide. Once a spread has captions they
+ * need the space beneath each print, so the spread loosens from the overlapping scatter into a
+ * staggered flow: same order, same widths, a small lift per position, no overlap, every caption
+ * readable under its own print (TASK-105: overlap must not hide captions).
+ */
 .spread[data-captioned='true'] {
-  --room: 7rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-6) var(--space-5);
+  height: auto;
+}
+
+.spread[data-captioned='true'] .place {
+  position: relative;
+  left: auto;
+  top: auto;
+  margin-block-start: calc(var(--lift) * 1cqw);
 }
 
 .spread + .spread {
@@ -112,30 +128,36 @@
   z-index: 2;
 }
 
+/* --lift: the stagger a print keeps in a captioned (flowing) spread. */
 .p0 {
   --x: var(--x0);
   --y: var(--y0);
   --w: var(--w0);
+  --lift: 0;
 }
 .p1 {
   --x: var(--x1);
   --y: var(--y1);
   --w: var(--w1);
+  --lift: 4;
 }
 .p2 {
   --x: var(--x2);
   --y: var(--y2);
   --w: var(--w2);
+  --lift: 1.5;
 }
 .p3 {
   --x: var(--x3);
   --y: var(--y3);
   --w: var(--w3);
+  --lift: 5;
 }
 .p4 {
   --x: var(--x4);
   --y: var(--y4);
   --w: var(--w4);
+  --lift: 2.5;
 }
 
 /* Tablet: the scatter opens up but keeps two loose rows. */

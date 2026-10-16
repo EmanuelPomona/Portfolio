@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { cleanup, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { about, type About as AboutContent, type LifePhoto } from '../../content';
@@ -76,6 +78,22 @@ describe('About', () => {
     const captioned: AboutContent = { ...about, photos: [slot('photo-1', '4:3', caption)] };
     render(<About about={captioned} heading="About" />);
     expect(screen.getByText(caption).textContent).toBe(caption);
+  });
+
+  it('loosens a captioned spread into a flow so no print covers a caption', () => {
+    // Regression: in the overlapping scatter, later prints covered up to 100% of an earlier
+    // print's caption (measured in the browser at 1440, 1024, 768, and 390 with 120-char captions).
+    const css = readFileSync(join(__dirname, 'About.module.css'), 'utf8');
+    const spread = css.match(/\.spread\[data-captioned='true'\]\s*\{([^}]*)\}/)?.[1] ?? '';
+    const place = css.match(/\.spread\[data-captioned='true'\] \.place\s*\{([^}]*)\}/)?.[1] ?? '';
+    expect(spread).toMatch(/display:\s*flex/);
+    expect(spread).toMatch(/flex-wrap:\s*wrap/);
+    expect(spread).toMatch(/height:\s*auto/);
+    expect(place).toMatch(/position:\s*relative/);
+
+    const captioned: AboutContent = { ...about, photos: about.photos.map((p, i) => (i === 1 ? { ...p, caption: 'A caption' } : p)) };
+    const { container } = render(<About about={captioned} heading="About" />);
+    expect(container.querySelector('[data-spread]')).toHaveAttribute('data-captioned', 'true');
   });
 
   it('never renders the draft flag', () => {
