@@ -3,8 +3,7 @@
 // Each rule test takes a minimally altered copy of the REAL content that breaks that rule only, and
 // expects exactly one violation with that rule and path.
 import { describe, expect, it } from 'vitest';
-import { content } from './index';
-import type { Content } from './types';
+import { content, type Content, type MediaId } from './index';
 import { validateContent, type RuleId } from './validate';
 
 const TODAY = '2026-10-16';
@@ -242,5 +241,97 @@ describe('link rules', () => {
   it('C-19 flags a hero link whose href is not in the contact links', () => {
     const c = variant((c) => (c.site.heroLinks[2]!.href = 'https://github.com/EmanuelPomona/Portfolio'));
     expect(found(c)).toEqual(one('C-19', 'site.heroLinks[2].href'));
+  });
+});
+
+describe('image and photo rules', () => {
+  // An id that exists in the real media manifest, so C-11 stays quiet while C-09 is exercised.
+  const REAL_IMAGE = 'backgrounds/alpine-valley' as MediaId;
+
+  it('C-09 flags alt text on a screen that has no image', () => {
+    const c = variant((c) => (c.projects[0]!.screen.alt = 'SagePlan requirements dashboard'));
+    expect(found(c)).toEqual(one('C-09', 'projects[0].screen.alt'));
+  });
+
+  it('C-09 flags a photo image with no alt text', () => {
+    const c = variant((c) => (c.about.photos[0]!.image = REAL_IMAGE));
+    expect(found(c)).toEqual(one('C-09', 'about.photos[0].alt'));
+  });
+
+  it('C-09 flags alt text shorter than 8 characters', () => {
+    const c = variant((c) => Object.assign(c.about.photos[0]!, { image: REAL_IMAGE, alt: 'A hike' }));
+    expect(found(c)).toEqual(one('C-09', 'about.photos[0].alt'));
+  });
+
+  it('C-09 flags alt text that only says "screenshot"', () => {
+    const c = variant((c) => (c.projects[0]!.screen = { image: REAL_IMAGE, alt: 'Screenshot' }));
+    expect(found(c)).toEqual(one('C-09', 'projects[0].screen.alt'));
+  });
+
+  it('C-09 accepts an image with descriptive alt text', () => {
+    const c = variant((c) => Object.assign(c.about.photos[0]!, { image: REAL_IMAGE, alt: 'Snow on the San Gabriel Mountains' }));
+    expect(found(c)).toEqual([]);
+  });
+
+  it('C-10 flags a caption with surrounding spaces', () => {
+    const c = variant((c) => (c.about.photos[1]!.caption = ' Mt. Baldy at dawn'));
+    expect(found(c)).toEqual(one('C-10', 'about.photos[1].caption'));
+  });
+
+  it('C-10 flags an empty caption', () => {
+    const c = variant((c) => (c.about.photos[1]!.caption = ''));
+    expect(found(c)).toEqual(one('C-10', 'about.photos[1].caption'));
+  });
+
+  it('C-10 flags a caption longer than 120 characters', () => {
+    const c = variant((c) => (c.about.photos[1]!.caption = `M${'m'.repeat(120)}`)); // 121 characters
+    expect(found(c)).toEqual(one('C-10', 'about.photos[1].caption'));
+  });
+
+  it('C-10 accepts a caption of exactly 120 characters', () => {
+    const c = variant((c) => (c.about.photos[1]!.caption = `M${'m'.repeat(119)}`));
+    expect(found(c)).toEqual([]);
+  });
+
+  it('C-11 flags a media id that is not in the manifest', () => {
+    const c = variant((c) => (c.site.sectionsImage = 'backgrounds/missing' as MediaId));
+    expect(found(c)).toEqual(one('C-11', 'site.sectionsImage'));
+  });
+
+  it('C-11 flags a project screenshot that has not been generated', () => {
+    const c = variant((c) => (c.projects[0]!.screen = { image: 'projects/sageplan' as MediaId, alt: 'SagePlan requirements dashboard' }));
+    expect(found(c)).toEqual(one('C-11', 'projects[0].screen.image'));
+  });
+
+  it('C-11 checks against the mediaIds option when given', () => {
+    const c = variant((c) => (c.projects[0]!.screen = { image: 'projects/sageplan' as MediaId, alt: 'SagePlan requirements dashboard' }));
+    const ids = ['backgrounds/alpine-valley', 'backgrounds/evergreen-forest', 'projects/sageplan'];
+    expect(found(c, { mediaIds: ids })).toEqual([]);
+    expect(found(content, { mediaIds: [] })).toEqual([
+      { rule: 'C-11', path: 'site.heroImage' },
+      { rule: 'C-11', path: 'site.sectionsImage' },
+    ]);
+  });
+
+  it('C-17 flags more than 8 photos', () => {
+    const c = variant((c) => {
+      for (const n of [6, 7, 8, 9]) c.about.photos.push({ id: `photo-${n}`, aspect: '4:3', image: null, alt: null, caption: null });
+    });
+    expect(found(c)).toEqual(one('C-17', 'about.photos'));
+  });
+
+  it('C-17 accepts no photos at all', () => {
+    const c = variant((c) => (c.about.photos = []));
+    expect(found(c)).toEqual([]);
+  });
+
+  it('C-17 flags a photo id not shaped like photo-N', () => {
+    const c = variant((c) => (c.about.photos[2]!.id = 'photo-three'));
+    expect(found(c)).toEqual(one('C-17', 'about.photos[2].id'));
+  });
+
+  it('C-17 flags a duplicate photo id at the second occurrence', () => {
+    const c = variant((c) => (c.about.photos[4]!.id = 'photo-1'));
+    expect(found(c)).toEqual(one('C-17', 'about.photos[4].id'));
   });
 });
