@@ -1,0 +1,233 @@
+/* Owner: agent/stickman. Dev-only lab. Reproduces the composition of
+   docs/reference/stickman-cursor-spike.html so the port can be compared side by side. */
+.lab {
+  --lab-ink: #242424;
+  --lab-ivory: #f8f9f7;
+  --lab-mist: #e3e8e5;
+  --lab-quiet: #4f5552;
+  --lab-hair: #c9d0cc;
+  --lab-forest: #0f2e24;
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: var(--lab-mist) url('/media/backgrounds/alpine-valley-1672.jpg') center / cover no-repeat;
+  color: var(--lab-ink);
+  font-family: 'Manrope Variable', system-ui, sans-serif;
+}
+.lab *,
+.lab *::before,
+.lab *::after {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+/* Until the real cursor layer exists (TASK-202), the lab hides the native cursor itself. */
+.lab--own-cursor,
+.lab--own-cursor * {
+  cursor: none;
+}
+
+.lab a {
+  color: var(--lab-ink);
+  text-decoration: none;
+  border-bottom: 1px solid currentColor;
+  padding-bottom: 2px;
+}
+.lab a:focus-visible,
+.lab button:focus-visible {
+  outline: 2px solid var(--lab-forest);
+  outline-offset: 3px;
+}
+
+.lab-nav {
+  position: absolute;
+  top: 30px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 44px;
+  font-size: 14px;
+  letter-spacing: 0.02em;
+}
+
+.lab-name {
+  position: absolute;
+  left: 6vw;
+  top: 17vh;
+}
+.lab-name h1 {
+  font-family: 'Instrument Serif', serif;
+  font-weight: 400;
+  font-size: clamp(52px, 7.2vw, 108px);
+  line-height: 0.9;
+  letter-spacing: -0.02em;
+}
+.lab-name p {
+  margin-top: 16px;
+  font-size: 15px;
+}
+.lab-links {
+  margin-top: 22px;
+  display: flex;
+  gap: 22px;
+  font-size: 14px;
+}
+
+.lab-work {
+  position: absolute;
+  right: 6vw;
+  bottom: 12vh;
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+.lab-work h2 {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 44px;
+}
+.lab .lab-window {
+  display: block;
+  width: min(400px, 36vw);
+  border: 1px solid #0d0d0d;
+  border-radius: 10px;
+  overflow: hidden;
+  padding: 0;
+  background: #161616;
+}
+.lab-chrome {
+  height: 30px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 12px;
+  background: #242424;
+}
+.lab-light {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #474747;
+  transition: background-color 0.35s;
+}
+.lab-window:is(:hover, :focus-visible) .lab-light--r { background: #ff5f57; }
+.lab-window:is(:hover, :focus-visible) .lab-light--y { background: #febc2e; }
+.lab-window:is(:hover, :focus-visible) .lab-light--g { background: #28c840; }
+.lab-url {
+  margin-left: 14px;
+  flex: 1;
+  height: 18px;
+  border-radius: 5px;
+  background: #1d1d1d;
+  color: #8a8f8c;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  padding-left: 10px;
+}
+.lab-screen {
+  aspect-ratio: 16 / 10;
+  display: grid;
+  place-items: center;
+  color: #8a8f8c;
+  font-size: 12px;
+}
+
+.lab-note {
+  position: absolute;
+  right: 16px;
+  top: 16px;
+  max-width: 280px;
+  background: var(--lab-ivory);
+  border: 1px solid var(--lab-hair);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.lab-note b {
+  font-weight: 600;
+}
+
+/* The panel is a tool, so it gets the native cursor and the stickman ignores it. */
+.lab-panel {
+  position: absolute;
+  left: 16px;
+  bottom: 16px;
+  z-index: 1;
+  background: var(--lab-ivory);
+  border: 1px solid var(--lab-hair);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 12px;
+}
+.lab .lab-panel,
+.lab .lab-panel * {
+  cursor: auto !important;
+}
+.lab .lab-panel button {
+  cursor: pointer !important;
+}
+.lab-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin: 6px 0;
+}
+.lab-row > span {
+  width: 84px;
+  color: var(--lab-quiet);
+}
+.lab-row button {
+  font: inherit;
+  min-height: 28px;
+  padding: 3px 10px;
+  border: 1px solid #bcc4c0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--lab-ink);
+}
+.lab-row button:hover {
+  border-color: var(--lab-ink);
+}
+.lab-row button[aria-pressed='true'] {
+  background: var(--lab-ink);
+  border-color: var(--lab-ink);
+  color: var(--lab-ivory);
+}
+
+/* Lab-only figure layer. TASK-202 replaces it with StickmanLayer's own canvas and ring. */
+.lab-canvas,
+.lab-mark {
+  position: fixed;
+  pointer-events: none;
+  mix-blend-mode: difference;
+  z-index: var(--z-stickman, 900);
+}
+.lab-canvas {
+  inset: 0;
+}
+.lab-mark {
+  left: 0;
+  top: 0;
+  transform: translate(-100px, -100px);
+}
+.lab-mark--ring {
+  width: 11px;
+  height: 11px;
+  margin: -5.5px 0 0 -5.5px;
+  border-radius: 50%;
+  border: 1.2px solid #fff;
+}
+.lab-mark--dot {
+  width: 4px;
+  height: 4px;
+  margin: -2px 0 0 -2px;
+  border-radius: 50%;
+  background: #fff;
+}
+.lab--over-panel .lab-mark {
+  opacity: 0;
+}
