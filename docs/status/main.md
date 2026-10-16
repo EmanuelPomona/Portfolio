@@ -67,5 +67,11 @@ Last updated: 2026-10-16T10:05:00Z
 
 - Owner actions before agents run: `sudo chown -R 501:20 ~/.npm` (npm cache EACCES); `npx vercel login` before TASK-304.
 
+## Preview merge (2026-10-16, NOT integration)
+- Owner asked to "merge all the stuff ... so that I can see the current final output". Per manager.md, real integration (Mode B) belongs in a FRESH session; did a throwaway preview instead.
+- Detached worktree <scratchpad>/preview-merge from main 3ea91a0; merged agent/backend (f0f7156), agent/frontend (b7dba1b), agent/stickman (ff0c101) in integrate.sh order: all CLEAN, no conflicts.
+- Verified on the merge: typecheck 0; 42 test files / 521 tests passed; build OK (JS 82.40 KB gz, CSS 5.85 KB gz); served `vite preview` on :4400; console clean at 1440; no horizontal overflow at narrow width.
+- main and all agent/* branches untouched. Open for Mode B: frontend CCR (BrowserWindow accessible name, TASK-103/W-05); backend CCR-1 (fonts inlined as data: URIs vs CSP), CCR-2 (hash served inline blocks), CCR-3 (content-hashed /media names); vite native-config warnings (extensionless imports in content files via plugins/seo.ts); INDEX on branches still shows READY (workers did not regenerate).
+
 ## Blocked on
 - nothing
