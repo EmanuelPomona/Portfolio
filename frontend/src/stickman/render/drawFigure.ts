@@ -26,7 +26,8 @@ function strokeLimb(ctx: CanvasRenderingContext2D, l: Limb): void {
   ctx.stroke();
 }
 
-function strokePencil(ctx: CanvasRenderingContext2D, tip: Vec2, top: Vec2): void {
+/** The loader's pencil, in rig units, in the current transform (tip and top end of the shaft). */
+export function strokePencil(ctx: CanvasRenderingContext2D, tip: Vec2, top: Vec2): void {
   const len = Math.hypot(top.x - tip.x, top.y - tip.y);
   const u = { x: (top.x - tip.x) / len, y: (top.y - tip.y) / len };
   const n = { x: -u.y * PENCIL_HALF_WIDTH, y: u.x * PENCIL_HALF_WIDTH };
