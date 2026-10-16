@@ -12,6 +12,7 @@
 // sharp's text renderer (Pango) ignored the Instrument Serif file on the build machine: its output was
 // byte-identical to a render in a nonexistent font family, both from the fontsource WOFF and from a TTF
 // converted from it. So the image ships without text; share cards show the name from og:title.
+import { writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
 
@@ -19,14 +20,16 @@ const SOURCE = fileURLToPath(new URL('../media-src/backgrounds/alpine-valley.png
 const OUTPUT = fileURLToPath(new URL('../public/og.jpg', import.meta.url));
 const MAX_BYTES = 200 * 1024;
 
-const info = await sharp(SOURCE)
+const { data, info } = await sharp(SOURCE)
   .resize({ width: 1200, height: 630, fit: 'cover', position: 'top' })
   .jpeg({ quality: 82, mozjpeg: true })
-  .toFile(OUTPUT);
+  .toBuffer({ resolveWithObject: true });
 
-if (info.size > MAX_BYTES) {
-  console.error(`og.jpg is ${info.size} bytes; the budget is ${MAX_BYTES}. Lower the quality and re-run.`);
+// Check the budget before writing, so a failed run leaves the previous og.jpg in place.
+if (data.length > MAX_BYTES) {
+  console.error(`og.jpg would be ${data.length} bytes; the budget is ${MAX_BYTES}. Lower the quality and re-run.`);
   process.exitCode = 1;
 } else {
-  console.log(`wrote public/og.jpg ${info.width}x${info.height}, ${info.size} bytes`);
+  await writeFile(OUTPUT, data);
+  console.log(`wrote public/og.jpg ${info.width}x${info.height}, ${data.length} bytes`);
 }
