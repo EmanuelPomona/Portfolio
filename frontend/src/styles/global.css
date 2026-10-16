@@ -25,6 +25,16 @@ body {
   margin: 0;
 }
 
+/*
+ * The index.html gate (API.md §2.4) locks scrolling while the loader is up, and nothing clears
+ * data-loader afterwards. <main> is inert exactly while the loader is up (mount contract), so
+ * release the lock as soon as it is not. Without this, first visits could not scroll by wheel,
+ * trackpad, touch, or keys. Specificity (0,2,3) beats the gate's (0,1,2).
+ */
+html[data-loader='show'] body:has(main:not([inert])) {
+  overflow: visible;
+}
+
 body {
   min-height: 100svh;
   background: var(--color-mist);
