@@ -1,0 +1,51 @@
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Dependencies
+node_modules/
+
+# Build files
+.next/
+dist/
+build/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Coverage
+coverage/
+
+# Temporary files
+tmp/
+temp/*~
+*~
+
+# Local Claude backups
+.claude/backups/
+
+# R session history
+.Rhistory
+
+# Local agent scratch (evidence in docs/review/ IS tracked on purpose)
+.venv-*/
+*.local.json
+
+# Human source material for the manager (resume, notes, mood images, PDFs).
+# Kept local on purpose: the distilled specs in docs/ are what gets committed.
+docs/inputs/*
+!docs/inputs/README.md
