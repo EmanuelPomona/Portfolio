@@ -1,7 +1,7 @@
 // Owner: agent/backend. Head metadata Vite plugin (docs/API.md §5, TASK-303).
 // Pure renderers first; the plugin wires them into index.html and the build output.
 import type { Plugin } from 'vite';
-import type { Link, Site } from '../src/content';
+import { contact, site as defaultSite, type Link, type Site } from '../src/content';
 
 /** Mist, the page's ground color (docs/DESIGN_CONSTRAINTS.md palette). */
 const THEME_COLOR = '#e3e8e5';
@@ -84,6 +84,28 @@ export function renderSitemap(site: Site): string {
   ].join('\n');
 }
 
-export function seoPlugin(_opts: { site?: Site; links?: readonly Link[] } = {}): Plugin {
-  return { name: 'el-seo' };
+const FALLBACK_TITLE = /<title>[\s\S]*?<\/title>/;
+
+/**
+ * Vite plugin: replaces index.html's fallback <title> and injects renderHead() after it (dev and
+ * build), and emits robots.txt (always) and sitemap.xml (once the origin is known) at build.
+ * Defaults to the real content; the options exist for tests.
+ */
+export function seoPlugin(opts: { site?: Site; links?: readonly Link[] } = {}): Plugin {
+  const site = opts.site ?? defaultSite;
+  const links = opts.links ?? contact.links;
+  return {
+    name: 'el-seo',
+    transformIndexHtml(html) {
+      if (!FALLBACK_TITLE.test(html)) {
+        throw new Error('seoPlugin: index.html has no <title> to replace. Keep the fallback <title> (docs/API.md §5).');
+      }
+      // A replacer function, so "$&" or "$1" in the title stay literal.
+      return html.replace(FALLBACK_TITLE, () => `<title>${escapeHtml(site.title)}</title>\n    ${renderHead(site, links)}`);
+    },
+    generateBundle() {
+      this.emitFile({ type: 'asset', fileName: 'robots.txt', source: renderRobots(site) });
+      if (site.origin) this.emitFile({ type: 'asset', fileName: 'sitemap.xml', source: renderSitemap(site) });
+    },
+  };
 }
