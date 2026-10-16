@@ -1,13 +1,13 @@
 ---
 id: TASK-304
 title: Vercel config, security headers, and the preview deployment
-status: BLOCKED
+status: REVIEW
 owner: backend
 branch: agent/backend
 priority: HIGH
 round: 0
 depends_on: [TASK-303]
-blocked_on: contract
+blocked_on: ""
 ---
 
 # TASK-304: Vercel config, security headers, and the preview deployment
@@ -112,6 +112,11 @@ and a contract test that fails if anyone changes those inline blocks without upd
   (`d1fd0cc`, with `plugins/font-inlining.contract.test.ts`). CCR-2 approved as ADR-008; the test
   already hashes the built blocks. CCR-3 resolved by option (b) as ADR-009 (`665e7cd`). The manager
   redeploys a preview from integrated `main` for the full review (see Notes).
+- **Redeployed** from `main` @ `3977ba4`: https://emanuel-ling-mij8hp576-team-boh-buh.vercel.app.
+  Headers, B-04 files, and caching re-checked with `vercel curl`. Served JS/CSS are byte-identical
+  to the local build. Zero site-caused CSP violations under the enforced headers:
+  `docs/review/M-304-csp-console.txt`. F-01 (Lighthouse on the preview) was not re-run. The task
+  returns to `REVIEW`.
 
 ## Review History
 

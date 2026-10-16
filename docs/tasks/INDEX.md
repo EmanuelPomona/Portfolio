@@ -5,7 +5,6 @@ Do not edit by hand — edit the task files and regenerate.
 
 | ID | Status | Owner | Round | Title |
 |---|---|---|---|---|
-| TASK-304 | BLOCKED | backend | 0 | Vercel config, security headers, and the preview deployment _(blocked on: contract)_ |
 | TASK-101 | REVIEW | frontend | 0 | Design system, page shell, nav, and fog-clear reveal |
 | TASK-102 | REVIEW | frontend | 0 | Hero section and responsive Picture component |
 | TASK-103 | REVIEW | frontend | 0 | Attention system and the dark macOS BrowserWindow |
@@ -19,6 +18,7 @@ Do not edit by hand — edit the task files and regenerate.
 | TASK-301 | REVIEW | backend | 0 | Content validator, invariant contract tests, and owner editing guide |
 | TASK-302 | REVIEW | backend | 0 | Deterministic media pipeline (npm run media) and manifest freshness test |
 | TASK-303 | REVIEW | backend | 0 | Head metadata plugin, favicon, Open Graph image, robots, sitemap |
+| TASK-304 | REVIEW | backend | 0 | Vercel config, security headers, and the preview deployment |
 | TASK-205 | BACKLOG | stickman | 0 | Safe-area viewport and real-phone check before the touch flag flips |
 
-**Counts:** BACKLOG 1, BLOCKED 1, REVIEW 13
+**Counts:** BACKLOG 1, REVIEW 14
