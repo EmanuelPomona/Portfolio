@@ -150,7 +150,7 @@ These are open to the owner's change.
    - Shown on the first visit of a browser session only.
    - Progress rises to 90% over about 1.2s, then waits for the hero image to
      decode.
-   - Minimum duration 1.2s; hard cap 4.5s.
+   - Minimum duration 1.2s; hard cap 4.5s. (Round 2, owner request: minimum 2.2s, ramp over 2.2s; ADR-011.)
    - Any click or key skips it.
    - Under reduced motion it is replaced by a 300ms fade.
 3. **The moving thing.** The owner's notes ask for "some sort of moving thingy".

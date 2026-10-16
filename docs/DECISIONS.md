@@ -15,6 +15,7 @@ Superseded decisions stay here and link their replacement.
 | ADR-008 | The CSP is computed over the served build, and fonts are never inlined | accepted | 2026-10-16 |
 | ADR-009 | Only content-hashed URLs are `immutable`; `/media` revalidates | accepted | 2026-10-16 |
 | ADR-010 | A project window is named by what it shows, and is black until attended | accepted | 2026-10-16 |
+| ADR-011 | Round 2 motion: clouds through the page, scroll depth, a 2.2s loader minimum | accepted | 2026-10-16 |
 
 ---
 
@@ -404,3 +405,44 @@ say a window is dark at rest.
 
 - **Positive:** the four primary links pass Label in Name. W-03 now matches the brief and the owner.
 - **Negative:** the screen-reader name is longer by the address.
+
+## ADR-011: Round 2 motion: clouds through the page, scroll depth, a 2.2s loader minimum
+
+**Date:** 2026-10-16. **Status:** accepted. **Deciders:** the owner (the requests), manager (the
+calls). The owner asked for autonomous completion, so the readings below are the manager's.
+
+### Context
+
+After seeing the integrated site, the owner asked for four changes: "Clouds should be hovering
+slightly within the page", "Scroll animations", "Make the loading screen a little bit longer", and
+Contact as one line, "Contact: linkedin, email, github." The brief said "Nothing else moves" and the
+constraints reject "animation applied because animation is possible" and "radial gradient orbs".
+Product-lens risk R1 is loader friction for a recruiter on a phone.
+
+### Decision
+
+- **Clouds** are photographic layers cut from the owner's two photographs, drifting slowly
+  (60s+ cycles) behind every background section. Transform only, paused off-screen and hidden.
+- **Scroll animations** get one job, depth: backgrounds and clouds travel slower than the plates,
+  windows arrive from their own side, prints settle. Once, never replayed.
+- **Loader minimum** 1.2s → 2.2s, with the progress ramp stretched to match. The 4.5s cap, the
+  skip on any click or key, and the fade mode are unchanged.
+- **Contact** is the sentence "Contact: LinkedIn, Email, GitHub.", proper-case like the hero.
+- All of it is off, or instant, under reduced motion. The brief's motion table gains two rows.
+
+### Alternatives considered
+
+- **CSS-drawn clouds (blurred radial gradients).** Cheap, but it is the constraints' "radial
+  gradient orbs" and would read as a template. Rejected.
+- **A scroll-animation library** (GSAP, Lenis). ADR-002 says no animation library; IntersectionObserver,
+  one passive scroll listener, and CSS cover this.
+- **Loader minimum 3s or more.** "A little bit longer" plus R1 argues for a modest step; 2.2s
+  roughly doubles the felt time while the cap keeps slow networks from waiting longer.
+- **Lowercase link labels**, as typed. Read as casual typing; proper case matches the hero row.
+
+### Consequences
+
+- **Positive:** the page feels like moving air, which is the brief's own metaphor carried further.
+- **Negative:** every first visit now costs about 1s more before the page; more motion to keep
+  inside the performance budget and the contrast measurements.
+- **Risk:** motion over text lowering contrast. M-05 makes X-02 a gate for the new layers.

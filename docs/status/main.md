@@ -1,7 +1,7 @@
 # STATUS: main
-Task: INTEGRATION (Mode B), round 1 — complete, handed to reviewer
-Round: 1
-Last updated: 2026-10-16T20:40:00Z
+Task: ROUND 2 (owner requests: clouds, scroll motion, longer loader, one-line Contact) — planning, then dispatch to running agents, then integration in this same session (owner instruction: "Finish all task before getting back" overrides manager.md's fresh-session rule)
+Round: 2
+Last updated: 2026-10-16T21:00:00Z
 
 Mode A record archived to `docs/archive/status-main-mode-a.md`.
 
@@ -10,6 +10,15 @@ Mode A record archived to `docs/archive/status-main-mode-a.md`.
 - superpowers:test-driven-development @ step 9, before integration glue -> RED then GREEN for: window name (2 tests), /media cache header, font inlining (2 tests), stickman contract precondition, touch forced-colors (2 table rows); mutation check on the contract test
 - vercel:deploy @ step 8, before redeploying the preview (TASK-304 notes) -> preflight, PREVIEW (never --prod) from a clean git archive of 3977ba4, inspect, header/asset checks
 - superpowers:verification-before-completion @ step 11, immediately before HANDOFF-2 -> fresh clean-clone CI reproduction, I-01, merge integrity, secrets; no implementation after it
+
+- superpowers:brainstorming @ round 2, before product decisions -> owner opted out of questions ("finish all task before getting back"); manager's calls recorded: photographic cloud drift in all background sections (TASK-107), scroll depth + plate/print arrivals (TASK-108), one-line Contact with proper-case labels (TASK-109), loader minimum 1.2s -> 2.2s with cap unchanged (TASK-206); no backend task
+
+## Round 2 owner request (verbatim)
+- "Clouds should be hovering slightly within the page"
+- "Scroll animations"
+- "Make the loading screen a little bit longer"
+- "Change the format of contacts ... put them all in one line like this: Contact: linkedin, email, github."
+- "implement this by assigning tasks to the other terminal agents that are up right now ... Finish all task before getting back."
 
 ## Done
 - [x] Read set; status.sh; overlap check (0 shared files); audit-skills (12/12, 15/15, 14/14 corroborated)

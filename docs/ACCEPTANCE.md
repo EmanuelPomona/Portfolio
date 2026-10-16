@@ -41,7 +41,8 @@ Otherwise use `npm run dev` after `scripts/bootstrap.sh`. Force the loader with
 - [ ] **L-06** While the loader is up, Tab cannot reach any page link, because
       `<main inert>`. The sheet exposes `role="progressbar"` and its
       `aria-valuenow` changes.
-- [ ] **L-07** In `show` mode the loader is visible for at least 1.2s.
+- [ ] **L-07** In `show` mode the loader is visible for at least 2.2s, even when the hero
+      has already decoded (round 2, ADR-011). The 4.5s cap (L-02) is unchanged.
 
 ## Stickman cursor (stickman slice; desktop, fine pointer)
 
@@ -143,8 +144,36 @@ Otherwise use `npm run dev` after `scripts/bootstrap.sh`. Force the loader with
 
 ## Connect (frontend)
 
-- [ ] **K-01** LinkedIn, Email, and GitHub appear with the exact hrefs from
-      `contact.ts`. Email is `mailto:emanuelling27@gmail.com`.
+- [ ] **K-01** Contact is one sentence, "Contact: LinkedIn, Email, GitHub." (round 2):
+      - "Contact" is the section's `h2`, followed by a colon;
+      - the three labels are links with the exact hrefs from `contact.ts`, in that order,
+        separated by ", " and ending with "."; the punctuation is not part of any link;
+      - it sits on one line at 768px and wider; at 390 it may wrap but reads as one sentence;
+      - every link is at least 44px tall as a tap target;
+      - Email is `mailto:emanuelling27@gmail.com` and opens in the same tab; the others open a
+        new tab with `rel="noopener noreferrer"`;
+      - no addresses are printed (they were in v1).
+
+## Motion (frontend, round 2)
+
+- [ ] **M-01** Cloud layers drift behind the Projects, About, and Contact content, not only
+      in the hero. Each is cut from the owner's two photographs (no drawn shapes, no CSS
+      radial blobs), is `aria-hidden` and `pointer-events: none`, and moves by transform
+      only: a few tens of pixels on a cycle of 60s or more. Two screenshots 10s apart at
+      1440 show the movement.
+- [ ] **M-02** Cloud drift pauses when its section is off-screen and when the tab is hidden,
+      and is absent under reduced motion (static layers, or none).
+- [ ] **M-03** Scroll depth: section backgrounds and clouds travel slower than the content
+      while scrolling, by at most 80px over a section's height. It is transform-only, driven
+      by one passive scroll listener or CSS scroll-driven animations, with no layout reads
+      per frame beyond cached values.
+- [ ] **M-04** Arrivals: each project window slides in from its own side (left plates from
+      the left, right plates from the right) as it enters, with its caption a beat behind.
+      Each About print settles into place, staggered. Arrivals run once and never replay.
+      Content that has keyboard focus is always fully visible.
+- [ ] **M-05** Motion never costs correctness: X-02 contrast still holds over the clouds;
+      F-03 CLS ≤ 0.05; F-02 budgets hold; no horizontal overflow at any width; the console is
+      clean; under reduced motion everything is present, static, and fully visible.
 
 ## Responsive (frontend)
 

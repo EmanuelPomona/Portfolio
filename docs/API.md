@@ -84,9 +84,9 @@ passing it.
 1. On mount, it removes `#boot-cover` and paints its own sheet of Soft Ivory
    paper.
 2. The stickman, holding a pencil, scribbles looping lines. Progress rises
-   smoothly toward 90% over about 1.2s, holds, and sprints to 100% once `ready`
+   smoothly toward 90% over about 2.2s, holds, and sprints to 100% once `ready`
    settles.
-3. **Minimum** visible time is 1.2s. **Cap** is 4.5s from mount: at the cap it
+3. **Minimum** visible time is 2.2s (round 2, ADR-011; was 1.2s). **Cap** is 4.5s from mount: at the cap it
    exits even if `ready` never settled.
 4. **Skip:** any `pointerdown` or `keydown` starts the exit immediately.
 5. **Exit:** at most 600ms. The stickman lets go of the pencil and becomes the
