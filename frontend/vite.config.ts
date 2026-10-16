@@ -16,6 +16,10 @@ export default defineConfig(({ mode }) => {
     plugins: [react(), seoPlugin()],
     server: { port, strictPort: true },
     preview: { port, strictPort: true },
+    // ADR-008: the CSP is `font-src 'self'`, so fonts are always emitted as files, never as data: URIs.
+    build: {
+      assetsInlineLimit: (file: string) => (/\.(woff2?|ttf|otf)$/i.test(file) ? false : undefined),
+    },
     test: {
       environment: 'jsdom',
       setupFiles: ['./src/test/setup.ts'],
