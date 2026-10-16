@@ -1,7 +1,7 @@
 ---
 id: TASK-203
 title: Scribbling loader with progress, timing rules, and cursor handoff
-status: READY
+status: IN_PROGRESS
 owner: stickman
 branch: agent/stickman
 priority: HIGH
