@@ -1,18 +1,21 @@
 Primary flow console log (I-02).
-Build: production (npm run build && vite preview at http://localhost:3101). Browser: headless Chrome 155 over CDP, 1440x900, fresh session, cache cleared. 2026-10-16T18:35:28.395Z
+Build: production (npm run build && vite preview at http://localhost:3101). Browser: headless Chrome 155 over CDP, 1440x900, fresh session, cache cleared. 2026-10-16T19:01:47.100Z
 Errors + warnings: 0 total, 0 from frontend-owned code.
 Caveat: this profile already holds a favicon (Chrome keeps favicons outside the HTTP cache), so it did not re-request one. Lighthouse's cold profile on the same build logged one error: GET /favicon.ico 404. The favicon is backend TASK-303 (public/favicon.svg + seoPlugin links), not yet merged on this branch.
 
 
-[    0ms] navigate http://localhost:3101/?loader=1 (production build, fresh session, browser cache cleared)
-[ 1831ms] loader done: main inert=false, boot-cover present=false, loader mode=show
-[ 3342ms] clicked nav Projects: hash=#projects aria-current=Projects
-[ 4550ms] hovered sageplan window (https://sageplan.vercel.app): state=attention
-[ 5773ms] hovered streetsafe-la window (https://github.com/EmanuelPomona/Street-Safe-LA): state=attention
-[ 6991ms] hovered revelation-youth window (https://revelation-youth.vercel.app): state=attention
-[ 8205ms] hovered snake-ai window (https://github.com/EmanuelPomona/Snake-AI): state=attention
-[ 9712ms] clicked nav About: hash=#about aria-current=About
-[10925ms] hovered first print: state=true
-[12436ms] clicked nav Contact: hash=#contact aria-current=Contact
-[12437ms] Email link: mailto:emanuelling27@gmail.com (same tab; not activated in headless)
-[13948ms] clicked nav Home: hash=#home aria-current=Home
+[    1ms] navigate http://localhost:3101/?loader=1 (production build, fresh session, browser cache cleared)
+[ 1846ms] loader done: main inert=false, boot-cover present=false, loader mode=show
+[ 2755ms] user scroll by wheel 1200px: scrollY 0 -> 1200, body overflow-y=visible
+[ 3660ms] user scroll by PageDown: scrollY 1200 -> 1988, body overflow-y=visible
+[ 4565ms] user scroll by Home key: scrollY 1988 -> 0, body overflow-y=visible
+[ 6074ms] clicked nav Projects: hash=#projects aria-current=Projects
+[ 7286ms] hovered sageplan window (https://sageplan.vercel.app): state=attention
+[ 8504ms] hovered streetsafe-la window (https://github.com/EmanuelPomona/Street-Safe-LA): state=attention
+[ 9720ms] hovered revelation-youth window (https://revelation-youth.vercel.app): state=attention
+[10937ms] hovered snake-ai window (https://github.com/EmanuelPomona/Snake-AI): state=attention
+[12450ms] clicked nav About: hash=#about aria-current=About
+[13669ms] hovered first print: state=true
+[15176ms] clicked nav Contact: hash=#contact aria-current=Contact
+[15177ms] Email link: mailto:emanuelling27@gmail.com (same tab; not activated in headless)
+[16686ms] clicked nav Home: hash=#home aria-current=Home
