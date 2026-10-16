@@ -52,3 +52,6 @@ docs/inputs/*
 
 # Brainstorming visual companion (local mockups)
 .superpowers/
+
+# Vercel CLI link (vercel link); local only
+.vercel
