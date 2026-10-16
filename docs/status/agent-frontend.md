@@ -1,7 +1,15 @@
 # STATUS: agent/frontend
-Task: TASK-101..106 handed off (HANDOFF-1). 101/102/104/105/106 REVIEW; 103 BLOCKED on contract (window accessible name, WCAG 2.5.3)
-Round: 0
-Last updated: 2026-10-16T16:40:00Z
+Task: ROUND 2 (manager portfolio-38): TASK-109 -> TASK-107 -> TASK-108, then HANDOFF-3 + SendMessage to portfolio-38. Round 1 (101-106) in REVIEW; ADR-010 resolved the CCR (window name now '<title>, <label>, <addressBar>', applied by manager) and W-03 (black at rest confirmed).
+Round: 2 (project round; task round counters stay with the reviewer)
+Last updated: 2026-10-16T17:10:00Z
+
+## Round 2 plan (read first if resuming)
+Specs: ADR-011 (DECISIONS.md), DESIGN_BRIEF motion rows (cloud drift, scroll depth), ACCEPTANCE K-01 (rewritten) + M-01..M-05, plans/2026-10-16-round-2.md (review focus 1-5), tasks 109/107/108.
+Contract files untouchable: index.html, types.ts, media.ts, stickman/*, flags.ts, vite.config.ts. Main serves :3000; mine :3001.
+- [ ] TASK-109 Contact one sentence: Connect = inline h2 'Contact' + ':' + 3 links ', ' '.' (punctuation outside links); new-tab notice via aria-describedby to a hidden span OUTSIDE the line (textContent must equal 'Contact: LinkedIn, Email, GitHub.'); Section additive prop labelledBy; serif at step-5; 44px targets; remove displayAddress if unused; tests (4 named); evidence F-109-contact-{1440,768,390}.png (prod build)
+- [ ] TASK-107 Clouds: invoke `animate` first; components/Clouds (layers from getMedia alpine/evergreen, same URLs), data-drift running|paused|off, pause off-screen + hidden tab (extract shared hook from Hero's useDriftPlaying), static under reduced motion; transform only, cycle >= 60s, few tens of px; wire into Section (Projects, About, Contact); 6 named tests; evidence F-107-clouds-1440-t0/-t10, F-107-clouds-390; X-02 re-measured 390/768/1440 at both drift ends
+- [ ] TASK-108 Depth: invoke `animate` first; lib/depth depthOffset (clamp ±80); hooks/useScrollDepth (one passive listener, rAF writes --depth, rects on mount/resize, no-op + remove under reduced motion); arrivals data-arrive from-left|from-right|settle (caption a beat behind, prints stagger <= 0.08s); useFogReveal: reveal if already above viewport + reveal on focus within; 10 named tests; evidence F-108-arrival-{1440,390} webm/gif + 5s scroll perf trace (no long task > 50ms)
+- [ ] Then: ecc:browser-qa, requesting-code-review, verification-before-completion (last), HANDOFF-3, push, SendMessage portfolio-38
 
 ## Skills invoked so far
 - ecc:frontend-design-direction @ TASK-101 step 1 (2026-10-16T10:16Z) -> direction: purpose = name→4 live project links in one scroll; tone = editorial/calm plate book, mostly fog; memorable detail = stickman (slice) + color-earned-by-attention (mine); scan order name→italic titles→sentence→links. Deliberate departure: skill's 'avoid one-hue palette' overridden by brief (monochrome is the point; content supplies color on attention). Constraint: stable dimensions for windows (fixed 16:10 screen), long titles wrap.
