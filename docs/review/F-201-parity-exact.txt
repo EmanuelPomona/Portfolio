@@ -1,0 +1,26 @@
+# F-201 deterministic parity: docs/reference/stickman-cursor-spike.html vs /stickman-lab.html
+# Both pages: headless Chrome 1440x900 dpr1, virtual clock (performance.now + rAF stepped at exactly 60 fps),
+# identical real CDP mouse input, canvas pixels digested (ink count, bbox, hash) at each checkpoint.
+# Settings: 32px, Hurries when far, Ring (the owner-approved defaults in both). Run 2026-10-16T17:40:21Z.
+
+SAME  first frame, standing at anchor    ref bbox=600,599,608,630 ink=117 | port bbox=600,599,608,630 ink=117
+SAME  walking toward 300,500 +6f         ref bbox=559,582,576,613 ink=169 | port bbox=559,582,576,613 ink=169
+SAME  walking toward 300,500 +12f        ref bbox=431,528,452,556 ink=216 | port bbox=431,528,452,556 ink=216
+SAME  walking toward 300,500 +24f        ref bbox=294,468,309,498 ink=198 | port bbox=294,468,309,498 ink=198
+SAME  arrived at 300,500                 ref bbox=296,469,303,500 ink=120 | port bbox=296,469,303,500 ink=120
+SAME  800px jump +3f (run, lean)         ref bbox=311,468,324,499 ink=191 | port bbox=311,468,324,499 ink=191
+SAME  800px jump +6f (run, lean)         ref bbox=383,468,405,497 ink=199 | port bbox=383,468,405,497 ink=199
+SAME  800px jump +9f (run, lean)         ref bbox=542,468,561,499 ink=202 | port bbox=542,468,561,499 ink=202
+SAME  800px jump +15f (run, lean)        ref bbox=818,468,838,498 ink=212 | port bbox=818,468,838,498 ink=212
+SAME  800px jump +30f (run, lean)        ref bbox=1086,468,1101,498 ink=197 | port bbox=1086,468,1101,498 ink=197
+SAME  50px move +8f (walk)               ref bbox=1111,468,1124,499 ink=202 | port bbox=1111,468,1124,499 ink=202
+SAME  resting on Projects (point)        ref bbox=665,10,673,41 ink=129 | port bbox=665,10,673,41 ink=129
+SAME  cheer +1f                          ref bbox=663,8,673,41 ink=163 | port bbox=663,8,673,41 ink=163
+SAME  cheer +5f                          ref bbox=658,7,675,38 ink=160 | port bbox=658,7,675,38 ink=160
+SAME  cheer +10f                         ref bbox=662,7,673,39 ink=153 | port bbox=662,7,673,39 ink=153
+SAME  cheer +20f                         ref bbox=658,10,679,41 ink=178 | port bbox=658,10,679,41 ink=178
+SAME  resting on window (point)          ref bbox=1150,621,1157,652 ink=110 | port bbox=1150,621,1157,652 ink=110
+SAME  idle 5s+ (sitting)                 ref bbox=1150,624,1159,654 ink=130 | port bbox=1150,624,1159,654 ink=130
+SAME  idle 6s+ (seated)                  ref bbox=1149,627,1161,653 ink=135 | port bbox=1149,627,1161,653 ink=135
+
+19 identical, 0 different checkpoints
