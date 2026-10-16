@@ -32,13 +32,15 @@
  * Transform only. Paused off-screen, in a hidden tab, and under reduced motion.
  */
 .drift {
+  --drift: 4%; /* half the stroke */
   position: absolute;
-  inset: 0 -6%; /* wider than the frame, so the slide never reveals an edge */
+  inset: 0 -6%; /* wider than the frame by more than the stroke, so no edge ever shows */
   mix-blend-mode: screen;
   opacity: 0.42;
   mask-image: linear-gradient(to bottom, transparent 16%, #000 40%, #000 74%, transparent 96%);
-  transform: scaleX(-1) translateX(-4%);
-  animation: fog-drift 45s var(--ease-in-out) infinite alternate;
+  transform: scaleX(-1) translateX(calc(-1 * var(--drift)));
+  /* Start mid-stroke, where the drift is fastest, so it reads as moving within the first seconds. */
+  animation: fog-drift 45s ease-in-out -22.5s infinite alternate;
   animation-play-state: paused;
 }
 
@@ -47,12 +49,20 @@
   will-change: transform;
 }
 
+/* A percentage of a phone-width layer is only a few pixels: give narrow screens a longer stroke. */
+@media (max-width: 40rem) {
+  .drift {
+    --drift: 9%;
+    inset: 0 -11%;
+  }
+}
+
 @keyframes fog-drift {
   from {
-    transform: scaleX(-1) translateX(-4%);
+    transform: scaleX(-1) translateX(calc(-1 * var(--drift)));
   }
   to {
-    transform: scaleX(-1) translateX(4%);
+    transform: scaleX(-1) translateX(var(--drift));
   }
 }
 
