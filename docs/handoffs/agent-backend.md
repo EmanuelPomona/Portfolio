@@ -78,8 +78,9 @@ revalidating. Vercel's CDN is purged on deploy; browser caches are not.
 
 **Proposed shape**, either of:
 - (a) Preferred: add a short content hash to rendition names, such as `<id>-<w>.<hash8>.<ext>`. This
-  changes the API.md §3 naming, `media.mjs`, and its tests (backend), and nothing for consumers,
-  because the frontend reads URLs only from the manifest.
+  changes the API.md §3 naming, `media.mjs`, and its tests (backend). Anything that reads URLs from
+  the manifest (`getMedia`) is unaffected. Anything that hard-codes a rendition path breaks: TASK-201's
+  lab page names `/media/backgrounds/alpine-valley-1672.jpg`, so it would have to use `getMedia()`.
 - (b) Make `/media/(.*)` revalidating, for example `public, max-age=0, must-revalidate`, and keep
   `immutable` for `/assets/(.*)`, which Vite does content-hash. This is a one-line change in
   `vercel.json` plus the CSP test's expectation (backend).
