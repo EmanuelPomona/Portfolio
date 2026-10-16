@@ -1,0 +1,81 @@
+/* Owner: agent/stickman. The first-visit loader (docs/API.md §2.2, wireframe 1): a sheet of Soft
+   Ivory paper, a graphite scribble drawn by the stickman's pencil, and an outline pill below it. */
+
+.stickman-loader {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-loader, 1000);
+  background: #f8f9f7;
+  opacity: 1;
+  /* The page arriving underneath is what matters, so the paper clears on a decelerating curve. */
+  transition: opacity 450ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.stickman-loader.is-leaving {
+  opacity: 0;
+}
+
+/* Reduced motion: no scribble, an opacity-only fade. */
+.stickman-loader[data-mode='fade'] {
+  transition: opacity 300ms linear;
+}
+
+/* While the paper is up, show the native "working" cursor over it (the stickman's ring sits
+   beneath the paper until he takes over). */
+html.stickman-cursor .stickman-loader,
+html.stickman-cursor .stickman-loader * {
+  cursor: progress !important;
+}
+
+.stickman-loader__stage {
+  position: absolute;
+  left: 50%;
+  top: 44%;
+  width: min(340px, 72vw);
+  height: min(190px, 42vw);
+  transform: translate(-50%, -50%);
+}
+
+.stickman-loader__scribble,
+.stickman-loader__figure {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.stickman-loader__meter {
+  position: absolute;
+  left: 50%;
+  top: calc(44% + min(190px, 42vw) / 2 + 44px);
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* An outline pill, graphite like the line above it; no grey track behind the fill. */
+.stickman-loader__pill {
+  display: block;
+  width: min(236px, 52vw);
+  height: 12px;
+  padding: 2px;
+  box-sizing: border-box;
+  border: 1.25px solid #242424;
+  border-radius: 999px;
+}
+
+.stickman-loader__fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: #0f2e24;
+  clip-path: inset(0 100% 0 0 round 999px);
+  transition: clip-path 120ms linear;
+}
+
+.stickman-loader__value {
+  min-width: 3.2em;
+  color: #4f5552;
+  font: 500 12px/1 'Manrope Variable', system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+}
