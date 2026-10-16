@@ -1,13 +1,13 @@
 ---
 id: TASK-103
 title: Attention system and the dark macOS BrowserWindow
-status: BLOCKED
+status: REVIEW
 owner: frontend
 branch: agent/frontend
 priority: HIGH
 round: 0
 depends_on: [TASK-102]
-blocked_on: "contract"
+blocked_on: ""
 ---
 
 # TASK-103: Attention system and the dark macOS BrowserWindow
@@ -23,7 +23,8 @@ Then build the project window that uses it.
   - the URL brightens;
   - one elevation shadow appears;
   - the screen lifts from black.
-- With no screenshot, its screen is the flat fog-tone panel reading "screenshot soon".
+- With no screenshot, its screen is near-black at rest reading "screenshot soon", and lifts to the
+  flat fog-tone panel on attention (ADR-010).
 
 ## Scope
 
@@ -62,12 +63,13 @@ Then build the project window that uses it.
 
 - [ ] **W-02:** rest and attention visuals, with paired screenshots
       `docs/review/F-103-window-rest.png` and `F-103-window-attention.png`.
-- [ ] **W-03:** v1 windows show the empty state, and no photograph ever appears inside a window.
+- [ ] **W-03:** v1 windows show the empty state (black at rest, fog panel on attention), and no
+      photograph ever appears inside a window.
 - [ ] **W-04:** a fixture test with `screen.image = 'backgrounds/evergreen-forest'`, which is a
       test fixture only and never shipped content. It asserts the `<img>` is present, and that
       `data-state` toggles between rest and attention on hover and on focus.
-- [ ] **W-05:** the accessible name is "<title>, <label>", with new tab and
-      `rel="noopener noreferrer"`.
+- [ ] **W-05:** the accessible name is "<title>, <label>, <addressBar>" (ADR-010), with new tab
+      and `rel="noopener noreferrer"`, and axe reports no `label-content-name-mismatch`.
 - [ ] **W-06:** the address field shows exactly `project.addressBar`.
 - [ ] **W-07:** at 390 with touch emulation, the window in the middle band is attended and
       reverts when it leaves.
@@ -112,6 +114,13 @@ Then build the project window that uses it.
   window and cheers on press, with no extra attributes needed.
 - **Skills:** `ecc:frontend-a11y`; `ecc:make-interfaces-feel-better` after the structure is
   right.
+
+## Integration notes
+
+- **Round 1 (manager):** the frontend's contract change request was approved as ADR-010. The
+  manager implemented the one-line name change on `main` at `57e1041`, with the W-05 test
+  updated first and a new label-in-name test over every shipped window. W-03 was confirmed as
+  built: black at rest, fog panel on attention. The task returns to `REVIEW`.
 
 ## Review History
 

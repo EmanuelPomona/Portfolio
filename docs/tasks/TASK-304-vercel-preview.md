@@ -50,20 +50,23 @@ and a contract test that fails if anyone changes those inline blocks without upd
   - `X-Content-Type-Options: nosniff`
   - `Referrer-Policy: strict-origin-when-cross-origin`
   - `Permissions-Policy: camera=(), microphone=(), geolocation=()`
-- **Caching:** `Cache-Control: public, max-age=31536000, immutable` on `/assets/(.*)` and
-  `/media/(.*)`.
+- **Caching (ADR-009):** `Cache-Control: public, max-age=31536000, immutable` on `/assets/(.*)`;
+  `public, max-age=0, must-revalidate` on `/media/(.*)`, whose names are not content-hashed.
 
 ## Acceptance Criteria
 
-- [ ] **B-05:** `curl -sI <preview>/` shows every header above, and `/media/...` shows
-      `immutable`.
+- [ ] **B-05:** `curl -sI <preview>/` shows every header above, `/assets/...` shows
+      `immutable`, and `/media/...` shows `must-revalidate`.
 - [ ] **B-04:** `/favicon.svg`, `/og.jpg`, `/robots.txt`, and `/sitemap.xml` return 200 on the
       preview. The sitemap needs `origin` set.
-- [ ] **CSP contract test:** it extracts the exact inline gate script text and boot-cover style
-      text from `frontend/index.html`, computes `sha256` in base64, and asserts both hashes
-      appear in `vercel.json`'s CSP. The test name is
+- [ ] **CSP contract test:** it builds the site, extracts the inline gate script and boot-cover
+      style from the **built** `index.html` (ADR-008: Vite minifies the style), checks the built gate
+      equals the source gate, computes `sha256` in base64, and asserts both hashes appear in
+      `vercel.json`'s CSP. The test name is
       `vercel CSP allows exactly the index.html inline gate and boot style`.
-- [ ] The preview loads with **zero CSP violations** in the console:
+- [ ] The preview loads with **zero CSP violations caused by the site** in the console. The Vercel
+      Toolbar script that Vercel injects into previews is not the site's; turning it off is an owner
+      setting:
   - the loader runs (`?loader=1`);
   - fonts and media load;
   - JSON-LD is a data block and is not executed.
@@ -102,6 +105,13 @@ and a contract test that fails if anyone changes those inline blocks without upd
 - The preview deploys whatever is on `agent/backend`: the walking skeleton plus your work. That
   is enough to verify headers and assets. The manager redeploys after integration for the full
   review.
+
+## Integration notes
+
+- **Round 1 (manager):** CCR-1 approved as ADR-008. `vite.config.ts` never inlines fonts
+  (`d1fd0cc`, with `plugins/font-inlining.contract.test.ts`). CCR-2 approved as ADR-008; the test
+  already hashes the built blocks. CCR-3 resolved by option (b) as ADR-009 (`665e7cd`). The manager
+  redeploys a preview from integrated `main` for the full review (see Notes).
 
 ## Review History
 

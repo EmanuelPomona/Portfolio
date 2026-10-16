@@ -83,8 +83,8 @@ Otherwise use `npm run dev` after `scripts/bootstrap.sh`. Force the loader with
       - he runs to the x of a tap;
       - he never blocks a tap.
 - [ ] **T-03** The flag flips to `true` only after the owner's approval is
-      recorded in `docs/status/main.md`, and after TASK-205 (forced-colors
-      exclusion and safe-area viewport) is done.
+      recorded in `docs/status/main.md`, and after TASK-205 (safe-area
+      viewport) is done.
 
 ## Hero (frontend)
 

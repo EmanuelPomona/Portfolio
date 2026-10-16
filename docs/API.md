@@ -124,7 +124,7 @@ or motion preference switches the layer without a reload.
 | Conditions | Result |
 |---|---|
 | `(pointer: fine)` and not `(prefers-reduced-motion: reduce)` and not `(forced-colors: active)` | **Desktop cursor.** Adds `html.stickman-cursor`, which hides the native cursor, on the first `pointermove` after activation, so a still pointer is never left blank. |
-| `(pointer: coarse)` and `touch === true` and not reduced motion and not `(forced-colors: active)` | **Touch walker.** The native touch behavior is untouched. (The forced-colors exclusion was added at integration round 1; TASK-205 implements it before the flag can flip.) |
+| `(pointer: coarse)` and `touch === true` and not reduced motion and not `(forced-colors: active)` | **Touch walker.** The native touch behavior is untouched. (The forced-colors exclusion was added at integration round 1.) |
 | anything else | Renders `null`. The native cursor is untouched, and `html.stickman-cursor` is absent. |
 
 On unmount or deactivation it **always** removes `html.stickman-cursor`.
@@ -163,6 +163,8 @@ approves it.
 - He walks with scroll velocity, runs horizontally to the x of a tap, and cheers
   if the tap hit a target.
 - He never blocks taps.
+- Before the flag flips, `index.html`'s viewport meta gains `viewport-fit=cover`,
+  so `env(safe-area-inset-bottom)` is non-zero on notched phones (TASK-205).
 
 ### 2.4 `index.html` gate and boot cover
 
