@@ -19,6 +19,10 @@ Do not edit by hand — edit the task files and regenerate.
 | TASK-302 | REVIEW | backend | 0 | Deterministic media pipeline (npm run media) and manifest freshness test |
 | TASK-303 | REVIEW | backend | 0 | Head metadata plugin, favicon, Open Graph image, robots, sitemap |
 | TASK-304 | REVIEW | backend | 0 | Vercel config, security headers, and the preview deployment |
+| TASK-107 | READY | frontend | 0 | Photographic clouds drifting through the page |
+| TASK-108 | READY | frontend | 0 | Scroll depth and arrivals (backgrounds slower, plates from their side, prints settle) |
+| TASK-109 | READY | frontend | 0 | Contact as one sentence, "Contact: LinkedIn, Email, GitHub." |
+| TASK-206 | READY | stickman | 0 | Loader minimum 2.2s, with the scribble and progress paced to match |
 | TASK-205 | BACKLOG | stickman | 0 | Safe-area viewport and real-phone check before the touch flag flips |
 
-**Counts:** BACKLOG 1, REVIEW 14
+**Counts:** BACKLOG 1, READY 4, REVIEW 14
