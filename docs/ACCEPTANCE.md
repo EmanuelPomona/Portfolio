@@ -83,7 +83,8 @@ Otherwise use `npm run dev` after `scripts/bootstrap.sh`. Force the loader with
       - he runs to the x of a tap;
       - he never blocks a tap.
 - [ ] **T-03** The flag flips to `true` only after the owner's approval is
-      recorded in `docs/status/main.md`.
+      recorded in `docs/status/main.md`, and after TASK-205 (forced-colors
+      exclusion and safe-area viewport) is done.
 
 ## Hero (frontend)
 
@@ -115,12 +116,15 @@ Otherwise use `npm run dev` after `scripts/bootstrap.sh`. Force the loader with
       - the screen lifts out of black.
 
       Provide paired screenshots, `-rest` and `-attention`.
-- [ ] **W-03** Every v1 window shows the empty state: a flat fog-tone screen with
-      "screenshot soon". **No photograph appears inside any window.**
+- [ ] **W-03** Every v1 window shows the empty state: near-black at rest with
+      "screenshot soon", lifting to a flat fog-tone screen on attention (ADR-010).
+      **No photograph appears inside any window.**
 - [ ] **W-04** A component test with a fixture image shows that the rest state
       is darkened or desaturated, and the attention state is full color.
 - [ ] **W-05** Activating a window opens `primary.href` in a new tab with
-      `rel="noopener noreferrer"`. Its accessible name is "<title>, <label>".
+      `rel="noopener noreferrer"`. Its accessible name is
+      "<title>, <label>, <addressBar>" (ADR-010), and axe reports no
+      `label-content-name-mismatch`.
 - [ ] **W-06** The address field shows exactly `project.addressBar`.
 - [ ] **W-07** At 390 with touch emulation, a window in the viewport's middle band
       shows the attention state, and reverts when it leaves the band.
@@ -203,7 +207,8 @@ Otherwise use `npm run dev` after `scripts/bootstrap.sh`. Force the loader with
       - `Referrer-Policy`;
       - `frame-ancestors 'none'`.
 
-      `/assets/*` and `/media/*` are served `immutable`.
+      `/assets/*` is served `immutable`; `/media/*` is served
+      `public, max-age=0, must-revalidate` (ADR-009).
 
 ## Performance (all)
 

@@ -46,11 +46,11 @@ in `docs/DATABASE.md`.
 | `site.name`, `site.tagline`, `site.heroLinks` | The hero, top to bottom. |
 | `site.heroImage`, `site.sectionsImage` | Decorative backgrounds. Render with `alt=""` or as CSS backgrounds. Never announced to screen readers. |
 | `projects` | Render order. The displayed number is `String(i + 1).padStart(2, '0')`. |
-| `project.primary` | The browser window's link target and its accessible name: "<title>, <primary.label>". `http(s)` links open in a new tab with `rel="noopener noreferrer"`. |
+| `project.primary` | The browser window's link target and its accessible name: "<title>, <primary.label>, <addressBar>" (ADR-010: the name contains the visible address, WCAG 2.5.3). `http(s)` links open in a new tab with `rel="noopener noreferrer"`. |
 | `project.secondary` | Small links after the meta line. May be empty, and is never the same URL as `primary`. |
 | `project.addressBar` | Rendered verbatim in the window's address field. |
 | `project.meta` | One line, items joined with " · ". |
-| `project.screen.image === null` | The window's **empty state**: a flat fog-tone screen and the words "screenshot soon". Never substitute any other image. |
+| `project.screen.image === null` | The window's **empty state**: near-black at rest with the words "screenshot soon"; on attention the screen lifts to a flat fog-tone panel (ADR-010). Never substitute any other image. |
 | `about.description` | Rendered as is. `descriptionIsDraft` is **never** rendered; it exists for the owner's tooling. |
 | `about.classes` | `label` as a small heading, `items` as a list. |
 | `about.photos[i].image === null` | A mist-tone panel at `aspect`. |
@@ -92,14 +92,18 @@ passing it.
 5. **Exit:** at most 600ms. The stickman lets go of the pencil and becomes the
    cursor (§2.3), and the paper clears.
 6. **Finish:** set `sessionStorage[LOADER_SEEN_KEY] = '1'`, ensure `#boot-cover` is
-   gone, and call `onDone()`.
+   gone, set `<html data-loader>` to `skip` (this releases the §2.4 scroll lock),
+   and call `onDone()`.
+
+While the paper is up the Loader shows the native `progress` cursor, because the
+ring (`--z-stickman`) sits under the paper (`--z-loader`).
 
 Under the contract test this means `onDone` fires within 5s of mount whatever
 `ready` does.
 
 **Mode `fade`** (first visit, `prefers-reduced-motion: reduce`):
 - No scribble and no movement.
-- The ivory sheet fades out over 300ms once `ready` settles. The cap still
+- The ivory sheet fades out in at most 300ms once `ready` settles. The cap still
   applies.
 - `onDone` is called within 1s of `ready`.
 
@@ -119,8 +123,8 @@ or motion preference switches the layer without a reload.
 
 | Conditions | Result |
 |---|---|
-| `(pointer: fine)` and not `(prefers-reduced-motion: reduce)` and not `(forced-colors: active)` | **Desktop cursor.** Adds `html.stickman-cursor`, which hides the native cursor. |
-| `(pointer: coarse)` and `touch === true` and not reduced motion | **Touch walker.** The native touch behavior is untouched. |
+| `(pointer: fine)` and not `(prefers-reduced-motion: reduce)` and not `(forced-colors: active)` | **Desktop cursor.** Adds `html.stickman-cursor`, which hides the native cursor, on the first `pointermove` after activation, so a still pointer is never left blank. |
+| `(pointer: coarse)` and `touch === true` and not reduced motion and not `(forced-colors: active)` | **Touch walker.** The native touch behavior is untouched. (The forced-colors exclusion was added at integration round 1; TASK-205 implements it before the flag can flip.) |
 | anything else | Renders `null`. The native cursor is untouched, and `html.stickman-cursor` is absent. |
 
 On unmount or deactivation it **always** removes `html.stickman-cursor`.
@@ -194,6 +198,14 @@ the first stylesheet.
 
 - `?loader=1` forces the loader. This is for the reviewer and the owner.
 - Storage being blocked means `skip`.
+- **CSP (ADR-008).** `vercel.json` allows these two blocks by the sha256 of their
+  **served** bytes, from the built `index.html`. Vite serves the gate script
+  verbatim and minifies the boot style. Editing either block requires new hashes;
+  `npm run test:contract` names the mismatch.
+- **Scroll-lock release.** `html[data-loader='show'] body { overflow: hidden }`
+  is released twice, and either alone suffices: the page's CSS releases it once
+  `<main>` is no longer `inert`, and the Loader sets `data-loader` to `skip` at
+  finish (§2.2).
 
 ### 2.5 Mount contract (`frontend/src/app/App.tsx`)
 
@@ -268,6 +280,9 @@ true.
 - **`placeholder`:** the mean color of the image, as `#rrggbb`.
 - **Deterministic:** the same inputs produce byte-identical outputs. Stale outputs
   for deleted sources are removed.
+- **Caching (ADR-009).** Rendition names are not content-hashed, so `/media/*` is
+  served `public, max-age=0, must-revalidate`. Only Vite's hashed `/assets/*` is
+  `immutable`.
 - **Exit codes:** non-zero on any failure. It never leaves a half-written manifest.
 
 ## 4. Flags: `frontend/src/config/flags.ts`
