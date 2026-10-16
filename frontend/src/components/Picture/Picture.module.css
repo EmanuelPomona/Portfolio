@@ -1,0 +1,4 @@
+/* The <picture> wrapper adds no box of its own: the <img> sizes and positions itself. */
+.picture {
+  display: contents;
+}
