@@ -35,12 +35,12 @@ import {
   meanColor,
   mediaIdFromPath,
   planWidths,
+  prepareSource,
   renderManifest,
 } from './media-lib.mjs';
 
 const FRONTEND = fileURLToPath(new URL('..', import.meta.url));
 const IMAGE_EXTENSIONS = new Set(['.png', '.jpg', '.jpeg', '.webp']);
-const IVORY = '#f8f9f7';
 /** @type {[ext: 'avif' | 'webp' | 'jpg', encode: (s: sharp.Sharp) => sharp.Sharp][]} */
 const FORMATS = [
   ['avif', (s) => s.avif({ quality: 60, effort: 4, chromaSubsampling: '4:4:4' })],
@@ -95,11 +95,7 @@ async function discover(srcDir) {
 
 /** Every rendition of one source, in memory, plus its manifest entry. */
 async function encode({ id, file }) {
-  const { data, info } = await sharp(file)
-    .autoOrient()
-    .flatten({ background: IVORY })
-    .raw()
-    .toBuffer({ resolveWithObject: true });
+  const { data, info } = await prepareSource(sharp(file)).raw().toBuffer({ resolveWithObject: true });
   const raw = { raw: { width: info.width, height: info.height, channels: info.channels } };
   const widths = planWidths(info.width);
   const files = new Map();

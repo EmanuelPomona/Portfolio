@@ -1,5 +1,19 @@
 // Owner: agent/backend. Pure helpers for the media pipeline (docs/API.md §3). No I/O here.
 
+/** Ivory (#f8f9f7), the paper color: transparent pixels are flattened onto it. */
+export const IVORY = '#f8f9f7';
+
+/**
+ * The one decode recipe for a source image, shared by the pipeline and the C-21 freshness test:
+ * auto-orient from EXIF, then flatten any transparency onto Ivory. sharp's output is 8-bit sRGB.
+ * Pure: it only adds steps to the sharp pipeline it is given.
+ * @param {import('sharp').Sharp} image
+ * @returns {import('sharp').Sharp}
+ */
+export function prepareSource(image) {
+  return image.autoOrient().flatten({ background: IVORY });
+}
+
 /** Rendition steps in pixels. An image never gets a rendition wider than itself. */
 export const WIDTH_STEPS = Object.freeze([640, 1024, 1600, 2400]);
 
