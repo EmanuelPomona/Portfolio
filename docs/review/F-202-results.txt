@@ -21,3 +21,12 @@ console errors/warnings                                    ["[error] Failed to l
 S-07 coarse pointer (touch emulation): pointer:coarse matches true
 S-07 coarse pointer: class / canvas present                [false,false]
 S-09 at 4x CPU throttle: long tasks / rAF p50 p99 max ms   {"pointermoves":300,"longTasks":[],"frames":300,"p50":"16.7","p99":"16.8","max":"16.8"}
+QA network responses >= 400 / failures                     ["404 http://localhost:3009/favicon.ico"]
+QA CLS with the stickman layer active                      0.0681
+QA every nav link activates through the layer              ["Home: ok","Projects: ok","About: ok","Contact: ok"]
+QA layer adds no focusable or announced nodes              [{"el":"stickman-canvas","tabIndex":-1,"ariaHidden":"true","role":null},{"el":"stickman-ring","tabIndex":-1,"ariaHidden":"true","role":null}]
+QA tab order: first 6 focus stops                          ["LinkedIn","Email","GitHub","HomeProjectsAboutContact","Home","Projects"]
+QA CLS diagnosis: layer ON 0.0681 vs layer OFF (reduced motion) 0.0681, identical; sources SECTION#home/#projects/#about at ~70-106ms (font swap on the unstyled skeleton, under the loader cover). Not the stickman layer; frontend F-03.
+QA tab order on a fresh load, layer ON and OFF identical: A:Home, A:Projects, A:About, A:Contact, A:LinkedIn, A:Email. (A stop reading "HomeProjectsAboutContact" was seen once only after the script's hash-navigation loop; not reproducible on a fresh load.)
+QA visual regression: INCONCLUSIVE, no committed baseline exists for comparison.
+QA axe-core: NOT RUN, axe is not installed and was not downloaded. Structural check only: the layer adds two aria-hidden, non-focusable nodes and no roles.
