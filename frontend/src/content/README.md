@@ -65,6 +65,8 @@ A few rules to keep in mind while writing. Section 4 lists all of them.
    slot in `about.ts`, for example `frontend/media-src/life/photo-2.jpg`.
    - Each slot has a fixed shape, its `aspect`. The five are, in order: 4:3, 2:3, 4:3, 9:16, 4:3.
      Crop the photo to its slot's shape before saving it.
+   - Phones often save `.HEIC` or `.JPG`. `.HEIC` is not supported: open it in Preview and use
+     File > Export, format JPEG. Rename `.JPG` to `.jpg`; `npm run media` tells you if you forget.
 2. Run:
 
    ```bash
@@ -154,3 +156,6 @@ git push
 
 Write a message that says what changed. Commit the files `npm run media` produced together
 with the original image and the content edit, so the three never get out of step.
+
+Pushing saves your change on GitHub. It does not update the live site by itself: publishing is a
+separate Vercel deploy, which is not automatic yet.
