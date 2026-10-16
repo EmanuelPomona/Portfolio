@@ -354,6 +354,12 @@ virtual-time budget.
 
 **CI:** GitHub Actions `ci` on `agent/backend` at `255dc97` completed successfully in 43 s.
 
+**Skill audit:** `scripts/audit-skills.sh .` exited 0 with "all claims corroborated by the
+transcript". All 12 claimed skills are marked OK, and the transcript positions match the stages
+claimed: contract-first and TDD at 9%, backend-patterns at 29%, systematic-debugging at 44%, seo at
+48%, security-review at 65%, the vercel skills at 69 to 70%, requesting and receiving code review at
+84 and 86%, and verification-before-completion at 96%.
+
 ### What Was NOT Verified
 
 - **Zero CSP violations on the preview: not met.** See CCR-1 and owner decision 2. TASK-304 stays
