@@ -94,6 +94,13 @@ describe('stepMotion', () => {
     expect(slow.facing).toBe(1);
   });
 
+  it('facing flips on the eased speed crossing 6, not the incoming speed', () => {
+    // dx = −2 -> desired 14. dt 0.01: 5 eases to 5 + 9·0.1 = 5.9 (≤ 6, keep); 5.9 eases to 6.71 (flip)
+    const target = { x: 98, y: 100 };
+    expect(stepMotion(at(100, 100, { speed: 5 }), target, 0.01, SIZE).facing).toBe(1);
+    expect(stepMotion(at(100, 100, { speed: 5.9 }), target, 0.01, SIZE).facing).toBe(-1);
+  });
+
   it('idle accumulates only when speed ≤ 8', () => {
     let s = at(50, 50);
     for (let i = 0; i < 10; i++) s = stepMotion(s, { x: 50, y: 50 }, 0.1, SIZE);
@@ -102,6 +109,12 @@ describe('stepMotion', () => {
     // moving (speed well above 8) resets it
     const moving = stepMotion(at(50, 50, { idle: 3, speed: 300 }), { x: 500, y: 50 }, FRAME, SIZE);
     expect(moving.idle).toBe(0);
+
+    // at the boundary, on the eased speed (target = pos, desired 0, dt 0.01):
+    // 8.8 eases to 7.92 (≤ 8: idle 1 -> 1.01); 9 eases to 8.1 (> 8: idle resets)
+    const still = { x: 50, y: 50 };
+    expect(stepMotion(at(50, 50, { idle: 1, speed: 8.8 }), still, 0.01, SIZE).idle).toBeCloseTo(1.01, 9);
+    expect(stepMotion(at(50, 50, { idle: 1, speed: 9 }), still, 0.01, SIZE).idle).toBe(0);
   });
 
   it('advances the stride phase by speed·dt / (size·0.5)', () => {

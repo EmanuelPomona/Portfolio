@@ -39,6 +39,11 @@ describe('stepGestures: sit', () => {
     expect(hold(REST, STILL, 4.9).sit).toBe(0);
   });
 
+  it('starts sitting strictly after 5s idle', () => {
+    expect(stepGestures(REST, motion(5), STILL, 0.1).sit).toBe(0);
+    expect(stepGestures(REST, motion(5.01), STILL, 0.1).sit).toBeCloseTo(0.4, 9);
+  });
+
   it('eases sit at rate 4/s', () => {
     // 0 + (1 - 0) * min(1, 0.1 * 4) = 0.4
     expect(stepGestures(REST, motion(6), STILL, 0.1).sit).toBeCloseTo(0.4, 9);
