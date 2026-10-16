@@ -1,7 +1,7 @@
 # STATUS: agent/backend
 Task: TASK-301 (then 302, 303, 304 in order)
 Round: 0
-Last updated: 2026-10-16T17:25:00Z
+Last updated: 2026-10-16T18:00:00Z
 
 ## Skills invoked so far
 - ecc:contract-first @ TASK-301 start, before validator -> shapes imported from types.ts (no redeclared copies); DATABASE.md is the invariant source; provider check = validate the real exported `content`; fixtures JSON-cloned because heroLinks/contact.links share refs (structuredClone would double-count)
@@ -14,6 +14,7 @@ Last updated: 2026-10-16T17:25:00Z
 - ecc:security-review @ TASK-304 start, before CSP/headers -> strict hash-only CSP (no unsafe-inline/eval) hashing the bytes actually served (built, minified style) not the source; .vercel/ must stay uncommitted; run npm audit; JSON-LD escaping (TASK-303) is the XSS boundary
 - vercel:vercel-cli @ TASK-304 step 2, before any CLI use -> check auth with `vercel whoami --format json`; never auto-link or start login myself; verify target with `vercel project inspect --non-interactive`; protected previews via `vercel curl`, never disable protection
 - vercel:deploy @ TASK-304 step 2 -> preflight (CLI, link, git status clean); PREVIEW only, never --prod; post-deploy `vercel inspect` + smoke check
+- superpowers:requesting-code-review @ pre-handoff, after implementation of 301-304 (range 3ea91a0..255dc97) -> dispatched a read-only general-purpose reviewer with the 4 task specs, DATABASE/API sections, and the known deviations; findings pending
 - (probe, scratchpad only) all 3 formats byte-stable across 3 processes on this mac; hero 1600w AVIF q50=53.6KB, q60=73.9KB -> chose AVIF q60/effort 4, WebP q80/effort 4, JPEG q80 mozjpeg
 
 ## Done
