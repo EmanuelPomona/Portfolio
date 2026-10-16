@@ -1,0 +1,27 @@
+# F-203 loader runtime checks, headless Chrome 1440x900, 2026-10-16T18:39:49.513Z
+L-01 first-visit mode / boot cover painted ivory             skip (now, after finish)
+L-07 times from navigation start (ms): mounted / exit / gone {"mounted":111,"exit":1321,"gone":1777}
+L-07 visible from mount until exit (ms, >= 1200)             1210
+L-03 exit duration (ms, <= 600)                              456
+L-06 main inert while up / after                             checked below
+page released after finish: body overflow / wheel scroll     {"overflow":"visible","scrollYAfterWheel":392}
+L-04 sessionStorage el:loader-seen after finish              1
+L-04 reload in same tab: data-loader / loader present        ["skip",false]
+console errors/warnings (show run)                           ["[error] Failed to load resource: the server responded with a status of 404 (Not Found) http://localhost:3009/favicon.ico"]
+L-06 role/label/min/max                                      ["Loading","0","100"]
+L-06 aria-valuenow sampled every 250ms                       ["0","81","100","100","100"]
+L-06 canvases aria-hidden                                    ["true","true"]
+L-06 <main> inert / aria-busy while up                       [true,"true"]
+L-06 Tab while up reaches (expect no page link)              BODY:100%HomeProjectsAbou
+hero BLOCKED (decode rejects = ready): times (ms from navigation): mounted / exit / gone {"mounted":50,"exit":1261,"gone":1718}
+hero blocked: exit started (ms after mount, cap 4500)        1211
+hero blocked: gone by (ms after navigation start, <= 4500 + exit + mount) 1718
+hero blocked: page usable after: main inert / a link focusable [false,true]
+L-02 hero HANGS: times (ms from navigation): mounted / exit / gone {"mounted":56,"exit":4502,"gone":4957}
+L-02 hero hangs: exit began after mount (ms, cap 4500)       4446
+L-02 hero hangs: gone after navigation start (ms)            4957
+L-02 hero hangs: page usable after (main inert / nav link focusable) [false,true]
+L-03 click at (ms) -> exit began / gone                      {"clickAt":668,"exit":682,"gone":1135,"exitLatency":14,"totalAfterClick":467}
+handoff: html.stickman-cursor after exit (pointer moved by the click) false
+L-05 fade mode: data-mode / canvases / meter                 ["fade",0,false]
+L-05 fade times (ms): mounted / exit / gone, fade duration   {"mounted":51,"exit":61,"gone":314,"fade":253}
