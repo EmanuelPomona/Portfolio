@@ -1,7 +1,7 @@
 ---
 id: TASK-202
 title: StickmanLayer desktop cursor (fine pointer)
-status: READY
+status: REVIEW
 owner: stickman
 branch: agent/stickman
 priority: HIGH

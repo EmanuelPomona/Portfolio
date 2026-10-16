@@ -1,0 +1,44 @@
+/* Owner: agent/stickman. The stickman layer's own CSS (docs/API.md §2.6).
+   The frontend never declares cursor: none and never styles classes prefixed stickman-. */
+
+/* Present only while the desktop cursor is live (fine pointer, motion allowed, no forced colors). */
+html.stickman-cursor,
+html.stickman-cursor * {
+  cursor: none !important;
+}
+
+.stickman-canvas,
+.stickman-ring {
+  position: fixed;
+  pointer-events: none;
+  z-index: var(--z-stickman, 900);
+  /* One white line drawing that inverts against pale fog and black windows alike. */
+  mix-blend-mode: difference;
+  user-select: none;
+}
+
+.stickman-canvas {
+  inset: 0;
+  /* The controller sets the CSS size to the viewport and the backing store to DPR (cap 2). */
+}
+
+/* The true click point: an 11px ring with a 1.2px stroke, centred on the pointer. */
+.stickman-ring {
+  left: 0;
+  top: 0;
+  width: 11px;
+  height: 11px;
+  margin: -5.5px 0 0 -5.5px;
+  box-sizing: border-box;
+  border: 1.2px solid #fff;
+  border-radius: 50%;
+  visibility: hidden;
+  will-change: transform;
+}
+
+@media print {
+  .stickman-canvas,
+  .stickman-ring {
+    display: none;
+  }
+}
