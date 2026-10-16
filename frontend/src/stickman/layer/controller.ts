@@ -4,8 +4,9 @@
 // Layout reads are bounded: a hovered target's rect is read at most once per frame, and only after
 // a pointermove, scroll, or resize. A scroll re-resolves the element under the ring (it can change
 // without a pointermove). The layer never calls preventDefault or stops propagation.
-import { stepGestures, type GestureState } from '../engine/gestures';
-import { MAX_DT, MOVING_SPEED, PACES, stepMotion, type MotionState, type Pace } from '../engine/motion';
+import { stepFigure, type Figure } from '../engine/figure';
+import type { GestureState } from '../engine/gestures';
+import { MAX_DT, PACES, type Pace } from '../engine/motion';
 import { REST_POINT_ANGLE, computePose, lineWidthFor, pointAngleTo } from '../engine/pose';
 import type { Vec2 } from '../engine/vec';
 import { drawFigure } from '../render/drawFigure';
@@ -81,8 +82,10 @@ export function createCursorController(
 
   const anchor = (): Vec2 => ({ x: ANCHOR_INSET, y: window.innerHeight - ANCHOR_INSET });
   let target = anchor();
-  let s: MotionState = { pos: { ...target }, speed: 0, facing: 1, phase: 0, idle: 0 };
-  let g: GestureState = { cheer: 0, point: 0, sit: 0 };
+  let fig: Figure = {
+    motion: { pos: { ...target }, speed: 0, facing: 1, phase: 0, idle: 0 },
+    gestures: { cheer: 0, point: 0, sit: 0 },
+  };
 
   let ctx: CanvasRenderingContext2D | null = null;
   let running = false;
@@ -202,18 +205,10 @@ export function createCursorController(
     refreshRects();
     const pointAt = focus ? focusCenter : hoverCenter;
 
-    if (pressed) s = { ...s, idle: 0 };
-    // The prototype judges "arrived" on the distance before this frame's step.
-    const dist = Math.hypot(target.x - s.pos.x, target.y - s.pos.y);
-    s = stepMotion(s, target, dt, size, pace);
-    g = stepGestures(
-      g,
-      s,
-      { moving: s.speed > MOVING_SPEED, arrived: dist < 1.5 * size, onTarget: pointAt !== null, pressed },
-      dt,
-    );
+    fig = stepFigure(fig, { target, onTarget: pointAt !== null, pressed }, dt, size, pace);
     pressed = false;
 
+    const { motion: s, gestures: g } = fig;
     const angle = pointAt ? pointAngleTo(s, g, size, pointAt) : REST_POINT_ANGLE;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
@@ -264,7 +259,7 @@ export function createCursorController(
     },
     handoff(at) {
       placed = true;
-      s = { ...s, pos: { ...at }, speed: 0, idle: 0 };
+      fig = { ...fig, motion: { ...fig.motion, pos: { ...at }, speed: 0, idle: 0 } };
       if (!pointerSeen) target = { ...at };
     },
     configure(o) {
@@ -272,6 +267,7 @@ export function createCursorController(
       if (o.pace !== undefined) pace = o.pace;
     },
     inspect() {
+      const { motion: s, gestures: g } = fig;
       return {
         pos: { ...s.pos },
         speed: s.speed,
