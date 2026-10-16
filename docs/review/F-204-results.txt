@@ -1,0 +1,8 @@
+# F-204 touch walker, lab at 390x844 dpr2 touch emulation, headless Chrome, 2026-10-16T18:46:12.686Z
+T-02 (pointer: coarse) under touch emulation             true
+T-02 elementFromPoint at the link (expect the link, not the canvas) Projects
+T-02 page scrolled by the script (px)                    1200
+T-02 link received the tap as a click (count)            1
+T-02 canvas pointer-events                               none
+frames / webm KB                                         [330,364]
+console errors/warnings                                  ["[error] Failed to load resource: the server responded with a status of 404 (Not Found) http://localhost:3009/favicon.ico"]
