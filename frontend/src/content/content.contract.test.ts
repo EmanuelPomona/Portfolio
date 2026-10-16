@@ -120,3 +120,76 @@ describe('copy rules', () => {
     expect(found(c)).toEqual([]);
   });
 });
+
+describe('project rules', () => {
+  it('C-03 flags a project id that is not lowercase kebab-case', () => {
+    const c = variant((c) => (c.projects[1]!.id = 'StreetSafe_LA'));
+    expect(found(c)).toEqual(one('C-03', 'projects[1].id'));
+  });
+
+  it('C-03 flags a duplicate project id at the second occurrence', () => {
+    const c = variant((c) => (c.projects[3]!.id = 'sageplan'));
+    expect(found(c)).toEqual(one('C-03', 'projects[3].id'));
+  });
+
+  it('C-04 flags a project with no meta items', () => {
+    const c = variant((c) => (c.projects[0]!.meta = []));
+    expect(found(c)).toEqual(one('C-04', 'projects[0].meta'));
+  });
+
+  it('C-04 flags a project with five meta items', () => {
+    const c = variant((c) => c.projects[2]!.meta.push('Vercel'));
+    expect(found(c)).toEqual(one('C-04', 'projects[2].meta'));
+  });
+
+  it('C-04 flags a meta item longer than 40 characters', () => {
+    const c = variant((c) => (c.projects[1]!.meta[0] = '3rd of 17 teams at the Claremont Graduate University hackathon'));
+    expect(found(c)).toEqual(one('C-04', 'projects[1].meta[0]'));
+  });
+
+  it('C-04 accepts a meta item of exactly 40 characters', () => {
+    const c = variant((c) => (c.projects[1]!.meta[0] = 'x'.repeat(40)));
+    expect(found(c)).toEqual([]);
+  });
+
+  it('C-04 flags a meta item with trailing punctuation', () => {
+    const c = variant((c) => (c.projects[0]!.meta[1] = 'TypeScript.'));
+    expect(found(c)).toEqual(one('C-04', 'projects[0].meta[1]'));
+  });
+
+  it('C-07 flags an address bar that keeps the scheme', () => {
+    const c = variant((c) => (c.projects[0]!.addressBar = 'https://sageplan.vercel.app'));
+    expect(found(c)).toEqual(one('C-07', 'projects[0].addressBar'));
+  });
+
+  it('C-07 strips a leading www. and a trailing slash from the primary href', () => {
+    const c = variant((c) => (c.projects[3]!.primary.href = 'https://www.github.com/EmanuelPomona/Snake-AI/'));
+    expect(found(c)).toEqual([]);
+  });
+
+  it('C-07 flags an address bar that keeps www.', () => {
+    const c = variant((c) => {
+      c.projects[3]!.primary.href = 'https://www.github.com/EmanuelPomona/Snake-AI';
+      c.projects[3]!.addressBar = 'www.github.com/EmanuelPomona/Snake-AI';
+    });
+    expect(found(c)).toEqual(one('C-07', 'projects[3].addressBar'));
+  });
+
+  it('C-08 flags a live link that is not the primary', () => {
+    const c = variant((c) => {
+      const p = c.projects[0]!;
+      [p.primary, p.secondary[0]] = [p.secondary[0]!, p.primary];
+      p.addressBar = 'github.com/EmanuelPomona/SagePlan';
+    });
+    expect(found(c)).toEqual(one('C-08', 'projects[0].secondary[0].kind'));
+  });
+
+  it('C-08 flags a primary link that is neither live nor code', () => {
+    const c = variant((c) => {
+      const p = c.projects[1]!;
+      [p.primary, p.secondary[0]] = [p.secondary[0]!, p.primary];
+      p.addressBar = 'devpost.com/software/street-safe-la';
+    });
+    expect(found(c)).toEqual(one('C-08', 'projects[1].primary.kind'));
+  });
+});
