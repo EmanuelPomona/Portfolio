@@ -3,7 +3,8 @@
 //
 // It never throws on bad content: it collects every violation so the owner sees all problems at
 // once. Messages are written for a non-engineer; frontend/src/content/README.md explains each rule.
-import type { Content, Link, LinkKind } from './types';
+import { isMediaId } from './media';
+import type { Content, LifePhoto, Link, LinkKind, ProjectScreen } from './types';
 
 export type RuleId = 'C-01' | 'C-02' | 'C-03' | 'C-04' | 'C-05' | 'C-06' | 'C-07' | 'C-08' | 'C-09'
   | 'C-10' | 'C-11' | 'C-12' | 'C-13' | 'C-14' | 'C-15' | 'C-16' | 'C-17' | 'C-18' | 'C-19' | 'C-20';
@@ -25,6 +26,8 @@ const KEBAB = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 const TRAILING_PUNCTUATION = /[.,;:!?]$/;
 const MAILTO = /^mailto:[^\s@]+@[^\s@]+$/;
 const REQUIRED_CONTACT_KINDS: readonly LinkKind[] = ['linkedin', 'email', 'github'];
+const GENERIC_ALT = /^(?:image|photo|screenshot)[.!]?$/i;
+const PHOTO_ID = /^photo-\d+$/;
 
 /** Length in characters as a reader counts them (code points, not UTF-16 units). */
 const length = (s: string) => [...s].length;
@@ -59,7 +62,7 @@ function* strings(value: unknown, path: string): Generator<[path: string, text: 
 
 export function validateContent(
   c: Content,
-  _opts: { today?: string; mediaIds?: readonly string[] } = {},
+  opts: { today?: string; mediaIds?: readonly string[] } = {},
 ): ContentViolation[] {
   const out: ContentViolation[] = [];
   const add = (rule: RuleId, path: string, message: string) => out.push({ rule, path, message });
@@ -162,6 +165,62 @@ export function validateContent(
     if (!contactHrefs.has(link.href)) {
       add('C-19', `site.heroLinks[${i}].href`, `The hero link ${link.href} must also be one of the contact links.`);
     }
+  });
+
+  // C-09: an image and its alt text come together, and the alt text describes something.
+  const slots: [path: string, slot: { readonly image: string | null; readonly alt: string | null }][] = [
+    ...c.projects.map((p, i): [string, ProjectScreen] => [`projects[${i}].screen`, p.screen]),
+    ...c.about.photos.map((ph, i): [string, LifePhoto] => [`about.photos[${i}]`, ph]),
+  ];
+  for (const [at, { image, alt }] of slots) {
+    if (image === null && alt !== null) {
+      add('C-09', `${at}.alt`, 'There is alt text but no image. Set both image and alt, or set both to null.');
+    }
+    if (image !== null && alt === null) {
+      add('C-09', `${at}.alt`, 'This image needs alt text: a short description of what it shows.');
+    }
+    if (alt !== null) {
+      if (length(alt.trim()) < 8) {
+        add('C-09', `${at}.alt`, `The alt text "${alt}" is too short; describe the image in at least 8 characters.`);
+      } else if (GENERIC_ALT.test(alt.trim())) {
+        add('C-09', `${at}.alt`, `The alt text "${alt}" must say what the image shows, not just what kind of image it is.`);
+      }
+    }
+  }
+
+  // C-10: a caption is null, or trimmed, non-empty text of at most 120 characters.
+  c.about.photos.forEach((ph, i) => {
+    const path = `about.photos[${i}].caption`;
+    if (ph.caption === null) return;
+    if (ph.caption.trim() === '') add('C-10', path, 'The caption is empty. Use null for no caption.');
+    else if (ph.caption !== ph.caption.trim()) add('C-10', path, 'The caption has spaces at the start or end; remove them.');
+    if (length(ph.caption) > 120) add('C-10', path, `The caption is ${length(ph.caption)} characters; the limit is 120.`);
+  });
+
+  // C-11: every referenced image exists in the media manifest.
+  const known = opts.mediaIds ? new Set(opts.mediaIds) : null;
+  const hasMedia = (id: string) => (known ? known.has(id) : isMediaId(id));
+  const images: [path: string, id: string | null][] = [
+    ['site.heroImage', c.site.heroImage],
+    ['site.sectionsImage', c.site.sectionsImage],
+    ...c.projects.map((p, i): [string, string | null] => [`projects[${i}].screen.image`, p.screen.image]),
+    ...c.about.photos.map((ph, i): [string, string | null] => [`about.photos[${i}].image`, ph.image]),
+  ];
+  for (const [path, id] of images) {
+    if (id !== null && !hasMedia(id)) {
+      add('C-11', path, `There is no generated image "${id}". Put the file in frontend/media-src/ and run npm run media.`);
+    }
+  }
+
+  // C-17: 0 to 8 photos, with unique ids shaped like photo-N.
+  if (c.about.photos.length > 8) {
+    add('C-17', 'about.photos', `There are ${c.about.photos.length} photos; the collage holds at most 8.`);
+  }
+  const photoIds = new Set<string>();
+  c.about.photos.forEach((ph, i) => {
+    if (!PHOTO_ID.test(ph.id)) add('C-17', `about.photos[${i}].id`, `The photo id "${ph.id}" must look like photo-1, photo-2, and so on.`);
+    if (photoIds.has(ph.id)) add('C-17', `about.photos[${i}].id`, `The photo id "${ph.id}" is already used by another photo.`);
+    photoIds.add(ph.id);
   });
 
   // C-16: the about description is one or two complete sentences and at most 320 characters.
