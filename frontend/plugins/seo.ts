@@ -96,7 +96,9 @@ export function seoPlugin(opts: { site?: Site; links?: readonly Link[] } = {}): 
   const links = opts.links ?? contact.links;
   return {
     name: 'el-seo',
-    transformIndexHtml(html) {
+    transformIndexHtml(html, ctx) {
+      // Only the site's own page. Other HTML (the dev-only stickman-lab.html) keeps its head as written.
+      if (ctx.path !== '/index.html') return html;
       if (!FALLBACK_TITLE.test(html)) {
         throw new Error('seoPlugin: index.html has no <title> to replace. Keep the fallback <title> (docs/API.md §5).');
       }
