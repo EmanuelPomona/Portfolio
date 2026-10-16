@@ -250,6 +250,6 @@ opacity-only change.
 | Drop shadow (item 4) | A project window is literally a window floating over fog. One soft elevation shadow, on project windows only, appears on attention. Nowhere else. |
 | Gradients (item 1) | Fog is a gradient. Allowed only as alpha masks: photo edges dissolving into Mist Gray, and the optional cursor-local fog wipe. Never a color-to-color decorative gradient, never on text. |
 | Multi-hue (item 3) | The three traffic-light colors are literal macOS chrome. They appear only on an attended window. |
-| Pure white (item 2) | Not used. Ivory is the lightest tone. |
+| Pure white (item 2) | No white surface anywhere; Ivory is the lightest tone. `#fff` appears only as the `mix-blend-mode: difference` ink of the stickman figure and ring, where it renders as the inverse of whatever is beneath, never as white. |
 | Custom cursor | The owner's signature request. Kept accessible: the true click point is always marked, the native cursor is used on coarse pointers, under reduced motion, and in forced-colors mode. |
 | `mix-blend-mode: difference` on the stickman and ring | Keeps one line drawing legible over both pale fog and black windows without two code paths. Tuned and approved in the prototype. |
