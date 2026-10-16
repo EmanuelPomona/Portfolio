@@ -1,7 +1,7 @@
 # STATUS: agent/frontend
 Task: TASK-106 (101–105 implemented + verified)
 Round: 0
-Last updated: 2026-10-16T13:20:00Z
+Last updated: 2026-10-16T15:20:00Z
 
 ## Skills invoked so far
 - ecc:frontend-design-direction @ TASK-101 step 1 (2026-10-16T10:16Z) -> direction: purpose = name→4 live project links in one scroll; tone = editorial/calm plate book, mostly fog; memorable detail = stickman (slice) + color-earned-by-attention (mine); scan order name→italic titles→sentence→links. Deliberate departure: skill's 'avoid one-hue palette' overridden by brief (monochrome is the point; content supplies color on attention). Constraint: stable dimensions for windows (fixed 16:10 screen), long titles wrap.
@@ -38,7 +38,8 @@ Last updated: 2026-10-16T13:20:00Z
 
 ## In progress
 - [x] Review finding 1 (Critical) reproduced on prod build (wheel/PageDown scrollY 0 after ?loader=1 at 1440+390) -> fixed in global.css (:has(main:not([inert])) releases lock) + regression test; verified lock holds while loading (decode never settles: inert, hidden, wheel 0) and releases after (wheel 1200, PageDown 1988)
-- [ ] Next: finding 3 (h3 name) -> 7 (nav pointer-events) -> 6 (font preload) -> 5 (App mount test) -> 2 (captioned spreads loosen, verify with local fixture + hit-test) -> re-run QA incl. wheel scroll -> verification-before-completion -> handoff (CCR: window label-in-name + scroll-lock ownership clarification; W-03 ambiguity question; vite-patterns not invoked)
+- [x] Finding 3 h3 name '01 SagePlan' (bbfff1a, test RED->GREEN); finding 7 nav band takes clicks (f6ffa40, hit-test window->NAV); finding 6 name font preload, same hashed URL, 1 request each (d44012c); finding 5 App mount-contract test, mutation-checked (f4072bf); finding 2 captioned spreads flow, 0% captions covered at 1440/1024/768/390 with local 120-char fixture (reverted) (be15fe7); finding 4 = plan ambiguity -> question to manager in handoff
+- [ ] Next: rebuild; re-run QA on prod (wheel scroll after ?loader=1, Lighthouse, axe, keyboard, console incl. wheel steps, full-page evidence refresh) -> verification-before-completion -> handoff (CCR window label-in-name; scroll-lock ownership note; W-03 question; vite-patterns not invoked) -> tasks to REVIEW (103 BLOCKED on contract)
 - [ ] Final gate for all tasks happens at TASK-106 handoff (browser-qa, requesting-code-review, verification-before-completion); tasks move to REVIEW then
 
 ## Verified
