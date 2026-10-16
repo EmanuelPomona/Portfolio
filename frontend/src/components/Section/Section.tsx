@@ -42,13 +42,13 @@ export function Section({ id, heading, backdrop = 'none', className, children }:
     >
       {backdrop === 'evergreen' && <EvergreenBackdrop />}
       <div className={styles.body}>
-        {heading && (
+        {heading ? (
           <header ref={ref} className={styles.header} data-fog="self">
             <h2 id={headingId} className={styles.heading}>
               {heading}
             </h2>
           </header>
-        )}
+        ) : null}
         {children}
       </div>
     </section>

@@ -8,7 +8,7 @@ import { useMemo, useState } from 'react';
 import { Nav } from '../components/Nav/Nav';
 import { Section } from '../components/Section/Section';
 import { flags } from '../config/flags';
-import { content, getMedia } from '../content';
+import { content, getMedia, type NavItem } from '../content';
 import { useActiveSection } from '../hooks/useActiveSection';
 import { Loader, StickmanLayer, loaderMode } from '../stickman';
 
@@ -18,12 +18,16 @@ function decodeImage(src: string): Promise<unknown> {
   return img.decode();
 }
 
+/** Owns the active-section subscription so a section change re-renders the nav, not the page. */
+function ActiveNav({ items }: { readonly items: readonly NavItem[] }) {
+  const active = useActiveSection(items.map((item) => item.id));
+  return <Nav items={items} active={active} />;
+}
+
 export function App() {
   const { site, projects, about, contact } = content;
   const heroReady = useMemo(() => decodeImage(getMedia(site.heroImage).fallback.src), [site.heroImage]);
   const [loaderDone, setLoaderDone] = useState(() => loaderMode() === 'skip');
-  const sectionIds = site.nav.map((item) => item.id);
-  const active = useActiveSection(sectionIds);
   const label = (id: string) => site.nav.find((item) => item.id === id)?.label ?? id;
 
   return (
@@ -31,7 +35,7 @@ export function App() {
       <StickmanLayer touch={flags.touchStickman} />
       {!loaderDone && <Loader ready={heroReady} onDone={() => setLoaderDone(true)} />}
       <main aria-busy={!loaderDone} inert={!loaderDone}>
-        <Nav items={site.nav} active={active} />
+        <ActiveNav items={site.nav} />
 
         <Section id="home">
           <h1>{site.name}</h1>
