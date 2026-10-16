@@ -122,7 +122,8 @@ No agent may claim completion without verification.
 14. Documentation updated where behavior changed.
 15. `docs/status/<branch-slug>.md` reflects the finished state.
 16. `docs/handoffs/<branch-slug>.md` written for consumers.
-17. Changes committed.
+17. Changes committed in small steps as the work progressed (section 24), not
+    as one commit at the end.
 
 Invoke `superpowers:verification-before-completion` immediately before declaring
 work finished — and do no further implementation work after it. If you keep
@@ -435,3 +436,32 @@ per-branch.
 
 The test for a good slice: **can its owner demo it without any other agent's work
 being finished?** If not, the slice boundary is wrong.
+
+---
+
+## 24. COMMIT CADENCE
+
+Commit in small, working steps as you go. Never save a task for one large commit
+at the end. The owner wants the history to show the work as it happened: a
+project lands with **at least 25 commits, and typically 40-100+**.
+
+Commit each time one logical step is done and verified, for example:
+
+- a component, endpoint, migration, or test file is added and passes
+- one interface state (loading, empty, error) or one breakpoint is finished
+- a bug is fixed, together with its regression test
+- a planning document, contract, or config file is written or changed
+
+Rules:
+
+- One logical change per commit, and every commit leaves the branch building.
+- A task normally produces several commits; 3-10 is typical. A task that reaches
+  handoff with a single commit was batched. Split the next one finer.
+- Never pad the count: no empty commits, no whitespace-only commits, no splitting
+  one change into fragments. Every commit must be worth reading on its own.
+- Messages are `type: what changed` in the imperative (`feat:`, `fix:`,
+  `test:`, `docs:`, `refactor:`, `style:`, `chore:`), under about 72 characters.
+- Commit under the repository's configured git identity, and add no
+  `Co-Authored-By` or other attribution trailers. The work credits the owner.
+- Merge, never squash. `scripts/integrate.sh` merges worker branches with their
+  history intact; do not squash-merge or rewrite a worker branch's commits.
