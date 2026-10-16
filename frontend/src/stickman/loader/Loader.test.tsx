@@ -29,6 +29,7 @@ beforeEach(() => {
 
 afterEach(() => {
   cleanup();
+  vi.restoreAllMocks();
   vi.useRealTimers();
   window.requestAnimationFrame = originalRaf;
   HTMLCanvasElement.prototype.getContext = originalGetContext;
@@ -80,6 +81,26 @@ describe('Loader timing (show mode)', () => {
     expect(leaving()).toBe(true);
     await advance(EXIT_MS);
     expect(onDone).toHaveBeenCalledTimes(1);
+  });
+
+  it('counts the cap from navigation start when the browser reports one (ACCEPTANCE L-02)', async () => {
+    vi.spyOn(performance, 'getEntriesByType').mockReturnValue([{} as PerformanceEntry]);
+    vi.spyOn(performance, 'now').mockReturnValue(300); // mounted 300ms after navigation
+    render(<Loader ready={new Promise(() => {})} onDone={vi.fn()} />);
+    await advance(CAP_MS - 300 - 1);
+    expect(leaving()).toBe(false);
+    await advance(1);
+    expect(leaving()).toBe(true);
+  });
+
+  it('a very slow mount still shows the loader for the minimum', async () => {
+    vi.spyOn(performance, 'getEntriesByType').mockReturnValue([{} as PerformanceEntry]);
+    vi.spyOn(performance, 'now').mockReturnValue(4000);
+    render(<Loader ready={new Promise(() => {})} onDone={vi.fn()} />);
+    await advance(MIN_MS - 1);
+    expect(leaving()).toBe(false);
+    await advance(1);
+    expect(leaving()).toBe(true);
   });
 
   it('a pointerdown starts the exit at once, without cancelling the event', async () => {

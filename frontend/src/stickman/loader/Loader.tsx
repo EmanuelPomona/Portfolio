@@ -9,7 +9,7 @@ import { handoffCursor } from '../layer/cursorChannel';
 import type { LoaderProps } from '../types';
 import { createLoaderArtist } from './artist';
 import { LOADER_SEEN_KEY, loaderMode } from './mode';
-import { EXIT_MS, FADE_MS, exitAt, fadeExitAt, progressAt } from './progress';
+import { CAP_MS, EXIT_MS, FADE_MS, MIN_MS, exitAt, fadeExitAt, progressAt } from './progress';
 import './loader.css';
 
 const SKIP_EVENTS = ['pointerdown', 'keydown'] as const;
@@ -40,6 +40,13 @@ export function Loader({ ready, onDone }: LoaderProps) {
 
     const t0 = Date.now();
     const elapsed = () => Date.now() - t0;
+    // The cap is 4.5s from mount (API.md) and, more strictly, from navigation start (ACCEPTANCE L-02):
+    // honour both by subtracting the time the page took to mount, but never cut below the minimum.
+    const sinceNavigation =
+      typeof performance !== 'undefined' && performance.getEntriesByType?.('navigation').length
+        ? performance.now()
+        : 0;
+    const capAt = Math.max(MIN_MS, CAP_MS - sinceNavigation);
     let readyAt: number | null = null;
     let skippedAt: number | null = null;
     let exiting = false;
@@ -105,7 +112,7 @@ export function Loader({ ready, onDone }: LoaderProps) {
       if (exiting || cancelled) return;
       clearTimeout(exitTimer);
       const at = mode === 'fade' ? fadeExitAt({ readyAt, skippedAt }) : exitAt({ readyAt, skippedAt });
-      exitTimer = setTimeout(beginExit, Math.max(0, at - elapsed()));
+      exitTimer = setTimeout(beginExit, Math.max(0, Math.min(at, capAt) - elapsed()));
     }
 
     const settle = () => {
