@@ -16,6 +16,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 const FRONTEND = fileURLToPath(new URL('..', import.meta.url));
 const REPO = path.dirname(FRONTEND);
 const IMMUTABLE = 'public, max-age=31536000, immutable';
+const REVALIDATE = 'public, max-age=0, must-revalidate';
 
 /** A CSP source expression for `text`: 'sha256-<base64>'. */
 const cspHash = (text: string) => `'sha256-${createHash('sha256').update(text, 'utf8').digest('base64')}'`;
@@ -113,13 +114,14 @@ describe('vercel.json', { timeout: 120_000 }, () => {
     });
   });
 
-  it('sends the security headers on every path and caches assets and media as immutable', async () => {
+  it('sends the security headers on every path, caches hashed assets as immutable, and revalidates media', async () => {
     const config = await vercelConfig();
     expect(header(config, '/(.*)', 'X-Content-Type-Options')).toBe('nosniff');
     expect(header(config, '/(.*)', 'Referrer-Policy')).toBe('strict-origin-when-cross-origin');
     expect(header(config, '/(.*)', 'Permissions-Policy')).toBe('camera=(), microphone=(), geolocation=()');
     expect(header(config, '/assets/(.*)', 'Cache-Control')).toBe(IMMUTABLE);
-    expect(header(config, '/media/(.*)', 'Cache-Control')).toBe(IMMUTABLE);
+    // ADR-009: rendition names are not content-hashed, so a replaced photo must not be cached for a year.
+    expect(header(config, '/media/(.*)', 'Cache-Control')).toBe(REVALIDATE);
   });
 
   it('builds the static site with the root scripts', async () => {
