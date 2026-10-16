@@ -10,6 +10,7 @@ import { Section } from '../components/Section/Section';
 import { flags } from '../config/flags';
 import { content, type NavItem } from '../content';
 import { useActiveSection } from '../hooks/useActiveSection';
+import { About } from '../sections/About/About';
 import { Hero } from '../sections/Hero/Hero';
 import { Projects } from '../sections/Projects/Projects';
 import { Loader, StickmanLayer, loaderMode } from '../stickman';
@@ -59,15 +60,7 @@ export function App() {
 
         <Projects projects={projects} heading={label('projects')} />
 
-        <Section id="about" heading={label('about')} backdrop="evergreen">
-          <p>{about.description}</p>
-          <h3>{about.classes.label}</h3>
-          <ul>
-            {about.classes.items.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-        </Section>
+        <About about={about} heading={label('about')} />
 
         <Section id="contact" heading={label('contact')}>
           <ul>
