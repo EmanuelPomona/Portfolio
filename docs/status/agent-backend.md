@@ -1,7 +1,7 @@
 # STATUS: agent/backend
 Task: TASK-301 (then 302, 303, 304 in order)
 Round: 0
-Last updated: 2026-10-16T17:11:55Z
+Last updated: 2026-10-16T17:25:00Z
 
 ## Skills invoked so far
 - ecc:contract-first @ TASK-301 start, before validator -> shapes imported from types.ts (no redeclared copies); DATABASE.md is the invariant source; provider check = validate the real exported `content`; fixtures JSON-cloned because heroLinks/contact.links share refs (structuredClone would double-count)
@@ -16,8 +16,12 @@ Last updated: 2026-10-16T17:11:55Z
 - [x] TASK-301 step 1: C-01..C-20 TDD in 5 families, each `test:` commit watched red (assertion failures, not errors) then `feat:` green (2c2d040..98a13ea)
 - [x] TASK-301 step 2: real-content test; proved it fails by temporarily putting an em dash + "TBD" in site.tagline (reported C-01 + C-20 at site.tagline), restored
 
+- [x] TASK-301 step 3: owner guide frontend/src/content/README.md (04473ab); every rule C-01..C-20 explained; C-20 false positives documented; TS error example is real tsc output
+- [x] No real content violations found -> no value files changed
+
 ## In progress
-- [ ] TASK-301 step 3: owner guide frontend/src/content/README.md
+- [ ] TASK-302: media pipeline. Next: invoke backend-patterns, error-handling (pipeline failure behavior), TDD helpers
+- [ ] TASK-301: code review + verification deferred to the combined pre-handoff pass (status stays IN_PROGRESS until then)
 
 ## Verified
 - Baseline (pre-change) -> typecheck/lint/test all pass on 3ea91a0

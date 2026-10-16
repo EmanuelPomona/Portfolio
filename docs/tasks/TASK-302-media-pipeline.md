@@ -1,7 +1,7 @@
 ---
 id: TASK-302
 title: Deterministic media pipeline (npm run media) and manifest freshness test
-status: READY
+status: IN_PROGRESS
 owner: backend
 branch: agent/backend
 priority: HIGH
