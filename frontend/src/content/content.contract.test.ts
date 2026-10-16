@@ -193,3 +193,54 @@ describe('project rules', () => {
     expect(found(c)).toEqual(one('C-08', 'projects[1].primary.kind'));
   });
 });
+
+describe('link rules', () => {
+  it('C-05 flags an http:// link', () => {
+    const c = variant((c) => (c.projects[1]!.secondary[0]!.href = 'http://devpost.com/software/street-safe-la'));
+    expect(found(c)).toEqual(one('C-05', 'projects[1].secondary[0].href'));
+  });
+
+  it('C-05 flags an https link that does not parse', () => {
+    const c = variant((c) => (c.projects[1]!.secondary[0]!.href = 'https://devpost com/software'));
+    expect(found(c)).toEqual(one('C-05', 'projects[1].secondary[0].href'));
+  });
+
+  it('C-05 flags a relative link', () => {
+    const c = variant((c) => (c.projects[1]!.secondary[0]!.href = '/projects'));
+    expect(found(c)).toEqual(one('C-05', 'projects[1].secondary[0].href'));
+  });
+
+  it('C-05 flags a mailto link without an @', () => {
+    const c = variant((c) => c.projects[3]!.secondary.push({ kind: 'email', label: 'Email', href: 'mailto:emanuelling27' }));
+    expect(found(c)).toEqual(one('C-05', 'projects[3].secondary[0].href'));
+  });
+
+  it('C-06 flags a secondary link that repeats the primary href', () => {
+    const c = variant((c) => (c.projects[0]!.secondary[0]!.href = 'https://sageplan.vercel.app'));
+    expect(found(c)).toEqual(one('C-06', 'projects[0].secondary[0].href'));
+  });
+
+  it('C-06 flags two secondary links with the same href', () => {
+    const c = variant((c) =>
+      c.projects[1]!.secondary.push({ kind: 'devpost', label: 'Devpost', href: 'https://devpost.com/software/street-safe-la' }),
+    );
+    expect(found(c)).toEqual(one('C-06', 'projects[1].secondary[1].href'));
+  });
+
+  it('C-18 flags contact links missing a required kind', () => {
+    const c = variant((c) => (c.contact.links[2]!.kind = 'code'));
+    expect(found(c)).toEqual(one('C-18', 'contact.links'));
+  });
+
+  it('C-18 flags a repeated contact link kind', () => {
+    const c = variant((c) =>
+      c.contact.links.push({ kind: 'linkedin', label: 'LinkedIn', href: 'https://www.linkedin.com/in/emanuel-ling-915a73244' }),
+    );
+    expect(found(c)).toEqual(one('C-18', 'contact.links[3].kind'));
+  });
+
+  it('C-19 flags a hero link whose href is not in the contact links', () => {
+    const c = variant((c) => (c.site.heroLinks[2]!.href = 'https://github.com/EmanuelPomona/Portfolio'));
+    expect(found(c)).toEqual(one('C-19', 'site.heroLinks[2].href'));
+  });
+});
