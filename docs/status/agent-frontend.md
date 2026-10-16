@@ -1,7 +1,7 @@
 # STATUS: agent/frontend
-Task: TASK-105 (101–104 implemented + verified; then 106)
+Task: TASK-106 (101–105 implemented + verified)
 Round: 0
-Last updated: 2026-10-16T12:35:00Z
+Last updated: 2026-10-16T13:20:00Z
 
 ## Skills invoked so far
 - ecc:frontend-design-direction @ TASK-101 step 1 (2026-10-16T10:16Z) -> direction: purpose = name→4 live project links in one scroll; tone = editorial/calm plate book, mostly fog; memorable detail = stickman (slice) + color-earned-by-attention (mine); scan order name→italic titles→sentence→links. Deliberate departure: skill's 'avoid one-hue palette' overridden by brief (monochrome is the point; content supplies color on attention). Constraint: stable dimensions for windows (fixed 16:10 screen), long titles wrap.
@@ -30,9 +30,10 @@ Last updated: 2026-10-16T12:35:00Z
 - [x] TASK-102 evidence -> docs/review/F-102-hero-{1440,768,390}.png (1d878e9)
 - [x] TASK-103 centerBand TDD (table + edges) cf72019; useMediaQuery refactor 584f3a4; useAttention TDD (6) c4db4f1; BrowserWindow TDD (8) fd04846; evidence e37630e
 - [x] TASK-104 Projects TDD (7 incl. 60-char title, contrast regression guard) 1be2c0d; in page f0e0bf3; contrast fix 5ede66f; backdrop containment e400237; evidence F-104-projects-{1440,1280,1024,768,390}
+- [x] TASK-105 PhotoSlot TDD (8) 0c08563; About TDD (7) e1f1fc2; in page 6fd6ba9; About lede contrast fix 8a88091; print hairline 24fb0f0; evidence 6fb3386 + fixture shots (fixture applied locally in content, reverted, git status clean)
 
 ## In progress
-- [ ] TASK-105: PhotoSlot (TDD) -> About (TDD) -> collage CSS per breakpoint -> reveal/attention -> evidence F-105-about-{1440,768,390} + fixture attention shot (local only)
+- [ ] TASK-106: Connect (TDD) -> footer -> make-interfaces-feel-better pass -> browser-qa evidence set -> requesting-code-review -> verification-before-completion -> handoff
 - [ ] Final gate for all tasks happens at TASK-106 handoff (browser-qa, requesting-code-review, verification-before-completion); tasks move to REVIEW then
 
 ## Verified
@@ -58,6 +59,13 @@ Last updated: 2026-10-16T12:35:00Z
 - Review Focus 5 (window) -> computed aspect-ratio '16 / 10', ratio 1.600 at all widths; .cover object-fit cover
 - W-01/R-02/Review Focus 4 -> CDP at 1440/1280/1024 alternate L,R,L,R; 1023/768/390/640(=1280@200%) stacked window->title->caption; 0 overlaps; scrollWidth == innerWidth everywhere; caption bottom == window bottom at >=1024
 - X-02 (projects) -> worst-pixel contrast, 9 widths, 0 failures, tightest 4.89 (meta over faded edge, 1024)
+- A-01 -> unit order test + browser: lede, 'This semester', 2 classes, 5 slots at 4:3/2:3/4:3/9:16/4:3; scatter echoes wireframe-3 (F-105-about-1440.png)
+- A-02 -> all 5 v1 slots empty: no img, textContent '', aria-hidden, no figcaption
+- A-03 -> unit fixture: img, data-attended on hover + focus, CSS grayscale(1) contrast(0.72) at rest -> none; browser fixture (local only): computed filter rest 'grayscale(1) contrast(0.72) brightness(1.08)' -> 'none' on hover (F-105-photo-fixture-{rest,attention}.png)
+- R-02 (collage) -> 390 offset two-column, overlaps 7-11%; 768 intermediate; 1440 scatter; spreads exactly as tall as lowest print (CSS max over --r ratios); contained in section; no horizontal scroll; 640 (200% zoom) phone arrangement
+- Review Focus 5 (about) -> unit: six photos -> six slots, positions 0..4,0, spreads fill 5,1; 120-char caption full; 60-char project title full
+- X-02 (about) -> worst-pixel contrast at 8 widths, 0 failures (lede 5.37+ at stacked widths after fix; 'This semester' ink-2 >= 5.33)
+- Window fixture (local only) -> 2:3 portrait screenshot cropped object-fit cover to 1.600 screen; rest grayscale + glass, attention filter none (F-103-window-fixture-{rest,attention}.png)
 - Browser tooling note: chrome-devtools MCP profile locked by another session -> using own headless Chrome via CDP (scratchpad qa/cdp.mjs), port 9333, isolated profile
 
 ## Protocol gaps (honest record)
