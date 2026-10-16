@@ -5,6 +5,7 @@ import { useEffect, useRef, useState, type MouseEvent } from 'react';
 import { PACES, type PaceName } from '../engine/motion';
 import { createCursorController, type CursorController } from '../layer/controller';
 import { registerCursorHandoff } from '../layer/cursorChannel';
+import { TOUCH_SIZE, createTouchWalker } from '../layer/touchWalker';
 import { Loader } from '../loader/Loader';
 import '../layer/stickman.css';
 import './lab.css';
@@ -65,6 +66,7 @@ export function Lab() {
   const [settings, setSettings] = useState<Settings>({ size: 32, pace: 'hurry', mark: 'ring' });
   const [overPanel, setOverPanel] = useState(false);
   const [replay, setReplay] = useState<Replay | null>(null);
+  const [touch, setTouch] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const markRef = useRef<HTMLDivElement>(null);
   const readoutRef = useRef<HTMLOutputElement>(null);
@@ -75,6 +77,12 @@ export function Lab() {
     const canvas = canvasRef.current;
     const mark = markRef.current;
     if (!canvas || !mark) return;
+    if (touch) {
+      // The lab overrides flags.touchStickman locally; production keeps it false (approved design §5.14).
+      const walker = createTouchWalker(canvas, { size: TOUCH_SIZE });
+      walker.start();
+      return () => walker.stop();
+    }
     const { size, pace } = initial.current;
     const cursor = createCursorController(canvas, mark, { size, pace: PACES[pace] });
     cursor.start();
@@ -97,7 +105,7 @@ export function Lab() {
       cursor.stop();
       cursorRef.current = null;
     };
-  }, []);
+  }, [touch]);
 
   useEffect(() => {
     cursorRef.current?.configure({ size: settings.size, pace: PACES[settings.pace] });
@@ -167,6 +175,13 @@ export function Lab() {
           name={(v) => MARK_LABELS[v]}
           onPick={set('mark')}
         />
+        <Choice
+          label="Touch walker"
+          options={['off', 'on'] as const}
+          value={touch ? 'on' : 'off'}
+          name={(v) => (v === 'on' ? 'On' : 'Off')}
+          onPick={(v) => setTouch(v === 'on')}
+        />
         <div className="lab-row" role="group" aria-label="Replay the loader">
           <span>Loader</span>
           {HERO_DELAYS.map((d) => (
@@ -179,6 +194,7 @@ export function Lab() {
       </div>
 
       {replay && <Loader key={replay.key} ready={replay.ready} onDone={() => setReplay(null)} />}
+      {touch && <div className="lab-scroll" aria-hidden="true" />}
 
       <canvas ref={canvasRef} className="lab-canvas" aria-hidden="true" />
       <div ref={markRef} className={`lab-mark lab-mark--${settings.mark}`} aria-hidden="true" />

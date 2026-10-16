@@ -192,6 +192,11 @@
   color: var(--lab-ivory);
 }
 
+/* With the touch walker on, the lab scrolls (the scene stays fixed) so scroll-walking can be tried. */
+.lab-scroll {
+  height: 400vh;
+}
+
 .lab-readout {
   display: block;
   margin-top: 4px;
