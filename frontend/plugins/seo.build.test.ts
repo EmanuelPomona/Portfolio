@@ -78,3 +78,18 @@ describe('seoPlugin in a vite build', { timeout: 60_000 }, () => {
     );
   });
 });
+
+describe('seoPlugin on pages other than index.html', () => {
+  type Hook = (html: string, ctx: { path: string; filename: string }) => string;
+  const hook = seoPlugin({ site: realSite, links: contact.links }).transformIndexHtml as Hook;
+
+  it('leaves the stickman lab page untouched', () => {
+    const lab = '<!doctype html><html><head><title>Stickman lab</title></head><body></body></html>';
+    expect(hook(lab, { path: '/stickman-lab.html', filename: '/repo/frontend/stickman-lab.html' })).toBe(lab);
+  });
+
+  it('does not fail on another page that has no <title>', () => {
+    const page = '<!doctype html><html><head></head><body></body></html>';
+    expect(hook(page, { path: '/stickman-lab.html', filename: '/repo/frontend/stickman-lab.html' })).toBe(page);
+  });
+});
