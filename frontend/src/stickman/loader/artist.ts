@@ -83,7 +83,7 @@ export function createLoaderArtist(o: ArtistOptions): LoaderArtist {
   let running = false;
   let follow: Follow = startFollow({ x: 0, y: 0 });
   let tip: Vec2 = { x: 0, y: 0 };
-  let dropped: { at: number; feet: Vec2; facing: 1 | -1; tip: Vec2; top: Vec2 } | null = null;
+  let dropped: { at: number; feet: Vec2; facing: 1 | -1; mirror: number; tip: Vec2; top: Vec2 } | null = null;
 
   const measure = () => {
     dpr = Math.min(2, window.devicePixelRatio || 1);
@@ -102,6 +102,8 @@ export function createLoaderArtist(o: ArtistOptions): LoaderArtist {
   };
 
   const facingOf = (f: Follow): 1 | -1 => (f.swing >= 0 ? 1 : -1);
+  /** The paper figure turns edge-on through the swing; never exactly 0 (a degenerate transform). */
+  const mirrorOf = (f: Follow): number => facingOf(f) * Math.max(0.02, Math.abs(f.swing));
 
   function drawSegment(points: Vec2[]) {
     if (!sctx || points.length === 0) return;
@@ -132,7 +134,7 @@ export function createLoaderArtist(o: ArtistOptions): LoaderArtist {
     const top = { x: dropped.tip.x - Math.sin(lean) * len, y: dropped.tip.y - Math.cos(lean) * len };
     fctx.save();
     fctx.translate(dropped.feet.x, dropped.feet.y);
-    fctx.scale(k * dropped.facing, k);
+    fctx.scale(k * dropped.mirror, k);
     fctx.globalAlpha = u < 0.5 ? 1 : 1 - (u - 0.5) / 0.5;
     fctx.strokeStyle = INK;
     fctx.lineCap = 'round';
@@ -169,6 +171,7 @@ export function createLoaderArtist(o: ArtistOptions): LoaderArtist {
       drawFigure(fctx, pose, dropped ? dropped.feet : feetFor(follow, size), {
         size,
         facing: dropped ? dropped.facing : facingOf(follow),
+        mirror: dropped ? dropped.mirror : mirrorOf(follow),
         lineWidth: lineWidthFor(size),
         color: INK,
         pencil: !dropped,
@@ -194,6 +197,7 @@ export function createLoaderArtist(o: ArtistOptions): LoaderArtist {
           at: env.now(),
           feet: feetFor(follow, size),
           facing: facingOf(follow),
+          mirror: mirrorOf(follow),
           tip: pose.pencil.tip,
           top: pose.pencil.top,
         };

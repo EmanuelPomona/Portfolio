@@ -57,6 +57,12 @@ describe('drawFigure', () => {
     expect(r.calls).toContainEqual(['scale', -0.8, 0.8]);
   });
 
+  it('mirrors continuously by `mirror` when given, so a paper figure can turn edge-on', () => {
+    const r = recorder();
+    drawFigure(r.ctx, pose, { x: 0, y: 0 }, { size: 40, facing: 1, mirror: -0.25, lineWidth: 1.8, color: '#fff' });
+    expect(r.calls).toContainEqual(['scale', -0.25, 1]);
+  });
+
   it('strokes in round caps and joins at lineWidth px regardless of scale', () => {
     const r = recorder();
     drawFigure(r.ctx, pose, { x: 0, y: 0 }, { size: 32, facing: 1, lineWidth: 1.8, color: '#242424' });

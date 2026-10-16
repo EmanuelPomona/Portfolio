@@ -1,5 +1,6 @@
 // Owner: agent/stickman. TASK-203. The loader's canvases, with recording contexts and a manual rAF.
 import { afterEach, describe, expect, it } from 'vitest';
+import { PENCIL_TIP } from '../engine/pose';
 import { recordingContext } from '../testing/recordingContext';
 import { GRAPHITE_PASSES, createLoaderArtist, graphitePassAlpha, type LoaderArtist } from './artist';
 
@@ -92,6 +93,33 @@ describe('createLoaderArtist', () => {
     expect(count(scribbleRec.calls, 'stroke')).toBe(0);
     // letting go twice returns the same place
     expect(a.letGo()).toEqual(feet);
+  });
+
+  it('the pencil tip touches the end of the line, every frame', () => {
+    const { a, scribbleRec, figureRec, frames } = harness();
+    a.start();
+    frames(1);
+    for (let i = 0; i < 40; i++) {
+      scribbleRec.clear();
+      figureRec.clear();
+      frames(1);
+      // end of this frame's stretch of line (first graphite pass has no offset)
+      const strokes = scribbleRec.calls;
+      const firstStroke = strokes.findIndex(([n]) => n === 'stroke');
+      const pass0 = strokes.slice(0, firstStroke).filter(([n]) => n === 'lineTo');
+      const [, lx, ly] = pass0.at(-1)!;
+      // the pencil outline starts with moveTo(PENCIL_TIP), in rig units under
+      // translate(feet) scale(k·mirror, k)
+      const calls = figureRec.calls;
+      const translate = calls.find(([n]) => n === 'translate')!;
+      const scale = calls.find(([n]) => n === 'scale')!;
+      const pencilTip = calls.find(([n, x, y]) => n === 'moveTo' && x === PENCIL_TIP.x && y === PENCIL_TIP.y)!;
+      expect(pencilTip).toBeDefined();
+      const sx = (translate[1] as number) + (pencilTip[1] as number) * (scale[1] as number);
+      const sy = (translate[2] as number) + (pencilTip[2] as number) * (scale[2] as number);
+      expect(sx).toBeCloseTo(lx as number, 6);
+      expect(sy).toBeCloseTo(ly as number, 6);
+    }
   });
 
   it('stop() cancels its frame', () => {

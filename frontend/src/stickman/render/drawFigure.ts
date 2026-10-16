@@ -7,6 +7,11 @@ export interface DrawOptions {
   /** Figure height in CSS px. */
   size: number;
   facing: 1 | -1;
+  /**
+   * Continuous horizontal mirror in [−1, 1], overriding facing for the x scale: a flat figure
+   * turning edge-on. The loader uses it so his planted pencil tip never jumps as he turns.
+   */
+  mirror?: number;
   /** Stroke width in CSS px (see lineWidthFor). */
   lineWidth: number;
   color: string;
@@ -64,7 +69,7 @@ export function drawFigure(
 
   ctx.save();
   ctx.translate(at.x, at.y);
-  ctx.scale(k * opts.facing, k);
+  ctx.scale(k * (opts.mirror ?? opts.facing), k);
   ctx.strokeStyle = opts.color;
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
