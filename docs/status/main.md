@@ -37,4 +37,4 @@ Mode A record archived to `docs/archive/status-main-mode-a.md`.
 - Turn off the Vercel Toolbar for previews (its injected script is blocked by the CSP).
 - Revoke the "Protection Bypass for Automation" secret once review is done.
 - S-02: compare /stickman-lab.html with the spike and record your words; approve or not the touch walker (T-03).
-- main is 47+ commits ahead of origin/main and not pushed; I-03 (CI green on main) needs a push.
+- main is 221 commits ahead of origin/main and not pushed; I-03 (CI green on main) needs a push.
