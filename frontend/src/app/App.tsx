@@ -11,6 +11,7 @@ import { flags } from '../config/flags';
 import { content, type NavItem } from '../content';
 import { useActiveSection } from '../hooks/useActiveSection';
 import { Hero } from '../sections/Hero/Hero';
+import { Projects } from '../sections/Projects/Projects';
 import { Loader, StickmanLayer, loaderMode } from '../stickman';
 
 interface Deferred {
@@ -56,25 +57,7 @@ export function App() {
 
         <Hero site={site} onHeroDecode={heroReady.settleWith} ready={loaderDone} />
 
-        <Section id="projects" heading={label('projects')} backdrop="evergreen">
-          {projects.map((project, i) => (
-            <article key={project.id} id={`project-${project.id}`}>
-              <h3>
-                {String(i + 1).padStart(2, '0')} / {project.title}
-              </h3>
-              <p>{project.sentence}</p>
-              <p>{project.meta.join(' · ')}</p>
-              <a href={project.primary.href} target="_blank" rel="noopener noreferrer">
-                {project.addressBar}
-              </a>
-              {project.secondary.map((link) => (
-                <a key={link.href} href={link.href} target="_blank" rel="noopener noreferrer">
-                  {link.label}
-                </a>
-              ))}
-            </article>
-          ))}
-        </Section>
+        <Projects projects={projects} heading={label('projects')} />
 
         <Section id="about" heading={label('about')} backdrop="evergreen">
           <p>{about.description}</p>
