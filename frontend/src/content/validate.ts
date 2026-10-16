@@ -3,7 +3,7 @@
 //
 // It never throws on bad content: it collects every violation so the owner sees all problems at
 // once. Messages are written for a non-engineer; frontend/src/content/README.md explains each rule.
-import type { Content } from './types';
+import type { Content, Link, LinkKind } from './types';
 
 export type RuleId = 'C-01' | 'C-02' | 'C-03' | 'C-04' | 'C-05' | 'C-06' | 'C-07' | 'C-08' | 'C-09'
   | 'C-10' | 'C-11' | 'C-12' | 'C-13' | 'C-14' | 'C-15' | 'C-16' | 'C-17' | 'C-18' | 'C-19' | 'C-20';
@@ -23,12 +23,28 @@ const SENTENCE_BREAK = /[.!?]\s+[A-Z]/g;
 const PLACEHOLDER = /\b(?:lorem|ipsum|todo|tbd|placeholder)s?\b|\bcoming\s+soon\b/i;
 const KEBAB = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 const TRAILING_PUNCTUATION = /[.,;:!?]$/;
+const MAILTO = /^mailto:[^\s@]+@[^\s@]+$/;
+const REQUIRED_CONTACT_KINDS: readonly LinkKind[] = ['linkedin', 'email', 'github'];
 
 /** Length in characters as a reader counts them (code points, not UTF-16 units). */
 const length = (s: string) => [...s].length;
 
 /** Sentences in `s`, counting breaks before the final character only. */
 const sentenceCount = (s: string) => 1 + (s.slice(0, -1).match(SENTENCE_BREAK)?.length ?? 0);
+
+/** Why `href` is not an allowed link, or null when it is (C-05). */
+function hrefProblem(href: string): string | null {
+  if (href.startsWith('mailto:')) {
+    return MAILTO.test(href) ? null : 'An email link must look like mailto:name@example.com.';
+  }
+  if (!href.startsWith('https://')) return 'Links must start with https:// (or mailto: for email).';
+  try {
+    new URL(href);
+    return null;
+  } catch {
+    return `"${href}" is not a valid web address.`;
+  }
+}
 
 /** Every string anywhere in `value`, with its dotted path. */
 function* strings(value: unknown, path: string): Generator<[path: string, text: string]> {
@@ -100,6 +116,52 @@ export function validateContent(
         add('C-08', `${at}.secondary[${j}].kind`, 'A live site link must be the main link (primary), not a secondary one.');
       }
     });
+  });
+
+  // C-05: every link is https:// or mailto:name@domain.
+  const links: [path: string, link: Link][] = [
+    ...c.site.heroLinks.map((l, i): [string, Link] => [`site.heroLinks[${i}]`, l]),
+    ...c.projects.flatMap((p, i): [string, Link][] => [
+      [`projects[${i}].primary`, p.primary],
+      ...p.secondary.map((l, j): [string, Link] => [`projects[${i}].secondary[${j}]`, l]),
+    ]),
+    ...c.contact.links.map((l, i): [string, Link] => [`contact.links[${i}]`, l]),
+  ];
+  for (const [path, link] of links) {
+    const problem = hrefProblem(link.href);
+    if (problem) add('C-05', `${path}.href`, problem);
+  }
+
+  // C-06: no two links in one project share an href.
+  c.projects.forEach((p, i) => {
+    const seen = new Set([p.primary.href]);
+    p.secondary.forEach((link, j) => {
+      if (seen.has(link.href)) {
+        add('C-06', `projects[${i}].secondary[${j}].href`, `This link repeats another link of the same project (${link.href}). Remove one.`);
+      }
+      seen.add(link.href);
+    });
+  });
+
+  // C-18: contact link kinds are unique and include LinkedIn, Email, and GitHub.
+  const contactKinds = new Set<string>();
+  c.contact.links.forEach((link, i) => {
+    if (contactKinds.has(link.kind)) {
+      add('C-18', `contact.links[${i}].kind`, `There is already a "${link.kind}" contact link. Keep one of each kind.`);
+    }
+    contactKinds.add(link.kind);
+  });
+  const missingKinds = REQUIRED_CONTACT_KINDS.filter((kind) => !contactKinds.has(kind));
+  if (missingKinds.length > 0) {
+    add('C-18', 'contact.links', `The contact links must include ${missingKinds.join(', ')}.`);
+  }
+
+  // C-19: every hero link also appears in the contact links.
+  const contactHrefs = new Set(c.contact.links.map((link) => link.href));
+  c.site.heroLinks.forEach((link, i) => {
+    if (!contactHrefs.has(link.href)) {
+      add('C-19', `site.heroLinks[${i}].href`, `The hero link ${link.href} must also be one of the contact links.`);
+    }
   });
 
   // C-16: the about description is one or two complete sentences and at most 320 characters.
