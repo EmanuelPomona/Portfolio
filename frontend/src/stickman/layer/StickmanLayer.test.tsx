@@ -34,6 +34,11 @@ function liveMedia(initial: Record<string, boolean>) {
   };
 }
 
+const move = () =>
+  act(() => {
+    window.dispatchEvent(new (window.PointerEvent ?? MouseEvent)('pointermove', { clientX: 50, clientY: 50 }));
+  });
+
 const FINE = '(pointer: fine)';
 const COARSE = '(pointer: coarse)';
 const REDUCE = '(prefers-reduced-motion: reduce)';
@@ -59,9 +64,11 @@ afterEach(() => {
 });
 
 describe('StickmanLayer', () => {
-  it('on a fine pointer hides the native cursor and renders an aria-hidden canvas and ring', () => {
+  it('on a fine pointer hides the native cursor once the pointer moves, with an aria-hidden canvas and ring', () => {
     liveMedia({ [FINE]: true });
     const { container } = render(<StickmanLayer touch={false} />);
+    expect(html.classList.contains('stickman-cursor')).toBe(false); // nothing to replace it yet
+    move();
     expect(html.classList.contains('stickman-cursor')).toBe(true);
     const canvas = container.querySelector('canvas.stickman-canvas');
     const ring = container.querySelector('.stickman-ring');
@@ -72,10 +79,12 @@ describe('StickmanLayer', () => {
   it('switches off live when reduced motion turns on, and back on when it turns off', () => {
     const media = liveMedia({ [FINE]: true });
     const { container } = render(<StickmanLayer touch={false} />);
+    move();
     media.set(REDUCE, true);
     expect(html.classList.contains('stickman-cursor')).toBe(false);
     expect(container.querySelector('canvas')).toBeNull();
     media.set(REDUCE, false);
+    move();
     expect(html.classList.contains('stickman-cursor')).toBe(true);
   });
 

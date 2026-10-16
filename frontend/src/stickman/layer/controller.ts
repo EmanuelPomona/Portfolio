@@ -2,8 +2,10 @@
 // (docs/API.md §2.3). React-free so the frame loop never touches React state.
 //
 // Layout reads are bounded: a hovered target's rect is read at most once per frame, and only after
-// a pointermove, scroll, or resize. A scroll re-resolves the element under the ring (it can change
-// without a pointermove). The layer never calls preventDefault or stops propagation.
+// a pointermove, scroll, or resize; the viewport size is cached on resize. A scroll or resize
+// re-resolves the element under the ring (it can change without a pointermove). The native cursor
+// is hidden only once the pointer has moved, so a still pointer is never left with nothing on it.
+// The layer never calls preventDefault or stops propagation.
 import { stepFigure, type Figure } from '../engine/figure';
 import type { GestureState } from '../engine/gestures';
 import { MAX_DT, PACES, type Pace } from '../engine/motion';
@@ -55,6 +57,8 @@ export interface CursorController {
 }
 
 const center = (r: DOMRect): Vec2 => ({ x: r.left + r.width / 2, y: r.top + r.height / 2 });
+/** An element that left the document or is display: none has no box to walk to. */
+const usable = (el: Element, r: DOMRect) => el.isConnected && (r.width > 0 || r.height > 0);
 
 function isFocusVisible(el: Element): boolean {
   try {
@@ -80,7 +84,9 @@ export function createCursorController(
   let pace = opts.pace ?? PACES.hurry;
   const color = opts.color ?? '#fff';
 
-  const anchor = (): Vec2 => ({ x: ANCHOR_INSET, y: window.innerHeight - ANCHOR_INSET });
+  let vw = window.innerWidth;
+  let vh = window.innerHeight;
+  const anchor = (): Vec2 => ({ x: ANCHOR_INSET, y: vh - ANCHOR_INSET });
   let target = anchor();
   let fig: Figure = {
     motion: { pos: { ...target }, speed: 0, facing: 1, phase: 0, idle: 0 },
@@ -93,15 +99,18 @@ export function createCursorController(
   let last = 0;
   let clock = 0;
   let dpr = 1;
+  let dprQuery: MediaQueryList | null = null;
 
-  let pointerSeen = false;
+  /** The true pointer position, once it has moved. */
+  let pointer: Vec2 | null = null;
   let placed = false; // handoff() has placed him; do not drift back to the anchor
+  let lastInput: 'key' | 'pointer' | null = null;
   let hover: Element | null = null;
   let hoverCenter: Vec2 | null = null;
   let focus: Element | null = null;
   let focusCenter: Vec2 | null = null;
   let rectsDirty = false;
-  let scrollDirty = false;
+  let hitTestDirty = false;
   let pressed = false;
 
   const showRing = (on: boolean) => {
@@ -109,17 +118,45 @@ export function createCursorController(
   };
 
   const resize = () => {
+    vw = window.innerWidth;
+    vh = window.innerHeight;
     dpr = Math.min(2, window.devicePixelRatio || 1);
-    canvas.width = Math.round(window.innerWidth * dpr);
-    canvas.height = Math.round(window.innerHeight * dpr);
-    canvas.style.width = `${window.innerWidth}px`;
-    canvas.style.height = `${window.innerHeight}px`;
+    canvas.width = Math.round(vw * dpr);
+    canvas.height = Math.round(vh * dpr);
+    canvas.style.width = `${vw}px`;
+    canvas.style.height = `${vh}px`;
+  };
+
+  // Moving the window to a display with another pixel ratio fires no resize event.
+  const onDprChange = () => {
+    resize();
+    watchDpr();
+  };
+  const watchDpr = () => {
+    dprQuery?.removeEventListener('change', onDprChange);
+    dprQuery = typeof window.matchMedia === 'function' ? window.matchMedia(`(resolution: ${dpr}dppx)`) : null;
+    dprQuery?.addEventListener?.('change', onDprChange);
+  };
+
+  /** Back to the ring after keyboard focus ends; what is under the ring is looked up again. */
+  const releaseFocus = () => {
+    if (!focus) return;
+    focus = null;
+    focusCenter = null;
+    if (pointer) {
+      target = { ...pointer };
+      hitTestDirty = true;
+      rectsDirty = true;
+    }
   };
 
   const onPointerMove = (e: PointerEvent) => {
-    pointerSeen = true;
+    if (!pointer) document.documentElement.classList.add(CURSOR_CLASS);
+    pointer = { x: e.clientX, y: e.clientY };
+    lastInput = 'pointer';
     focus = null;
-    target = { x: e.clientX, y: e.clientY };
+    focusCenter = null;
+    target = { ...pointer };
     ring.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
     showRing(true);
     hover = findTarget(e.target instanceof Element ? e.target : null);
@@ -127,6 +164,7 @@ export function createCursorController(
   };
 
   const onPointerDown = (e: PointerEvent) => {
+    lastInput = 'pointer';
     const hit = findTarget(e.target instanceof Element ? e.target : null);
     if (!hit) return;
     pressed = true;
@@ -136,30 +174,39 @@ export function createCursorController(
     }
   };
 
+  const onKeyDown = () => {
+    lastInput = 'key';
+  };
+
   const onPointerOut = (e: PointerEvent) => {
     if (!e.relatedTarget) showRing(false); // the pointer left the window
   };
 
   const onScroll = () => {
-    scrollDirty = true;
+    hitTestDirty = true;
     rectsDirty = true;
   };
 
   const onResize = () => {
     resize();
+    hitTestDirty = true;
     rectsDirty = true;
-    if (!pointerSeen && !placed) target = anchor();
+    if (!pointer && !placed) target = anchor();
   };
 
   const onFocusIn = (e: FocusEvent) => {
     const el = e.target instanceof Element ? e.target : null;
     const hit = findTarget(el);
-    focus = hit && el && isFocusVisible(el) ? hit : null;
-    if (focus) rectsDirty = true;
+    if (hit && el && isFocusVisible(el) && lastInput !== 'pointer') {
+      focus = hit;
+      rectsDirty = true;
+    } else {
+      releaseFocus();
+    }
   };
 
   const onFocusOut = (e: FocusEvent) => {
-    if (!e.relatedTarget) focus = null;
+    if (!e.relatedTarget) releaseFocus();
   };
 
   const schedule = () => {
@@ -178,20 +225,33 @@ export function createCursorController(
   };
 
   function refreshRects() {
-    if (scrollDirty && pointerSeen && !focus) {
-      hover = findTarget(env.elementFromPoint(target.x, target.y));
+    if (hitTestDirty && pointer && !focus) {
+      hover = findTarget(env.elementFromPoint(pointer.x, pointer.y));
     }
-    scrollDirty = false;
+    hitTestDirty = false;
     if (!rectsDirty) return;
     rectsDirty = false;
-    hoverCenter = hover ? center(hover.getBoundingClientRect()) : null;
+
+    if (hover) {
+      const r = hover.getBoundingClientRect();
+      if (usable(hover, r)) hoverCenter = center(r);
+      else {
+        hover = null;
+        hoverCenter = null;
+      }
+    } else hoverCenter = null;
+
     if (focus) {
       const r = focus.getBoundingClientRect();
+      if (!usable(focus, r)) {
+        releaseFocus();
+        return;
+      }
       focusCenter = center(r);
       const half = size / 2;
       target = {
-        x: Math.min(window.innerWidth - half, Math.max(half, r.left - 0.4 * size)),
-        y: Math.min(window.innerHeight - 4, Math.max(size + 4, r.bottom + 0.3 * size)),
+        x: Math.min(vw - half, Math.max(half, r.left - 0.4 * size)),
+        y: Math.min(vh - 4, Math.max(size + 4, r.bottom + 0.3 * size)),
       };
     } else focusCenter = null;
   }
@@ -211,7 +271,7 @@ export function createCursorController(
     const { motion: s, gestures: g } = fig;
     const angle = pointAt ? pointAngleTo(s, g, size, pointAt) : REST_POINT_ANGLE;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    ctx.clearRect(0, 0, vw, vh);
     drawFigure(ctx, computePose(s, g, angle, clock), s.pos, {
       size,
       facing: s.facing,
@@ -225,6 +285,7 @@ export function createCursorController(
     const m = on ? 'addEventListener' : 'removeEventListener';
     window[m]('pointermove', onPointerMove as EventListener, { passive: true, capture: true });
     window[m]('pointerdown', onPointerDown as EventListener, { passive: true, capture: true });
+    window[m]('keydown', onKeyDown, { passive: true, capture: true });
     document[m]('pointerout', onPointerOut as EventListener, { passive: true });
     window[m]('scroll', onScroll, { passive: true, capture: true });
     window[m]('resize', onResize, { passive: true });
@@ -239,9 +300,10 @@ export function createCursorController(
       ctx = canvas.getContext('2d');
       if (!ctx) return; // no canvas: keep the native cursor
       running = true;
-      document.documentElement.classList.add(CURSOR_CLASS);
-      showRing(pointerSeen);
+      if (pointer) document.documentElement.classList.add(CURSOR_CLASS);
+      showRing(pointer !== null);
       resize();
+      watchDpr();
       listen(true);
       last = env.now();
       if (!document.hidden) schedule();
@@ -252,6 +314,8 @@ export function createCursorController(
       env.cancelRaf(rafId);
       rafId = 0;
       listen(false);
+      dprQuery?.removeEventListener('change', onDprChange);
+      dprQuery = null;
       document.documentElement.classList.remove(CURSOR_CLASS);
       showRing(false);
       ctx?.setTransform(1, 0, 0, 1, 0, 0);
@@ -260,7 +324,7 @@ export function createCursorController(
     handoff(at) {
       placed = true;
       fig = { ...fig, motion: { ...fig.motion, pos: { ...at }, speed: 0, idle: 0 } };
-      if (!pointerSeen) target = { ...at };
+      if (!pointer) target = { ...at };
     },
     configure(o) {
       if (o.size !== undefined) size = o.size;
