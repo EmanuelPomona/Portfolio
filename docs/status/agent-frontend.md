@@ -15,6 +15,7 @@ Last updated: 2026-10-16T13:20:00Z
 - ecc:react-performance @ TASK-102, hero LCP (11:25Z) -> client-only SPA waterfall: React DOM preload() of best hero source (type + imagesrcset/imagesizes, fetchPriority high) called in main.tsx before render; verified 1 request at High priority (preload matched). Re-render risk checked: Hero re-renders only on drift visibility flips + once on ready. Accepted: drift copy = second decoded bitmap of same cached URL.
 - superpowers:systematic-debugging @ TASK-104, X-02 caption contrast failure (12:10Z) -> Phase 1 mapped caption boxes into photo space (dense pine cluster image y22-49% x55-100% lands under plate-1 caption at >=1024; phones pass because photo sits behind heading); hypothesis 1 (mirror backdrop) fixed 1024/1440, exposed 390 heading + 1280 meta residuals; evidence again (dark map of photo) -> change A: mirror only >=64rem; change B: dissolve caption-side edge earlier (36%->70%) + far-edge fade + eased ramp. Result: 0 failures at 9 widths (worst 4.89). Also found + fixed: About backdrop spilling into Contact (max-height 100% + overflow hidden).
 - ecc:make-interfaces-feel-better @ TASK-106 step 3, polish pass (13:40Z) -> measured: 0 'transition: all'/'will-change: all'; 17 interactive targets all >=44px tall and >=8px apart at 390 + 1440; every h1-h3/p/figcaption has text-wrap balance|pretty. Changed: hero name optical offset -0.035em -> -0.015em (ink 57.4 -> 60.0 vs tagline 60.1) 2d528ca; neutral 1px rgb(0 0 0/.1) inset outline on prints 788fb6d; footer rule sized to content width (32c6fb3). Unchanged after check: concentric radius (field not nested at window corner), tabular-nums on meta/footer, font smoothing.
+- ecc:browser-qa @ TASK-106 step 4, on the production build (npm run build && vite preview :3101) (14:20Z) -> smoke: 0 console errors/warnings on primary flow (F-console.txt; Lighthouse cold profile saw favicon.ico 404 = backend TASK-303); Lighthouse mobile perf 90 / a11y 100 / BP 96 / SEO 82, desktop 100/100/100/82, CLS 0 both; axe 4.14 WCAG 2.2 AA: 0 critical, 1 serious = label-content-name-mismatch on the 4 windows (contract-mandated aria-label vs visible URL -> CONTRACT CHANGE REQUEST), color-contrast incomplete over photos (covered by worst-pixel measurement); keyboard: 17 stops in visual order, 2px forest ring each, 100% visible below fixed nav; reduced motion: fade loader, 0 running animations, 0 fogged elements, drift none. Visual baseline: none committed before this run -> these captures ARE the baseline (INCONCLUSIVE as regression, by the skill's rule). Verdict: SHIP WITH FIXES (1 contract issue, 0 frontend blockers).
 
 ## Done
 - [x] Read protocol, routing, tasks 101–106, PRODUCT, DESIGN_BRIEF, DESIGN_CONSTRAINTS, API, ACCEPTANCE, approved spec, wireframes, background photos
@@ -67,6 +68,15 @@ Last updated: 2026-10-16T13:20:00Z
 - Review Focus 5 (about) -> unit: six photos -> six slots, positions 0..4,0, spreads fill 5,1; 120-char caption full; 60-char project title full
 - X-02 (about) -> worst-pixel contrast at 8 widths, 0 failures (lede 5.37+ at stacked widths after fix; 'This semester' ink-2 >= 5.33)
 - Window fixture (local only) -> 2:3 portrait screenshot cropped object-fit cover to 1.600 screen; rest grayscale + glass, attention filter none (F-103-window-fixture-{rest,attention}.png)
+- F-02 -> vite build: JS 238.78 kB / 75.06 kB gzip (<=110), CSS 19.52 kB / 5.31 kB gzip (<=25)
+- F-03 -> Lighthouse CLS 0 (mobile + desktop); layout-shift observer <= 0.0001 in dev
+- X-01 -> Lighthouse accessibility 100 mobile + desktop (F-lighthouse-local-{mobile,desktop}.html); axe 0 critical
+- D-05 -> grep U+2014/U+2013 in frontend/dist (no sourcemaps emitted): none
+- D-03 -> slop-check 7 hits, all brief-justified: window elevation shadow on attention (3), photo alpha masks (4)
+- R-01 -> full-page captures F-01-desktop-1440 (1440x6460), F-02-tablet-768 (768x6671), F-03-mobile-390 (390x5301); scrollWidth == innerWidth each
+- Review Focus 4 -> F-zoom-1280-200pct.png (640 CSS px at DPR 2): stacked, no overlap, no horizontal scroll
+- States -> F-04-state-empty.png (window at rest + empty print), F-05-state-attention.png (both attended)
+- I-02 -> F-console.txt: 0 errors, 0 warnings over load, nav x4, hover 4 windows + 1 print
 - Browser tooling note: chrome-devtools MCP profile locked by another session -> using own headless Chrome via CDP (scratchpad qa/cdp.mjs), port 9333, isolated profile
 
 ## Protocol gaps (honest record)
