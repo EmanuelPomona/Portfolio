@@ -39,6 +39,29 @@ describe('createScribble', () => {
     }
   });
 
+  it('loops like a hand scribbling: the heading turns through at least 3 full turns in 2s', () => {
+    // A wandering Lissajous curve rarely curls back; a scribble keeps circling.
+    for (let seed = 1; seed <= 50; seed++) {
+      const s = createScribble(seed);
+      let turn = 0;
+      let prevHeading: number | null = null;
+      const dt = 0.004;
+      for (let t = 0; t < 2; t += dt) {
+        const a = s(t);
+        const b = s(t + dt);
+        const heading = Math.atan2(b.y - a.y, b.x - a.x);
+        if (prevHeading !== null) {
+          let d = heading - prevHeading;
+          while (d > Math.PI) d -= 2 * Math.PI;
+          while (d < -Math.PI) d += 2 * Math.PI;
+          turn += Math.abs(d);
+        }
+        prevHeading = heading;
+      }
+      expect(turn / (2 * Math.PI)).toBeGreaterThanOrEqual(3);
+    }
+  });
+
   it('fills the square like a ball of loops, not a line: extent over 0.5 on both axes in 10s', () => {
     for (let seed = 1; seed <= 50; seed++) {
       const s = createScribble(seed);
