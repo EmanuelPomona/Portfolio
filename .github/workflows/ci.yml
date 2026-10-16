@@ -17,7 +17,7 @@ jobs:
 
       - name: Handoff schema defined once
         run: |
-          n=$(grep -rl "### Tasks Completed" --include="*.md" . | grep -v docs/archive | wc -l | tr -d ' ')
+          n=$(grep -rl "### Tasks Completed" --include="*.md" . | grep -v -e docs/archive -e docs/handoffs/ | wc -l | tr -d ' ')
           test "$n" -le 1 || { echo "Handoff schema duplicated; AGENT_PROTOCOL section 16 is the only copy."; exit 1; }
 
       - name: No shared handoff or task file
