@@ -1,7 +1,7 @@
 # STATUS: agent/stickman
 Task: TASK-203 in progress (201/202 code-complete; 202 review pending), then TASK-204
 Round: 0
-Last updated: 2026-10-16T13:20:00Z
+Last updated: 2026-10-16T14:05:00Z
 
 ## Skills invoked so far
 - superpowers:test-driven-development @ TASK-201 step 1, before motion.ts -> RED/GREEN per module: motion.test.ts failed on missing module, then 17 pass; same for gestures (8) and pose (21); expectations hand-derived (scratchpad sim of the spike: 800px settles 1.083s, 50px peaks 198 px/s)
@@ -17,7 +17,9 @@ Last updated: 2026-10-16T13:20:00Z
 - ecc:frontend-a11y @ TASK-202, LATE: invoked after implementation as a review, not before (honest record) -> checklist passed, no change; residual risk recorded: hiding the native cursor also hides an OS-enlarged accessibility cursor (no media query exists); within the brief's custom-cursor exception
 - ecc:react-performance @ TASK-202, LATE: invoked after implementation as a review -> loop outside React, useSyncExternalStore primitive snapshot, passive single listeners; measured bundle: JS 74.61 KB gz (+3.76), CSS 3.79 KB gz
 - ecc:browser-qa @ TASK-202, before handoff -> smoke/interaction/a11y-structure on the main page: nav links all activate through the layer; CLS 0.0681 identical with layer on/off (skeleton font swap, frontend F-03); visual regression INCONCLUSIVE (no baseline); axe NOT run (not installed)
-- superpowers:requesting-code-review @ TASK-202, after browser QA -> reviewer dispatched on 765cf18..06da8f4 (result pending)
+- superpowers:requesting-code-review @ TASK-202, after browser QA -> reviewer on 765cf18..06da8f4: "With fixes", 0 critical, 2 important (native cursor hidden before any ring; state machine unpinned: deleting pressed=false passed the suite), 6 minor
+- superpowers:receiving-code-review @ after the TASK-202 review (re-invoked) -> verified each item; fixed 1-6 and 8 (DPR listener, rigToScreen dedupe) in 4016cea + e037194; 7 (no cursor under loader) handled in TASK-203 CSS (cursor: progress); pushed back on the idle-redraw skip (eased values never become exactly equal; no measured problem; S-09 clean at 4x throttle) -> debt. Mutation check: 14/15 controller mutations killed; the survivor is an equivalent mutant after the root-cause fix (target == pointer whenever unfocused)
+- superpowers:systematic-debugging @ TASK-203, loader screenshot looked like the line ended at the pencil top -> reproduced with a per-frame geometry diagnostic (outside the repo): tip vs line end matched except during turns (up to 8px off while swing passed through 0); the 'top' was my misreading at 32px (verified at 160px render). Fix: drawFigure mirror option, the paper figure turns edge-on (291f1a7); test pins tip == line end every frame
 - superpowers:test-driven-development @ TASK-203 stage (re-invoked) -> progress (17 tests), scribble (4; one RED on extent caught a real design weakness -> dominant+loop wave scheme, measured over 1000 seeds), follow (6), Loader (13, RED vs stub: 12 fail)
 - ecc:frontend-design-direction / frontend-design:frontend-design / ui-ux-pro-max:ui-ux-pro-max / design-taste-frontend @ TASK-203, before the Loader view (re-invoked for the loader) -> centered wireframe composition; tokens Ivory/Charcoal/Forest/#4F5552; outline pill (no grey track); tiny % only; one moving thing; ux: aria-busy + progressbar, accelerate-on-leave for the pencil drop
 - ecc:motion-patterns @ TASK-203, exit curve -> paper opacity 450ms cubic-bezier(0.22,1,0.36,1); pencil drop ease-in (gravity) rotating about the tip; fade mode 300ms opacity only (API wins over the skill's 200ms preference)
@@ -40,11 +42,12 @@ Last updated: 2026-10-16T13:20:00Z
 - [x] TASK-202 step 5 browser verification + evidence 2a1f6de
 
 ## In progress
-- [ ] TASK-202: await reviewer (765cf18..06da8f4); act on findings; then verification-before-completion + HANDOFF-1 (201+202) + tasks -> REVIEW
-- [x] TASK-203 progress.ts ed02df6, scribble.ts 4d55458, follow.ts 0015de2
-- [ ] TASK-203 Loader view: Loader.test.tsx written (RED). Next: loader/artist.ts (canvas: graphite never-cleared scribble + figure with pencil + pencil drop), loader.css, Loader.tsx (timers not rAF; finish sets html data-loader=skip). Then lab replay control, evidence F-203-*.
+- [x] TASK-202 review fixes 4016cea, e037194 (verification-before-completion + handoff still to do, together with 203/204 at the end)
+- [x] TASK-203 progress.ts ed02df6, scribble.ts 4d55458, follow.ts 0015de2, artist.ts b80ef99, Loader.tsx + loader.css c491861 (13 Loader tests GREEN, contract 9/9 vs real Loader), tip-on-line fix 291f1a7
+- [ ] TASK-203 NEXT: (1) FADE_MS 300 -> 250 (measured 305ms, L-05 needs <= 300); (2) scribble too sparse at 1.2s (one lazy curve; wireframe = dense ball): faster loop waves (target ~800-1100 px/s, more loops) - prototype variants visually first, keep scribble tests (<0.005/ms, extent > 0.5); (3) L-02 cap at runtime needs a HANGING hero request (Fetch.enable requestPaused, never continue) - blocking makes decode() reject = ready at once; (4) re-run docs/review evidence (F-203-loader*.png, F-203-results.txt exist but uncommitted and stale); (5) lab replay control; (6) then TASK-204
 
 ## Verified
+- TASK-203 runtime (headless, before the density/fade tweaks): L-07 visible 1214ms; exit 455ms; L-03 skip -> exit 15ms, gone 472ms after click; L-04 reload shows no loader (skip); L-06 progressbar Loading/0/100 + live valuenow, main inert + aria-busy, Tab reaches no page link; page released (wheel scroll 392px after loader, was 0 before the fix); L-05 fade mode no canvas/meter, fade measured 305ms (to fix)
 - S-01 native cursor hidden, ring centred exactly at pointer (300.5,300.5 -> 300.5,300.5), click 2px inside "Projects" edge -> #projects -> docs/review/F-202-results.txt
 - S-04 point / cheer / sit -> docs/review/F-202-gestures.png; pixel parity incl. point, cheer, sit -> F-201-parity-exact.txt
 - S-05 Tab -> he walks below-left of the focused link and points -> docs/review/F-202-keyboard-focus.png
