@@ -11,7 +11,7 @@ describe('Footer', () => {
     const footer = screen.getByRole('contentinfo');
     expect(footer).toHaveTextContent('© 2026 Emanuel Ling');
     expect(footer).toHaveTextContent('Updated October 2026');
-    expect(footer.textContent).not.toMatch(/[—·]/); // no em dash, no dot-joined strip
+    expect(footer.textContent).not.toMatch(/[\u2014\u00b7]/); // no em dash, no dot-joined strip
   });
 
   it('leaves out the updated line rather than print a broken date', () => {
