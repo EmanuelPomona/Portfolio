@@ -44,9 +44,14 @@ Last updated: 2026-10-16T17:25:00Z
 - [x] TASK-304 step 1: CSP contract test (9482449 red) -> vercel.json (21d0f69 green); hashes computed independently with openssl from built index.html; mutation: +1 space in gate -> test red; source style hash JYAd9.. != served Wd3nS.. (why we hash the build)
 - [x] Vercel auth OK (whoami: emanuelling27-2425, team-boh-buh, hobby). Created project emanuel-ling (no Git connection: avoids auto prod deploys on push), linked; removed CLI-created .env.local (OIDC token); .gitignore += .vercel only (e5974b3)
 
+- [x] TASK-304 deploy 1 (53cb8e6, clean git-archive export): Vercel assigned the project's FIRST deployment to PRODUCTION (no --prod passed): https://emanuel-ling.vercel.app serves the skeleton. Owner decision pending; nothing deleted.
+- [x] TASK-304 site.origin = https://emanuel-ling.vercel.app (454dc58); deploy 2 = PREVIEW https://emanuel-ling-oh4a2xaqd-team-boh-buh.vercel.app (dpl_6JfxyCWN96hdoo55KoQQiArueHaf), protected by Vercel Authentication
+- [x] B-05 via `vercel curl -- --head`: CSP + nosniff + referrer + permissions on /, immutable on /media and /assets. B-04: favicon/og/robots/sitemap 200. (vercel curl auto-created an automation-bypass secret on the project; never written to repo, redacted from evidence)
+- [x] Console (?loader=1, headless Chrome 155, virtual 8s): gate ran (data-loader=show), boot cover removed, main not inert, 1 JSON-LD not executed; 1 CSP violation (data: font). Lighthouse mobile: Perf 96, A11y 94 (target-size, frontend), BP 92 (2 CSP violations), SEO n/a (robots fetch 302 behind SSO + Vercel preview noindex). Evidence 938f257.
+- [x] CCR-1 (font inlining vs font-src 'self') + CCR-2 (hash served style) written to docs/handoffs/agent-backend.md; fix for CCR-1 verified locally, NOT committed (vite.config.ts is manager-owned); TASK-304 -> BLOCKED blocked_on: contract
+
 ## In progress
-- [ ] TASK-304 step 3: preview deploy from a clean `git archive HEAD` export (no untracked/ignored local files uploaded); then set site.origin, redeploy, verify
-- [ ] FINDING for TASK-304: Vite MINIFIES the inline boot-cover <style> in dist/index.html (source text != served text) -> a CSP hash computed from source index.html (as TASK-304 specifies) would not match the served style. Gate <script> survives verbatim. Must resolve in TASK-304 (hash what is served, or contract change request).
+- [ ] Pre-handoff: requesting-code-review over 301-304, fix findings, full verification, verification-before-completion, HANDOFF-1, push
 - [ ] TASK-301: code review + verification deferred to the combined pre-handoff pass (status stays IN_PROGRESS until then)
 
 ## Verified
@@ -56,4 +61,4 @@ Last updated: 2026-10-16T17:25:00Z
 - Hero AVIF 1600w = 75,638 bytes (budget 250 KB)
 
 ## Blocked on
-- nothing
+- TASK-304 zero-CSP-violation criterion: CCR-1 (manager: vite.config.ts assetsInlineLimit for fonts, or alternative). Toolbar violation on previews needs an OWNER setting (Vercel Toolbar off for previews).
