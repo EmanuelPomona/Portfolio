@@ -1,10 +1,15 @@
 // Owner: agent/frontend.
-// WALKING SKELETON from the manager scaffold: unstyled, semantic, real content. agent/frontend
-// replaces everything here EXCEPT the mount contract (docs/API.md §2.5): StickmanLayer always
-// mounted, Loader mounted until onDone, <main> inert while the loader is up.
+// The page. Keeps the mount contract (docs/API.md §2.5): StickmanLayer always mounted, Loader
+// mounted until onDone, <main> inert and aria-busy while the loader is up, and `ready` created
+// once from the same hero source the hero renders.
+// TASK-101: shell, nav, and sections. Section contents are still the scaffold's plain markup;
+// TASK-102 to TASK-106 replace them.
 import { useMemo, useState } from 'react';
+import { Nav } from '../components/Nav/Nav';
+import { Section } from '../components/Section/Section';
 import { flags } from '../config/flags';
 import { content, getMedia } from '../content';
+import { useActiveSection } from '../hooks/useActiveSection';
 import { Loader, StickmanLayer, loaderMode } from '../stickman';
 
 function decodeImage(src: string): Promise<unknown> {
@@ -17,21 +22,18 @@ export function App() {
   const { site, projects, about, contact } = content;
   const heroReady = useMemo(() => decodeImage(getMedia(site.heroImage).fallback.src), [site.heroImage]);
   const [loaderDone, setLoaderDone] = useState(() => loaderMode() === 'skip');
+  const sectionIds = site.nav.map((item) => item.id);
+  const active = useActiveSection(sectionIds);
+  const label = (id: string) => site.nav.find((item) => item.id === id)?.label ?? id;
 
   return (
     <>
       <StickmanLayer touch={flags.touchStickman} />
       {!loaderDone && <Loader ready={heroReady} onDone={() => setLoaderDone(true)} />}
       <main aria-busy={!loaderDone} inert={!loaderDone}>
-        <nav aria-label="Sections">
-          {site.nav.map((item) => (
-            <a key={item.id} href={`#${item.id}`}>
-              {item.label}
-            </a>
-          ))}
-        </nav>
+        <Nav items={site.nav} active={active} />
 
-        <section id="home">
+        <Section id="home">
           <h1>{site.name}</h1>
           <p>{site.tagline}</p>
           <ul>
@@ -41,10 +43,9 @@ export function App() {
               </li>
             ))}
           </ul>
-        </section>
+        </Section>
 
-        <section id="projects">
-          <h2>Projects</h2>
+        <Section id="projects" heading={label('projects')} backdrop="evergreen">
           {projects.map((project, i) => (
             <article key={project.id} id={`project-${project.id}`}>
               <h3>
@@ -52,20 +53,19 @@ export function App() {
               </h3>
               <p>{project.sentence}</p>
               <p>{project.meta.join(' · ')}</p>
-              <a href={project.primary.href} target="_blank" rel="noreferrer">
+              <a href={project.primary.href} target="_blank" rel="noopener noreferrer">
                 {project.addressBar}
               </a>
               {project.secondary.map((link) => (
-                <a key={link.href} href={link.href} target="_blank" rel="noreferrer">
+                <a key={link.href} href={link.href} target="_blank" rel="noopener noreferrer">
                   {link.label}
                 </a>
               ))}
             </article>
           ))}
-        </section>
+        </Section>
 
-        <section id="about">
-          <h2>About</h2>
+        <Section id="about" heading={label('about')} backdrop="evergreen">
           <p>{about.description}</p>
           <h3>{about.classes.label}</h3>
           <ul>
@@ -73,10 +73,9 @@ export function App() {
               <li key={item}>{item}</li>
             ))}
           </ul>
-        </section>
+        </Section>
 
-        <section id="contact">
-          <h2>Contact</h2>
+        <Section id="contact" heading={label('contact')}>
           <ul>
             {contact.links.map((link) => (
               <li key={link.kind}>
@@ -84,7 +83,7 @@ export function App() {
               </li>
             ))}
           </ul>
-        </section>
+        </Section>
       </main>
     </>
   );
