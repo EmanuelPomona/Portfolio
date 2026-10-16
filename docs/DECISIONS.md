@@ -12,6 +12,9 @@ Superseded decisions stay here and link their replacement.
 | ADR-005 | Generated media is committed, produced by a deterministic pipeline | accepted | 2026-10-16 |
 | ADR-006 | Touch walker ships behind a flag that stays off until the owner approves | accepted | 2026-10-16 |
 | ADR-007 | Reviewer runs on Opus for this project | accepted | 2026-10-16 |
+| ADR-008 | The CSP is computed over the served build, and fonts are never inlined | accepted | 2026-10-16 |
+| ADR-009 | Only content-hashed URLs are `immutable`; `/media` revalidates | accepted | 2026-10-16 |
+| ADR-010 | A project window is named by what it shows, and is black until attended | accepted | 2026-10-16 |
 
 ---
 
@@ -301,3 +304,103 @@ unchanged; the override is per launch.
 
 - **Positive:** a stronger gate on distinctiveness and feel.
 - **Negative:** higher review cost per round.
+
+## ADR-008: The CSP is computed over the served build, and fonts are never inlined
+
+**Date:** 2026-10-16. **Status:** accepted. **Deciders:** manager, at integration round 1. Resolves
+backend CCR-1 and CCR-2.
+
+### Context
+
+The production CSP is strict: `font-src 'self'`, with the inline gate script and boot style allowed
+only by hash (TASK-304). Two build behaviours broke the assumption that the source matches what is
+served. Vite inlines any asset under 4 KB as a `data:` URI, so a small font subset became
+`data:font/woff2`, which `font-src 'self'` blocks on every load. Vite also minifies the inline boot
+`<style>`, so its served hash differs from its source hash. Browsers hash what they receive.
+
+### Decision
+
+`frontend/vite.config.ts` never inlines font files (`build.assetsInlineLimit` returns `false` for
+`.woff2?/.ttf/.otf`). The CSP hashes are of the **built** `index.html` inline blocks. The contract
+test builds the site and hashes those, and also asserts the built gate script equals the source gate.
+
+### Alternatives considered
+
+- **Latin-only font imports (frontend).** Frontend already did this, so the immediate trigger is gone.
+  Not sufficient alone: any future small subset or icon font would silently re-break the CSP.
+- **`font-src 'self' data:`.** One line, but it loosens the policy to fix a build quirk.
+- **Hash the source blocks, as TASK-304 first said.** It would pass a source-only test and block the
+  boot cover in production, so the loader would flash.
+
+### Consequences
+
+- **Positive:** the CSP stays exactly as specified. The test fails if anyone edits the inline blocks
+  without updating `vercel.json`.
+- **Negative:** each font file costs one request instead of being inlined in the CSS.
+- **Risk:** a Vite upgrade that changes minification changes the style hash. The contract test names
+  the mismatch.
+
+## ADR-009: Only content-hashed URLs are `immutable`; `/media` revalidates
+
+**Date:** 2026-10-16. **Status:** accepted. **Deciders:** manager, at integration round 1. Resolves
+backend CCR-3.
+
+### Context
+
+TASK-304 served `/media/(.*)` with `public, max-age=31536000, immutable`. Media renditions are named
+`<id>-<w>.<ext>`, from the source path and width only. The owner will replace screenshots and photos
+(the owner guide tells them how), and a replacement of the same width keeps the same URL. Any browser
+holding the old file would keep showing it for up to a year. Vercel purges its CDN on deploy; browser
+caches are not purged.
+
+### Decision
+
+`/assets/(.*)` (Vite content-hashes these) stays `immutable`. `/media/(.*)` is served
+`public, max-age=0, must-revalidate`, so a repeat visit revalidates with the ETag and gets a 304 when
+nothing changed. API.md §3 naming is unchanged.
+
+### Alternatives considered
+
+- **Content hashes in rendition names (`<id>-<w>.<hash8>.<ext>`).**
+  - Pros: true immutability.
+  - Cons: changes API.md §3, `media.mjs` and its tests, and every hard-coded rendition path (the lab
+    page).
+  - Why not: more change than a one-page site with a handful of images needs right now.
+- **Keep `immutable`.** Rejected: the owner's own browser would show stale screenshots.
+
+### Consequences
+
+- **Positive:** a replaced photo appears on the next visit.
+- **Negative:** repeat visits make one conditional request per image (a 304, no body).
+- **Revisit** if image count or repeat traffic grows: switch to hashed names then.
+
+## ADR-010: A project window is named by what it shows, and is black until attended
+
+**Date:** 2026-10-16. **Status:** accepted. **Deciders:** manager, at integration round 1. Resolves
+the frontend CCR (TASK-103, W-05) and the frontend question on W-03.
+
+### Context
+
+The window link's accessible name was "<title>, <primary.label>". The only visible text inside the
+link is the address bar, so the name did not contain the visible label: WCAG 2.5.3 Label in Name, Level
+A. axe reports `label-content-name-mismatch` (serious) on all four windows. Separately, W-03 said an
+empty window shows "a flat fog-tone screen", while the brief and the owner ("black until you hover")
+say a window is dark at rest.
+
+### Decision
+
+- The accessible name is "<title>, <primary.label>, <addressBar>", for example
+  "SagePlan, Live site, sageplan.vercel.app".
+- An empty window is near-black at rest with "screenshot soon", and lifts to the flat fog-tone panel
+  on attention. This confirms what frontend built.
+
+### Alternatives considered
+
+- **Keep the name and drop `aria-label`, letting the content name the link.** The name would become
+  just the URL, losing the project title for screen-reader users.
+- **Fog panel at rest.** Removes the owner's "black until you hover" from every v1 window.
+
+### Consequences
+
+- **Positive:** the four primary links pass Label in Name. W-03 now matches the brief and the owner.
+- **Negative:** the screen-reader name is longer by the address.
