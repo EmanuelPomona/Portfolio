@@ -1,7 +1,7 @@
 # STATUS: agent/frontend
-Task: TASK-103 (101, 102 implemented + verified; then 104, 105 → 106)
+Task: TASK-105 (101–104 implemented + verified; then 106)
 Round: 0
-Last updated: 2026-10-16T11:32:00Z
+Last updated: 2026-10-16T12:35:00Z
 
 ## Skills invoked so far
 - ecc:frontend-design-direction @ TASK-101 step 1 (2026-10-16T10:16Z) -> direction: purpose = name→4 live project links in one scroll; tone = editorial/calm plate book, mostly fog; memorable detail = stickman (slice) + color-earned-by-attention (mine); scan order name→italic titles→sentence→links. Deliberate departure: skill's 'avoid one-hue palette' overridden by brief (monochrome is the point; content supplies color on attention). Constraint: stable dimensions for windows (fixed 16:10 screen), long titles wrap.
@@ -13,6 +13,7 @@ Last updated: 2026-10-16T11:32:00Z
 - ecc:frontend-a11y @ TASK-101 step 5, before Nav/Section (10:48Z) -> nav[aria-label=Sections] with real anchors, aria-current="true" (contract value), section aria-labelledby its h2, backdrop alt="" + aria-hidden wrapper, nav kept inside <main> so inert covers it during loader (L-06).
 - vercel:react-best-practices @ TASK-101 after TSX edits (10:57Z) -> moved useActiveSection into ActiveNav leaf (rerender-defer-reads: section change no longer re-renders the page); ternary for optional heading (rendering-conditional-render). Passive listeners + functional setState + primitive deps already satisfied. Resource hints deferred to TASK-102 (hero LCP).
 - ecc:react-performance @ TASK-102, hero LCP (11:25Z) -> client-only SPA waterfall: React DOM preload() of best hero source (type + imagesrcset/imagesizes, fetchPriority high) called in main.tsx before render; verified 1 request at High priority (preload matched). Re-render risk checked: Hero re-renders only on drift visibility flips + once on ready. Accepted: drift copy = second decoded bitmap of same cached URL.
+- superpowers:systematic-debugging @ TASK-104, X-02 caption contrast failure (12:10Z) -> Phase 1 mapped caption boxes into photo space (dense pine cluster image y22-49% x55-100% lands under plate-1 caption at >=1024; phones pass because photo sits behind heading); hypothesis 1 (mirror backdrop) fixed 1024/1440, exposed 390 heading + 1280 meta residuals; evidence again (dark map of photo) -> change A: mirror only >=64rem; change B: dissolve caption-side edge earlier (36%->70%) + far-edge fade + eased ramp. Result: 0 failures at 9 widths (worst 4.89). Also found + fixed: About backdrop spilling into Contact (max-height 100% + overflow hidden).
 
 ## Done
 - [x] Read protocol, routing, tasks 101–106, PRODUCT, DESIGN_BRIEF, DESIGN_CONSTRAINTS, API, ACCEPTANCE, approved spec, wireframes, background photos
@@ -27,9 +28,11 @@ Last updated: 2026-10-16T11:32:00Z
 - [x] TASK-102 Hero TDD (6 tests: h1/tagline/links order, new-tab rel, onHeroDecode once, drift running/paused by IO+visibility, reduced motion paused, copy waits for ready) -> 5e78339
 - [x] TASK-102 App: deferred ready settled by rendered hero img decode (+ handled rejection) -> 05086bc; drift timing/amplitude 5446b67; preload 4932ee6
 - [x] TASK-102 evidence -> docs/review/F-102-hero-{1440,768,390}.png (1d878e9)
+- [x] TASK-103 centerBand TDD (table + edges) cf72019; useMediaQuery refactor 584f3a4; useAttention TDD (6) c4db4f1; BrowserWindow TDD (8) fd04846; evidence e37630e
+- [x] TASK-104 Projects TDD (7 incl. 60-char title, contrast regression guard) 1be2c0d; in page f0e0bf3; contrast fix 5ede66f; backdrop containment e400237; evidence F-104-projects-{1440,1280,1024,768,390}
 
 ## In progress
-- [ ] TASK-103: centerBand (TDD table) -> useAttention (TDD) -> BrowserWindow (TDD) -> CSS -> evidence F-103-window-{rest,attention}
+- [ ] TASK-105: PhotoSlot (TDD) -> About (TDD) -> collage CSS per breakpoint -> reveal/attention -> evidence F-105-about-{1440,768,390} + fixture attention shot (local only)
 - [ ] Final gate for all tasks happens at TASK-106 handoff (browser-qa, requesting-code-review, verification-before-completion); tasks move to REVIEW then
 
 ## Verified
@@ -47,6 +50,14 @@ Last updated: 2026-10-16T11:32:00Z
 - F-03 (hero) -> layout-shift observer: 1440 0.00005, 768 0.0001, 390 0
 - X-02 (hero) -> worst bg pixel under each glyph run (text hidden, sharp sampling): name >= 11.69, tagline >= 9.59, links >= 10.41, dots (#4f5552) >= 5.05 across 390/768/1024/1280/1440
 - Loader contract stub with ?loader=1 -> main released only after hero img complete; boot-cover removed
+- W-02 -> real mouse move at 1440: rest lights rgb(70,71,71) gray, no shadow, screen #161616; attention lights #ff5f57/#febc2e/#28c840, shadow on, screen fog panel #d0d4d2, URL #9aa09d (6.54:1) -> #e3e8e5 (14.0:1); leave -> rest; keyboard Tab focus -> attention (F-103-window-rest.png, F-103-window-attention.png)
+- W-03 -> unit: every shipped project window renders no <img>, 'screenshot soon'
+- W-04 -> unit fixture (evergreen 2:3): <img> present, data-state toggles on hover + focus; CSS: rest grayscale(1) + glass 0.86, attention filter none + glass 0
+- W-05/W-06 -> unit: name 'SagePlan, Live site', target _blank, rel noopener noreferrer; address textContent exact; browser: never truncated at 390/768/1024
+- W-07 -> 390 touch emulation (pointer: coarse true): mid 458/844 -> attention; mid 197 and 718 -> rest; back to center -> attention (F-103-window-touch-center-390.png)
+- Review Focus 5 (window) -> computed aspect-ratio '16 / 10', ratio 1.600 at all widths; .cover object-fit cover
+- W-01/R-02/Review Focus 4 -> CDP at 1440/1280/1024 alternate L,R,L,R; 1023/768/390/640(=1280@200%) stacked window->title->caption; 0 overlaps; scrollWidth == innerWidth everywhere; caption bottom == window bottom at >=1024
+- X-02 (projects) -> worst-pixel contrast, 9 widths, 0 failures, tightest 4.89 (meta over faded edge, 1024)
 - Browser tooling note: chrome-devtools MCP profile locked by another session -> using own headless Chrome via CDP (scratchpad qa/cdp.mjs), port 9333, isolated profile
 
 ## Protocol gaps (honest record)

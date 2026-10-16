@@ -1,7 +1,7 @@
 ---
 id: TASK-105
 title: About section with classes and the scattered photo collage
-status: READY
+status: IN_PROGRESS
 owner: frontend
 branch: agent/frontend
 priority: HIGH
