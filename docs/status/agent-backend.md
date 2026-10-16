@@ -27,13 +27,18 @@ Last updated: 2026-10-16T17:25:00Z
 - [x] TASK-302 step 2: CLI integration tests red (fab889b) -> pipeline green (763e2d5); input-shape tests (6d09165) mutation-checked: removing autoOrient / flatten each turns its test red; toColourspace('srgb') + raw depth were redundant (sharp 0.35 outputs 8-bit sRGB by default for gray/CMYK/rgb16) -> removed, 16-bit test pins it
 - [x] TASK-302 step 3: real run (18f636c): alpine 640/1024/1600/1672, evergreen 640/1024; second run "0 written, manifest unchanged", git status clean; build ok; headless Chrome 155 loads all 18 renditions (onload, natural sizes correct)
 
+- [x] TASK-302 step 4: C-21 media.contract.test.ts (a2296dd): 5 checks (listed 3 + orphaned entry + source width changed), each proven to fail by a real state mutation (new unprocessed image / removed source / missing rendition / resized source / dangling content image), restored, tree clean
+- [x] Owner guide explains C-21 (9e88b05)
+
 ## In progress
-- [ ] TASK-302 step 4: C-21 media.contract.test.ts
+- [ ] TASK-303: head metadata plugin. Next: invoke ecc:seo, TDD renderHead/buildJsonLd
 - [ ] TASK-301: code review + verification deferred to the combined pre-handoff pass (status stays IN_PROGRESS until then)
 
 ## Verified
 - Baseline (pre-change) -> typecheck/lint/test all pass on 3ea91a0
-- B-01 -> `npm run test:contract`: tsc ok, 2 files, 78 passed (69 content + 9 stickman)
+- B-01 -> `npm run test:contract`: tsc ok, 3 files, 83 passed (69 content + 9 stickman + 5 C-21)
+- B-02 -> second real `npm run media`: "0 written, 0 stale removed, manifest unchanged"; `git status` clean; temp-dir add/delete covered by media.test.mjs
+- Hero AVIF 1600w = 75,638 bytes (budget 250 KB)
 
 ## Blocked on
 - nothing
