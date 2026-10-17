@@ -88,6 +88,22 @@
   transition: filter var(--dur-release) var(--ease-out);
 }
 
+/*
+ * A recording (ADR-012, W-08): letterboxed whole with `contain` on the screen's black, since
+ * recordings are rarely 16:10, never stretched or cut. It wears the same glass as a screenshot:
+ * gray under the near-black glass at rest, color on attention. It plays only while attended
+ * (BrowserWindow); its start and stop add no motion of their own.
+ */
+.video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: var(--color-screen-off);
+  filter: grayscale(1);
+  transition: filter var(--dur-release) var(--ease-out);
+}
+
 /* A recording's poster, shown as a still when the recording cannot load: framed like the video. */
 .contain {
   display: block;
@@ -126,6 +142,8 @@
 .window[data-state='attention'] .screen,
 .window[data-state='attention'] .screen::after,
 .window[data-state='attention'] .cover,
+.window[data-state='attention'] .video,
+.window[data-state='attention'] .contain,
 .window[data-state='attention'] .empty {
   transition-duration: var(--dur-attend);
 }
@@ -157,6 +175,11 @@
 }
 
 .window[data-state='attention'] .cover {
+  filter: none;
+}
+
+.window[data-state='attention'] .video,
+.window[data-state='attention'] .contain {
   filter: none;
 }
 

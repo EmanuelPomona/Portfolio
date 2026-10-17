@@ -294,4 +294,18 @@ describe('BrowserWindow with a recording (W-08, ADR-012)', () => {
     expect(names).toEqual(['SagePlan, Live site, sageplan.vercel.app', 'SagePlan, Live site, sageplan.vercel.app']);
     still.unmount();
   });
+
+  it('fits the recording with contain on black', () => {
+    // Recordings are rarely 16:10: letterboxed whole on the screen's black, never stretched or cut.
+    const video = rule('.video');
+    expect(video).toMatch(/object-fit:\s*contain/);
+    expect(video).toMatch(/width:\s*100%/);
+    expect(video).toMatch(/height:\s*100%/);
+    expect(video).toMatch(/background(-color)?:\s*var\(--color-screen-off\)/);
+    expect(rule('.screen')).toMatch(/background:\s*var\(--color-screen-off\)/);
+    // The same glass as a screenshot (W-04): gray at rest, color on attention; the still fallback too.
+    expect(video).toMatch(/filter:\s*grayscale\(1\)/);
+    expect(rule('.contain')).toMatch(/object-fit:\s*contain/);
+    expect(css).toMatch(/\.window\[data-state='attention'\] \.video,\s*\.window\[data-state='attention'\] \.contain\s*\{[^}]*filter:\s*none/);
+  });
 });
