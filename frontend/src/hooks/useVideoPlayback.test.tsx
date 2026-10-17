@@ -52,6 +52,28 @@ describe('useVideoPlayback', () => {
     expect(play).toHaveBeenCalledTimes(2);
   });
 
+  it('with metadata already loaded, the first play seeks once and adds no re-seek', () => {
+    const { rerender } = render(<Player wanted={false} startAt={11.989} />);
+    const video = screen.getByTestId('video') as HTMLVideoElement;
+    const state = instrument(video, 1); // HAVE_METADATA
+    rerender(<Player wanted startAt={11.989} />);
+    expect(state.seeks).toEqual([11.989]);
+    state.time = 0;
+    video.dispatchEvent(new Event('loadedmetadata'));
+    expect(state.seeks).toEqual([11.989]);
+  });
+
+  it('leaves alone a start position the engine already applied', () => {
+    const { rerender } = render(<Player wanted={false} startAt={11.989} />);
+    const video = screen.getByTestId('video') as HTMLVideoElement;
+    const state = instrument(video, 0); // HAVE_NOTHING: the seek is a stored start position
+    rerender(<Player wanted startAt={11.989} />);
+    expect(state.seeks).toEqual([11.989]);
+    // The engine honored it: currentTime already reads 11.989 when the metadata arrives.
+    video.dispatchEvent(new Event('loadedmetadata'));
+    expect(state.seeks).toEqual([11.989]);
+  });
+
   it('a seek the engine refuses never breaks playback', () => {
     // Older WebKit threw InvalidStateError for a seek before metadata. Thrown from an effect, that
     // would unmount the page on hover; the poster simply stays where it was instead.
