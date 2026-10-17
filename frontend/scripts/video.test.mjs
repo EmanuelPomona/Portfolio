@@ -30,7 +30,7 @@ async function workspace() {
     out: path.join(root, 'public', 'media', 'video'),
     posters: path.join(root, 'media-src', 'projects'),
     run: () =>
-      execFileAsync('swift', [SCRIPT, '--src', ws.src, '--out', ws.out, '--posters', ws.posters], {
+      execFileAsync('swift', ['-suppress-warnings', SCRIPT, '--src', ws.src, '--out', ws.out, '--posters', ws.posters], {
         maxBuffer: 1 << 20,
       }),
     files: async () => [
@@ -186,5 +186,96 @@ describe.skipIf(process.platform !== 'darwin')('npm run video (macOS AVFoundatio
     expect(failure).toMatchObject({ code: 1 });
     expect(failure.stderr).toContain('media-src/video/Demo_App.mov: name must be lowercase kebab-case');
     expect(await ws.files()).toEqual([]);
+  });
+
+  it('crops the sides with cropLeft and cropRight', async () => {
+    const ws = await workspace();
+    await addRecording(ws, 'demo-app', { ...SETTINGS, cropLeft: 10, cropRight: 10 });
+
+    await ws.run();
+
+    expect(mp4Info(await readFile(path.join(ws.out, 'demo-app.mp4'))).sizes).toEqual([[1250, 954]]);
+    expect((await sharp(path.join(ws.posters, 'demo-app.png')).metadata()).width).toBe(1250);
+  });
+
+  it('fails when the cropped width is odd, pointing at cropRight', async () => {
+    const ws = await workspace();
+    await addRecording(ws, 'demo-app', { ...SETTINGS, cropRight: 1 });
+
+    const failure = await ws.run().then(() => null, (error) => error);
+
+    expect(failure).toMatchObject({ code: 1 });
+    expect(failure.stderr).toContain('1269');
+    expect(failure.stderr).toContain('cropRight');
+    expect(await ws.files()).toEqual([]);
+  });
+
+  it('fails on a negative crop', async () => {
+    const ws = await workspace();
+    await addRecording(ws, 'demo-app', { ...SETTINGS, cropTop: -1 });
+
+    const failure = await ws.run().then(() => null, (error) => error);
+
+    expect(failure).toMatchObject({ code: 1 });
+    expect(failure.stderr).toContain('media-src/video/demo-app.mov');
+    expect(await ws.files()).toEqual([]);
+  });
+
+  it('fails when posterSeconds is past the end of the recording', async () => {
+    const ws = await workspace();
+    await addRecording(ws, 'demo-app', { ...SETTINGS, posterSeconds: 99 });
+
+    const failure = await ws.run().then(() => null, (error) => error);
+
+    expect(failure).toMatchObject({ code: 1 });
+    expect(failure.stderr).toContain('posterSeconds must be between 0 and 33.7');
+    expect(await ws.files()).toEqual([]);
+  });
+
+  it('reports a recording in a format other than .mov', async () => {
+    const ws = await workspace();
+    await writeFile(path.join(ws.src, 'demo-app.gif'), 'GIF89a');
+
+    const failure = await ws.run().then(() => null, (error) => error);
+
+    expect(failure).toMatchObject({ code: 1 });
+    expect(failure.stderr).toContain('media-src/video/demo-app.gif: unsupported file type');
+  });
+
+  it('writes nothing when any one of several recordings fails', async () => {
+    const ws = await workspace();
+    await addRecording(ws, 'demo-app');
+    await addRecording(ws, 'other-app', null);
+
+    const failure = await ws.run().then(() => null, (error) => error);
+
+    expect(failure).toMatchObject({ code: 1 });
+    expect(failure.stderr).toContain('media-src/video/other-app.mov');
+    expect(await ws.files()).toEqual([]);
+  });
+
+  it('removes its partial files when a check after encoding fails', async () => {
+    const ws = await workspace();
+    await addRecording(ws, 'demo-app');
+    // A directory where the temporary poster goes makes the poster write fail after the MP4 is encoded.
+    await mkdir(path.join(ws.posters, '.demo-app.partial.png', 'blocker'), { recursive: true });
+
+    const failure = await ws.run().then(() => null, (error) => error);
+
+    expect(failure).toMatchObject({ code: 1 });
+    expect(failure.stderr).toContain('media-src/video/demo-app.mov');
+    expect((await ws.files()).filter((f) => f.startsWith('out/'))).toEqual([]);
+  });
+
+  it('removes its partial files when moving them into place fails', async () => {
+    const ws = await workspace();
+    await addRecording(ws, 'demo-app');
+    // A non-empty directory at the final MP4 path makes the rename fail.
+    await mkdir(path.join(ws.out, 'demo-app.mp4', 'blocker'), { recursive: true });
+
+    const failure = await ws.run().then(() => null, (error) => error);
+
+    expect(failure).toMatchObject({ code: 1 });
+    expect(await ws.files()).toEqual(['out/demo-app.mp4']);
   });
 });
