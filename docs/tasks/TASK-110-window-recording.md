@@ -1,7 +1,7 @@
 ---
 id: TASK-110
 title: Project windows show screenshots and play recordings while attended
-status: READY
+status: IN_PROGRESS
 owner: frontend
 branch: agent/frontend
 priority: HIGH
