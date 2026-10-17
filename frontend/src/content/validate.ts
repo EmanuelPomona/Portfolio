@@ -1,4 +1,4 @@
-// Owner: agent/backend. Pure validator for the content invariants C-01 to C-20 in docs/DATABASE.md.
+// Owner: agent/backend. Pure validator for the content invariants C-01 to C-20 and C-22 in docs/DATABASE.md.
 // Shapes come from ./types (manager contract); nothing here redeclares them.
 //
 // It never throws on bad content: it collects every violation so the owner sees all problems at
@@ -29,6 +29,8 @@ const REQUIRED_CONTACT_KINDS: readonly LinkKind[] = ['linkedin', 'email', 'githu
 const GENERIC_ALT = /^(?:image|photo|screenshot)[.!]?$/i;
 const PHOTO_ID = /^photo-\d+$/;
 const NAV_ORDER: readonly SectionId[] = ['home', 'projects', 'about', 'contact'];
+const VIDEO_SRC = /^\/media\/video\/[a-z0-9-]+\.mp4$/;
+const MAX_VIDEO_BYTES = 3 * 1024 * 1024;
 
 /** Length in characters as a reader counts them (code points, not UTF-16 units). */
 const length = (s: string) => [...s].length;
@@ -246,6 +248,34 @@ export function validateContent(
     if (!PHOTO_ID.test(ph.id)) add('C-17', `about.photos[${i}].id`, `The photo id "${ph.id}" must look like photo-1, photo-2, and so on.`);
     if (photoIds.has(ph.id)) add('C-17', `about.photos[${i}].id`, `The photo id "${ph.id}" is already used by another photo.`);
     photoIds.add(ph.id);
+  });
+
+  // C-22: a recording has a poster, a /media/video/<name>.mp4 src, a file of at most 3 MB, and a
+  // landscape size in whole pixels. The file clauses need opts.videoSizes (the validator does no I/O);
+  // the Node contract test fills it from frontend/public.
+  c.projects.forEach((p, i) => {
+    const video = p.screen.video;
+    if (!video) return;
+    const at = `projects[${i}].screen`;
+    if (p.screen.image === null) {
+      add('C-22', `${at}.image`, 'A recording needs a poster image: run npm run video, then npm run media, and set image to it.');
+    }
+    if (!VIDEO_SRC.test(video.src)) {
+      add('C-22', `${at}.video.src`, `"${video.src}" must look like /media/video/project-name.mp4 (lowercase, hyphens).`);
+    } else if (opts.videoSizes) {
+      const size = Object.hasOwn(opts.videoSizes, video.src) ? opts.videoSizes[video.src] : undefined;
+      if (size === undefined) {
+        add('C-22', `${at}.video.src`, `There is no file frontend/public${video.src}. Run npm run video.`);
+      } else if (size > MAX_VIDEO_BYTES) {
+        add('C-22', `${at}.video.src`, `frontend/public${video.src} is ${size} bytes; the limit is 3 MB (${MAX_VIDEO_BYTES} bytes). Trim the recording.`);
+      }
+    }
+    const whole = (n: number) => Number.isInteger(n) && n > 0;
+    if (!whole(video.width)) add('C-22', `${at}.video.width`, `The recording width must be a whole number of pixels, like 1270.`);
+    if (!whole(video.height)) add('C-22', `${at}.video.height`, `The recording height must be a whole number of pixels, like 954.`);
+    if (whole(video.width) && whole(video.height) && video.width < video.height) {
+      add('C-22', `${at}.video`, `The recording is ${video.width}x${video.height}; it must be at least as wide as it is tall.`);
+    }
   });
 
   // C-12: the four sections, in order.
