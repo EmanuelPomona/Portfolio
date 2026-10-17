@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { getMedia, site } from '../../content';
 import { REDUCED_MOTION_QUERY } from '../../hooks/usePrefersReducedMotion';
 import { Hero } from '../../sections/Hero/Hero';
+import { installFrames } from '../../test-utils/frames';
 import { installIntersectionObserver, installMatchMedia } from '../../test-utils/media';
 import { Section } from '../Section/Section';
 import { Clouds } from './Clouds';
@@ -109,6 +110,23 @@ describe('Clouds', () => {
     // isolated it, and the photos' dark rocks painted normally: text contrast fell to 1.13:1.
     expect(css).toMatch(/\.clouds\s*\{[^}]*mix-blend-mode:\s*screen/);
     expect(css).not.toMatch(/\.layer\s*\{[^}]*mix-blend-mode/);
+  });
+
+  it('each layer lags the scroll on its own --depth, by translate, apart from its drift', () => {
+    const frames = installFrames();
+    try {
+      const { container } = render(<Clouds section="about" />);
+      frames.flush();
+      const layers = [...container.querySelectorAll<HTMLElement>('[data-drift]')];
+      const depths = layers.map((l) => l.style.getPropertyValue('--depth'));
+      for (const d of depths) expect(d).toMatch(/^-?[\d.]+px$/);
+      // Different factors, so the two layers never move as one sheet.
+      expect(new Set(depths).size).toBe(layers.length);
+      // translate, not transform: the drift keeps transform to itself.
+      expect(css).toMatch(/\.layer\s*\{[^}]*translate:\s*0 var\(--depth/);
+    } finally {
+      frames.restore();
+    }
   });
 
   it('animates transform only, on a cycle of at least 60s', () => {

@@ -6,6 +6,8 @@ import { getMedia, type Link, type Site } from '../../content';
 import { Picture } from '../../components/Picture/Picture';
 import { HERO_PHOTO_SIZES } from '../../components/Picture/sizes';
 import { useDriftPlaying } from '../../hooks/useDriftPlaying';
+import { useScrollDepth } from '../../hooks/useScrollDepth';
+import { DEPTH } from '../../lib/depth';
 import styles from './Hero.module.css';
 
 interface HeroProps {
@@ -51,11 +53,14 @@ function HeroLink({ link }: { readonly link: Link }) {
 export function Hero({ site, onHeroDecode, ready = true }: HeroProps) {
   const [section, setSection] = useState<HTMLElement | null>(null);
   const playing = useDriftPlaying(section);
+  // The photograph lags the scroll a little (TASK-108): the valley reads as farther than the name.
+  const [photoLayer, setPhotoLayer] = useState<HTMLDivElement | null>(null);
+  useScrollDepth(photoLayer, DEPTH.hero);
   const photo = getMedia(site.heroImage);
 
   return (
     <section id="home" ref={setSection} className={styles.hero}>
-      <div className={styles.photo} aria-hidden="true">
+      <div ref={setPhotoLayer} className={styles.photo} aria-hidden="true">
         <Picture media={photo} alt="" sizes={HERO_PHOTO_SIZES} priority className={styles.image} onDecode={onHeroDecode} />
         <div className={styles.drift} data-drift={playing ? 'running' : 'paused'}>
           <Picture media={photo} alt="" sizes={HERO_PHOTO_SIZES} className={styles.image} />

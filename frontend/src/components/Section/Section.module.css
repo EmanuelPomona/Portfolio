@@ -6,6 +6,9 @@
 .section {
   position: relative;
   isolation: isolate;
+  /* Scroll depth and arrivals move layers and plates by up to 80px and 48px (TASK-108): clip them
+     to the section, so nothing spills over a neighbour or widens the page. */
+  overflow: clip;
   /* The Mist ground the clouds screen against inside this isolated group (TASK-107). Same tone as
      the page, so nothing changes where there are no clouds. */
   background: var(--color-mist);
@@ -41,6 +44,8 @@
   max-height: 100%;
   overflow: hidden;
   pointer-events: none;
+  /* Scroll depth (TASK-108): the forest lags the content, so it reads as far away. */
+  translate: 0 var(--depth, 0px);
   /* A section can mirror its photograph (-1) so the dense pines fall behind something opaque
      rather than behind its text. The mask mirrors with it, so the inner edge still dissolves. */
   transform: scaleX(var(--backdrop-flip, 1));
@@ -70,4 +75,10 @@
 .backdrop img {
   width: 100%;
   height: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .backdrop {
+    translate: none;
+  }
 }

@@ -1,5 +1,18 @@
 // Owner: agent/frontend. Scroll depth (TASK-108, M-03): how far a background lags the content.
 
+/**
+ * How much each layer lags the content (0 = moves with it). Farther layers lag more, so the page
+ * reads in depth: the far forest, then the valley photograph, then the clouds, then the plates.
+ * Feel values, tuned in the browser; with the 80px clamp, 0.1 is about the most a viewport-tall
+ * layer can use before it would pin at the clamp while still in view.
+ */
+export const DEPTH = {
+  backdrop: 0.1,
+  hero: 0.08,
+  valleyCloud: 0.06,
+  forestCloud: 0.04,
+} as const;
+
 export interface DepthMeasure {
   /** The element's top in document coordinates (its layout position, without any depth offset). */
   readonly top: number;

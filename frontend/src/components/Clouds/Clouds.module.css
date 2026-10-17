@@ -7,8 +7,8 @@
  *   only lighten what is behind the text: contrast can rise, never fall.
  * - CSS animation, transform only, each stroke 60s or more, alternating (ease-in-out, the hero
  *   drift's curve). Paused off-screen and in a hidden tab; static under reduced motion.
- * - TASK-108 moves the whole .clouds wrapper for scroll depth; the drift stays on the layers, so the
- *   two transforms never fight.
+ * - Scroll depth (TASK-108) moves each layer by `translate`; the drift keeps `transform`, so the
+ *   two never fight.
  */
 .clouds {
   position: absolute;
@@ -32,6 +32,7 @@
     linear-gradient(to right, transparent 0, #000 22%, #000 78%, transparent 100%);
   mask-composite: intersect;
   transform: translate3d(calc(-1 * var(--travel)), 0, 0);
+  translate: 0 var(--depth, 0px);
   animation: cloud-drift var(--drift-duration) ease-in-out var(--delay) infinite alternate;
   animation-play-state: paused;
 }
@@ -93,5 +94,6 @@
 @media (prefers-reduced-motion: reduce) {
   .layer {
     animation: none;
+    translate: none;
   }
 }

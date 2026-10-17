@@ -1,7 +1,10 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { act, cleanup, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { site } from '../../content';
 import { REDUCED_MOTION_QUERY } from '../../hooks/usePrefersReducedMotion';
+import { installFrames } from '../../test-utils/frames';
 import { installIntersectionObserver, installMatchMedia } from '../../test-utils/media';
 import { Hero } from './Hero';
 
@@ -89,6 +92,22 @@ describe('Hero', () => {
     const hero = document.getElementById('home')!;
     act(() => io.intersect(hero, 1));
     expect(hero.querySelector('[data-drift]')).toHaveAttribute('data-drift', 'paused');
+  });
+
+  it('lets the photograph lag the scroll (--depth) with room above, so its top edge never shows', () => {
+    const frames = installFrames();
+    try {
+      const { container } = render(<Hero site={site} onHeroDecode={() => {}} />);
+      frames.flush();
+      const photo = container.querySelector('#home img')!.closest('[aria-hidden="true"]') as HTMLElement;
+      expect(photo.style.getPropertyValue('--depth')).toMatch(/^-?[\d.]+px$/);
+      const css = readFileSync(join(__dirname, 'Hero.module.css'), 'utf8');
+      const rule = css.match(/\.photo\s*\{([^}]*)\}/)![1]!;
+      expect(rule).toMatch(/translate:\s*0 var\(--depth/);
+      expect(rule).toMatch(/inset:\s*-\d+px 0 0/);
+    } finally {
+      frames.restore();
+    }
   });
 
   it('holds the copy in the fog until ready, then clears it', () => {

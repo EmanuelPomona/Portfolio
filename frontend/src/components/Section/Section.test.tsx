@@ -1,6 +1,11 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
+import { installFrames } from '../../test-utils/frames';
 import { Section } from './Section';
+
+const css = readFileSync(join(__dirname, 'Section.module.css'), 'utf8');
 
 describe('Section', () => {
   afterEach(cleanup);
@@ -24,6 +29,25 @@ describe('Section', () => {
       </Section>,
     );
     expect(screen.queryByRole('heading')).toBeNull();
+  });
+
+  it('lets the backdrop lag the scroll by translate (--depth), clipped to its own section', () => {
+    const frames = installFrames();
+    try {
+      const { container } = render(
+        <Section id="about" heading="About" backdrop="evergreen">
+          <p>body</p>
+        </Section>,
+      );
+      frames.flush();
+      const backdrop = container.querySelector('img')!.closest('[aria-hidden="true"]') as HTMLElement;
+      expect(backdrop.style.getPropertyValue('--depth')).toMatch(/^-?[\d.]+px$/);
+      expect(css).toMatch(/\.backdrop\s*\{[^}]*translate:\s*0 var\(--depth/);
+      // Offsets and arrivals never spill into the next section or widen the page.
+      expect(css).toMatch(/\.section\s*\{[^}]*overflow:\s*clip/);
+    } finally {
+      frames.restore();
+    }
   });
 
   it('paints the evergreen backdrop as a decorative image hidden from assistive tech', () => {

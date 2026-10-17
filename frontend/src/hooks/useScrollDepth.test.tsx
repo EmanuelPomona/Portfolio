@@ -1,6 +1,7 @@
 import { act, cleanup, render, screen } from '@testing-library/react';
 import { useState } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { installFrames } from '../test-utils/frames';
 import { installMatchMedia } from '../test-utils/media';
 import { REDUCED_MOTION_QUERY } from './usePrefersReducedMotion';
 import { useScrollDepth } from './useScrollDepth';
@@ -9,30 +10,6 @@ function Layer({ id, factor = 0.1 }: { readonly id: string; readonly factor?: nu
   const [el, setEl] = useState<HTMLDivElement | null>(null);
   useScrollDepth(el, factor);
   return <div ref={setEl} data-testid={id} />;
-}
-
-/** A requestAnimationFrame the test flushes by hand. */
-function installFrames() {
-  let queue: FrameRequestCallback[] = [];
-  const raf = vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => {
-    queue.push(cb);
-    return queue.length;
-  });
-  const caf = vi.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => {});
-  return {
-    pending: () => queue.length,
-    flush() {
-      const run = queue;
-      queue = [];
-      act(() => {
-        for (const cb of run) cb(0);
-      });
-    },
-    restore() {
-      raf.mockRestore();
-      caf.mockRestore();
-    },
-  };
 }
 
 function setScroll(y: number) {

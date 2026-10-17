@@ -13,7 +13,11 @@
 
 .photo {
   position: absolute;
-  inset: 0;
+  /* 12px of photograph above the frame: the scroll depth (TASK-108) can push the layer down a few
+     px at the very top on phones (svh hero, taller viewport once the URL bar hides), and the band
+     over the hero is clear, so its edge must never show. */
+  inset: -12px 0 0;
+  translate: 0 var(--depth, 0px);
   z-index: -1;
   mask-image: linear-gradient(to bottom, #000 0, #000 70%, transparent 100%);
 }
@@ -69,6 +73,10 @@
 @media (prefers-reduced-motion: reduce) {
   .drift {
     animation: none;
+  }
+
+  .photo {
+    translate: none;
   }
 }
 

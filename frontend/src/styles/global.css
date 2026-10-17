@@ -142,6 +142,16 @@ a:active {
 }
 
 /*
+ * ---- Scroll depth (TASK-108). useScrollDepth writes --depth on a layer itself; the layer's own
+ * rule translates by it. Typed and not inherited, so a write restyles that layer alone.
+ */
+@property --depth {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+
+/*
  * ---- Fog-clear reveal (useFogReveal sets data-revealed). ----
  * data-fog="self": the element itself clears.
  * data-fog="stagger": its direct children clear in sequence, --reveal-stagger apart.

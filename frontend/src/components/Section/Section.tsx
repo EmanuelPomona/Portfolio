@@ -1,7 +1,9 @@
 // Owner: agent/frontend. A page section: its id, optional h2, and optional fog backdrop (TASK-101).
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { getMedia, site, type SectionId } from '../../content';
 import { useFogReveal } from '../../hooks/useFogReveal';
+import { useScrollDepth } from '../../hooks/useScrollDepth';
+import { DEPTH } from '../../lib/depth';
 import { Clouds } from '../Clouds/Clouds';
 import { Picture } from '../Picture/Picture';
 import { SECTION_BACKDROP_SIZES } from '../Picture/sizes';
@@ -21,8 +23,10 @@ interface SectionProps {
 }
 
 function EvergreenBackdrop() {
+  const [layer, setLayer] = useState<HTMLDivElement | null>(null);
+  useScrollDepth(layer, DEPTH.backdrop);
   return (
-    <div className={styles.backdrop} aria-hidden="true">
+    <div ref={setLayer} className={styles.backdrop} aria-hidden="true">
       <Picture media={getMedia(site.sectionsImage)} alt="" sizes={SECTION_BACKDROP_SIZES} />
     </div>
   );
