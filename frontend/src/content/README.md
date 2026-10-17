@@ -65,10 +65,14 @@ A few rules to keep in mind while writing. Section 5 lists all of them.
 
 A short screen recording plays in a project's window while someone looks at it, like Snake AI's.
 
-1. Record only the app's window (for example with Shift-Command-5) and keep it short: the encoded
-   file must stay under 3 MB. Snake AI's 34 seconds came to about 0.5 MB.
-2. Save it as `frontend/media-src/video/<project id>.mov`, for example `snake-ai.mov`.
-3. Next to it, create `<project id>.json` with three numbers:
+1. Record the app's window: press Shift-Command-5, choose to record a selected portion, and drag
+   the selection to the window's edges as closely as you can. Keep it short. The encoded file must
+   stay under 3 MB: Snake AI's 34 seconds of a mostly black screen came to about 0.5 MB, but a busy
+   screen (scrolling, a moving map) can reach 3 MB in a few seconds. To shorten a recording, open it
+   in QuickTime Player and use Edit > Trim.
+2. Save it as `frontend/media-src/video/<project id>.mov`, for example `snake-ai.mov`. Only `.mov`
+   is read: export anything else from QuickTime Player with File > Export As.
+3. Next to it, create `<project id>.json`:
 
    ```json
    { "cropTop": 51, "cropBottom": 1, "posterSeconds": 12 }
@@ -77,6 +81,9 @@ A short screen recording plays in a project's window while someone looks at it, 
    - `cropTop`: how many rows of pixels to cut from the top, to remove the recorded window's title
      bar. On a Retina screen it is usually around 50 (Snake AI: 51). Step 5 shows how to check it.
    - `cropBottom`: usually 0. If `npm run video` says the height must be even, change it to 1.
+   - `cropLeft` and `cropRight` (optional, 0 if left out): columns to cut from each side, when the
+     recording shows some desktop beside the window. If `npm run video` says the width must be
+     even, change `cropRight` by 1.
    - `posterSeconds`: the moment shown as a still picture before the recording plays. Pick one
      where the important things are on screen.
 4. Run:
@@ -91,8 +98,10 @@ A short screen recording plays in a project's window while someone looks at it, 
    snake-ai.mov: public/media/video/snake-ai.mp4 (H.264, 1270x954, 33.7s, 485602 bytes, no audio), media-src/projects/snake-ai.png (poster at 11.989s)
    ```
 
-5. Open the poster, `frontend/media-src/projects/<project id>.png`, in Preview. If any of the title
-   bar shows at its top, raise `cropTop` and run `npm run video` again; if the app is cut, lower it.
+5. Open the poster, `frontend/media-src/projects/<project id>.png`, in Preview, and check all four
+   edges. If any of the title bar shows at the top, raise `cropTop`; if desktop shows at a side,
+   raise `cropLeft` or `cropRight`; if the app itself is cut, lower the number. Then run
+   `npm run video` again. If it fails, it writes nothing, so you can fix the settings and retry.
 6. Run `npm run media`. It makes the web-sized copies of the poster.
 7. In `projects.ts`, set that project's `screen`, using the width and height `npm run video` printed:
 
@@ -191,7 +200,7 @@ What each rule means:
 | C-19 | A link in the hero row is not also one of the contact links. |
 | C-20 | Some text contains an unfinished word: lorem, ipsum, todo, tbd, placeholder, or "coming soon" (any capitalization, plurals included). |
 | C-21 | The images and `media.generated.ts` are out of step: an image was added, removed, or replaced without running `npm run media`, or a generated file is missing. Run `npm run media` and commit everything it changes. |
-| C-22 | A project recording has no poster `image`, its `src` is not `/media/video/<name>.mp4`, the file is missing or over 3 MB, or its `width` and `height` are not whole numbers with the width at least the height. Run `npm run video` and copy the size it prints. |
+| C-22 | A project recording has no poster `image`, its `src` is not `/media/video/<name>.mp4`, the file is missing or over 3 MB, or its `width` and `height` are not whole numbers with the width at least the height (or differ from the file's real size). Run `npm run video` and copy the size it prints. An encoded recording that no project uses is reported too: delete it. |
 
 **Known false alarms for C-20.** It checks whole words in every piece of text, links
 included, so an honest use of those words is flagged too: "my todos", or a repository named
