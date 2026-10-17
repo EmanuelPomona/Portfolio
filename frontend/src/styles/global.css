@@ -260,6 +260,11 @@ a:active {
 [data-fog='stagger'] > :focus-within {
   opacity: 1 !important;
   filter: none !important;
+}
+
+/* Only arrivals travel, so only arrivals have their translate taken over. */
+:where([data-arrive])[data-fog='self']:focus-within,
+:where([data-arrive])[data-fog='stagger'] > :focus-within {
   translate: none !important;
 }
 
@@ -267,8 +272,12 @@ a:active {
   [data-fog],
   [data-fog] > * {
     opacity: 1 !important;
-    translate: none !important;
     animation: none !important;
+  }
+
+  :where([data-arrive])[data-fog],
+  :where([data-arrive])[data-fog] > * {
+    translate: none !important;
   }
 
   *,
@@ -282,7 +291,11 @@ a:active {
   [data-fog],
   [data-fog] > * {
     opacity: 1 !important;
-    translate: none !important;
     animation: none !important;
+  }
+
+  :where([data-arrive])[data-fog],
+  :where([data-arrive])[data-fog] > * {
+    translate: none !important;
   }
 }

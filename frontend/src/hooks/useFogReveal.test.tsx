@@ -136,12 +136,25 @@ describe('useFogReveal', () => {
     // M-04: the hero copy clears right after the loader, and a keyboard user can tab into it
     // mid-animation (measured at 0.93 opacity). Important declarations outrank the animation, and
     // leaving `animation` itself alone means nothing replays when focus moves on.
-    const rule = globalCss.match(/\[data-fog='stagger'\] > :focus-within[^{]*\{([^}]*)\}/)?.[1] ?? '';
+    const rule = globalCss.match(/\n\[data-fog='stagger'\] > :focus-within[^{]*\{([^}]*)\}/)?.[1] ?? '';
     expect(rule).toMatch(/opacity:\s*1 !important/);
     expect(rule).toMatch(/filter:\s*none !important/);
-    expect(rule).toMatch(/translate:\s*none !important/);
     expect(rule).not.toMatch(/animation/);
     expect(globalCss).toMatch(/\[data-fog='self'\]:focus-within/);
+    // Only arrivals travel, so only arrivals have their translate taken over.
+    expect(rule).not.toMatch(/translate/);
+    const travel = globalCss.match(/:where\(\[data-arrive\]\)\[data-fog='stagger'\] > :focus-within[^{]*\{([^}]*)\}/)?.[1] ?? '';
+    expect(travel).toMatch(/translate:\s*none !important/);
+  });
+
+  it('reduced motion and print take over translate on arrivals only', () => {
+    for (const media of ['@media \\(prefers-reduced-motion: reduce\\)', '@media print']) {
+      const block = globalCss.match(new RegExp(`${media}\\s*\\{([\\s\\S]*?)\\n\\}`))?.[1] ?? '';
+      const all = block.match(/\[data-fog\],\s*\[data-fog\] > \*\s*\{([^}]*)\}/)?.[1] ?? '';
+      expect(all).toMatch(/animation:\s*none !important/);
+      expect(all).not.toMatch(/translate/);
+      expect(block).toMatch(/:where\(\[data-arrive\]\)\[data-fog\] > \*\s*\{[^}]*translate:\s*none !important/);
+    }
   });
 
   it('never un-reveals', () => {
