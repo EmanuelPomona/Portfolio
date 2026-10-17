@@ -7,7 +7,7 @@ import { isMediaId } from './media';
 import type { Content, LifePhoto, Link, LinkKind, ProjectScreen, SectionId } from './types';
 
 export type RuleId = 'C-01' | 'C-02' | 'C-03' | 'C-04' | 'C-05' | 'C-06' | 'C-07' | 'C-08' | 'C-09'
-  | 'C-10' | 'C-11' | 'C-12' | 'C-13' | 'C-14' | 'C-15' | 'C-16' | 'C-17' | 'C-18' | 'C-19' | 'C-20';
+  | 'C-10' | 'C-11' | 'C-12' | 'C-13' | 'C-14' | 'C-15' | 'C-16' | 'C-17' | 'C-18' | 'C-19' | 'C-20' | 'C-22';
 
 export interface ContentViolation {
   rule: RuleId;
@@ -82,7 +82,12 @@ function* strings(value: unknown, path: string): Generator<[path: string, text: 
 
 export function validateContent(
   c: Content,
-  opts: { today?: string; mediaIds?: readonly string[] } = {},
+  opts: {
+    today?: string;
+    mediaIds?: readonly string[];
+    /** Byte size of each file under frontend/public by its URL, e.g. { '/media/video/snake-ai.mp4': 485602 }. */
+    videoSizes?: Readonly<Record<string, number>>;
+  } = {},
 ): ContentViolation[] {
   const out: ContentViolation[] = [];
   const add = (rule: RuleId, path: string, message: string) => out.push({ rule, path, message });
