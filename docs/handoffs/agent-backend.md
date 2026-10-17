@@ -551,6 +551,8 @@ MP4 boxes                ftyp(28) moov(27484) mdat(458090); avc1; handlers: vide
 crop rows (src frames)   0 s: row50=54 row51=0 | 12 s: row50=57 row51=0 | 30 s: row50=57 row51=0
 decoded MP4 frames       1 s and 12 s: row 0 max 0 (no title bar)
 poster                   11.989 s; re-made in a temp folder it is byte-identical to the committed PNG
+scripts/audit-skills.sh  exit 0, "all claims corroborated by the transcript"; TASK-305 invocations at
+                         TDD 78%, backend-patterns 80%, requesting/receiving review 90-92%, verification 97%
 ```
 
 ### What Was NOT Verified
@@ -588,5 +590,6 @@ poster                   11.989 s; re-made in a temp folder it is byte-identical
 
 ### Commit
 
-`agent/backend` at the commit that adds this handoff, which builds on `5c82dc8`. Committed locally
-only; not pushed, because of the owner's hold.
+`agent/backend` at the commit that adds the audit result to this handoff, which builds on
+`5c82dc8`. There are 29 commits since `12e9c35`, this one included. Committed locally only; not
+pushed, because of the owner's hold.
