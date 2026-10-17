@@ -1,7 +1,7 @@
 ---
 id: TASK-109
 title: Contact as one sentence, "Contact: LinkedIn, Email, GitHub."
-status: IN_PROGRESS
+status: REVIEW
 owner: frontend
 branch: agent/frontend
 priority: HIGH

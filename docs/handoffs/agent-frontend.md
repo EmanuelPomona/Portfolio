@@ -348,3 +348,171 @@ Unchanged from HANDOFF-1.
 
 ### Commit
 `cf153dc` (test), followed by this docs commit, pushed to `origin/agent/frontend`.
+
+## HANDOFF-3 — agent/frontend — 2026-10-16
+
+### Summary
+Round 2 is built and verified: TASK-109, then TASK-107, then TASK-108, in the order assigned. All three tasks are now `REVIEW`.
+- **TASK-109, Contact as one sentence.** The section now reads "Contact: LinkedIn, Email, GitHub." The `h2` "Contact" sits inside the sentence and names the region. The punctuation is outside every link. The "opens in a new tab" notice is an `aria-describedby` to a hidden span, so the visible sentence stays clean.
+- **TASK-107, clouds through the page.** Photographic cloud layers, cut from the owner's two photographs, drift behind Projects, About and Contact.
+  - They are fetched at the same URLs as the existing hero and backdrop images, so there is no new request.
+  - They move by transform only, on strokes of 60s or more.
+  - They pause off-screen and in a hidden tab, and are static under reduced motion.
+  - They are screened as one group over a Mist ground, so they can only lighten what sits behind text.
+- **TASK-108, scroll depth and arrivals.**
+  - The hero photograph, the section backdrops and each cloud layer travel slower than the content: at most 80px, `translate` only, one passive scroll listener, with the work done in rAF.
+  - Each project window arrives from its own side, with its title and caption a beat behind.
+  - Each About print settles into place, 50ms apart.
+  - Arrivals play once and never replay, including after a reduced-motion or print toggle.
+  - Focused content is always fully visible.
+- **Independent code review:** verdict "with fixes", 0 Critical, 1 Important, 6 Minor. The Important finding (finished reveals replayed after a reduced-motion or print toggle) is fixed. So are five Minors; the sixth needs no change.
+
+### Tasks Completed
+- **TASK-109:** K-01, X-04, H-03, and the 4 named tests.
+  - **Evidence:** `docs/review/F-109-contact-{1440,768,390}.png`.
+  - **One line:** at 1440, 1280, 1024 and 768 (counted from text line boxes); two lines at 390, as K-01 allows.
+  - **Links:** 105, 75 and 58px tall.
+  - **Nav:** the Contact link lands on the section with `aria-current`.
+- **TASK-107:** M-01, M-02, the X-02 and F-02/F-03 parts of M-05, H-02 unchanged, and the 6 named tests plus a blend regression test.
+  - **Evidence:** `F-107-clouds-1440-t0.png` and `-t10.png` show +18.2px and −15.8px of movement in 10s; `F-107-clouds-390.png`.
+  - **Pausing:** the drift is paused when scrolled away.
+  - **Requests:** only `alpine-valley-1600.avif` and `evergreen-forest-1024.avif` are fetched, the same files as before.
+- **TASK-108:** M-03, M-04, M-05, X-05, F-03, and the 10 named tests.
+  - **Evidence:** `F-108-arrival-1440.gif` and `F-108-arrival-390.gif` (scrolling through Projects and About), and `F-108-perf-trace.txt`: 5s of real wheel and touch scrolling, 0 long tasks over 50ms, 0 script-forced layouts.
+  - **Tests added beyond the named ten:** wiring, seam, focus, replay, measurement and Contact-layer tests.
+
+**X-02 under the clouds (TASK-107 asks for these numbers).** Worst background pixel under each text run, with the text hidden and the layers held at each end of their drift. The stickman canvas is excluded, since its own strokes are not background:
+
+| Section | Drift end | 390 | 768 | 1440 |
+|---|---|---|---|---|
+| Projects | start | 6.15 / 4.5 | 6.15 / 4.5 | 6.07 / 4.5 |
+| Projects | end | 6.15 / 4.5 | 6.15 / 4.5 | 6.07 / 4.5 |
+| About | start | 6.15 / 4.5 | 5.69 / 4.5 | 6.51 / 4.5 |
+| About | end | 6.15 / 4.5 | 5.91 / 4.5 | 6.34 / 4.5 |
+| Contact | start | 8.99 / 3 | 9.38 / 3 | 6.51 / 3 |
+| Contact | end | 8.99 / 3 | 9.49 / 3 | 9.81 / 3 |
+
+**X-02 under scroll depth (TASK-108, M-05).** Section backdrops can now sit anywhere from 0 to 80px below their resting place, so each text box was stretched by 80px up and down over backdrop-only pixels. The clouds were left out, since a screen can only lighten. Results:
+- **Projects and About:** 15/15 runs pass at 390, 768, 1024, 1280 and 1440. The tightest is the Projects meta line at 1024, 4.79 / 4.5.
+- **Hero:** measured live at scroll 0 to 500, it passes. Its tightest is the decorative dot at 390, 4.8 / 4.5.
+
+### Files Changed
+`frontend/src/` only:
+- **TASK-109:** `sections/Connect/*`, `lib/format.*` (removed the now-unused `displayAddress`), `components/Section/*` (additive props `labelledBy`, `clouds`; Mist ground; `overflow: clip`).
+- **TASK-107:** `components/Clouds/*` (new), `components/Picture/sizes.ts` (new: one `sizes` value per photograph use), `hooks/useDriftPlaying.*` (extracted from Hero), `sections/{Projects,About}/*.tsx` (`clouds`).
+- **TASK-108:** `lib/depth.*` (new), `hooks/useScrollDepth.*` (new), `hooks/useFogReveal.*`, `styles/global.css` and `styles/tokens.css` (arrivals, settle, focus, `@property --depth`, `scroll-padding-bottom`), `sections/{Hero,Projects,About}/*`, `components/Clouds/*`, `components/Section/*`.
+- **Test helpers:** `test-utils/cssTimings.ts` (new: reads timings from the CSS sources), `test-utils/frames.ts` (new: a hand-flushed rAF), `test-utils/media.ts` (a `top` option on the fake IntersectionObserver).
+  - `test-utils/media.ts` is the frontend's own test helper, **not** the contract `media.ts`.
+- **Docs and evidence:** `docs/review/F-107-*`, `F-108-*`, `F-109-*`, refreshed `F-01`, `F-02`, `F-03`, `F-zoom-1280-200pct`, `F-console.txt`, `F-lighthouse-local-*`; `docs/status/agent-frontend.md`; the three task files (status only).
+
+### Contracts
+None changed, and there is no contract change request this round.
+- **Contract files untouched:** `git diff 68b0ebc..HEAD` touches none of `index.html`, `content/*` (including `types.ts` and `media.ts`), `stickman/*`, `flags.ts` or `vite.config.ts`.
+- **New interfaces are frontend-internal:**
+  - `depthOffset(m, factor, maxPx)` and `DEPTH` in `lib/depth.ts`;
+  - `useScrollDepth(target, factor)` and `DEPTH_MAX_PX` in `hooks/useScrollDepth.ts`;
+  - `settleWhenRevealed(el, onSettled)` in `hooks/useFogReveal.ts`;
+  - the `data-arrive` and `data-reveal="instant"` attributes.
+- **For the stickman slice:** windows and prints are never parallaxed, only backgrounds and clouds. Arrivals finish within about 1.1s and never replay, so cached target rects stay true.
+
+**Choices made where the tasks left room (recorded as instructed):**
+- **Contact is set in proper case,** as in the round-1 heading.
+- **The clouds' screen blend sits on the `.clouds` wrapper,** over a Mist ground the Section paints. With the blend on each layer, the wrapper's stacking context isolated it and the dark rocks painted normally: contrast measured 1.13:1. On the wrapper it measures 6.51:1. A regression test guards this.
+- **Cloud recipe:**
+  - Projects and About: a valley layer (84s, ±44px, 50%) and a forest layer (66s, ∓36px, 42%).
+  - Contact: one valley band, chosen in TSX so no hidden layer is mounted.
+- **`useScrollDepth(target, factor)`** instead of a no-argument hook, to match `useDriftPlaying(target)`, so Clouds shares one root element without merged refs.
+- **Depth is registered per cloud layer, not on the wrapper.** A tall section's wrapper would sit at the 80px clamp the whole time its top cloud is in view.
+- **Depth factors** (farther lags more): backdrop 0.1, hero 0.08, valley cloud 0.06, forest cloud 0.04.
+- **The backdrop moves down only** (`translate: 0 calc((var(--depth) + 80px) / 2)`, so 0 to 80px). **The hero photograph slides inside a still, masked frame.** Both decisions came from a measured seam: with depth on, the boundary luminance step was 0.15 to 0.27, against 0.008 with depth off. After the fix it is 0.008 with depth on.
+- **Arrival timing:**
+  - Distances: windows 48px; titles, captions and prints 16px.
+  - The caption trails its window by 0.12s, a beat rather than a stagger.
+  - Prints use the existing 0.05s stagger.
+  - Arrivals use the same curve and 0.9s duration as the fog-clear, so they read as one gesture.
+- **`data-reveal="instant"`** (no motion, never removed) is set when:
+  - the observer finds an element above the viewport;
+  - an element receives focus;
+  - reduced motion is on;
+  - a reveal that did play has finished. This is the replay fix.
+- **Correction to my own earlier claim:** a smooth nav jump reveals the plates it passes through the normal arrival, not instantly. "Already above the viewport" applies when the observer's first report finds the element above, or when a jump carries a partly shown element off the top.
+
+### Skills Used
+| Skill | Stage invoked | What it actually changed |
+|---|---|---|
+| superpowers:test-driven-development | Start of round 2, before any code | Red then green for every test listed above. Mutation checks: a synchronous write, a non-passive listener and a removed "above" branch each fail their test. |
+| animate | TASK-107, before the cloud motion | CSS animation, translate3d only, ease-in-out alternate, strokes of 60s or more, negative delays; the blend on the group so the clouds only lighten. |
+| animate | TASK-108 step 1, before arrivals and depth | Arrivals: CSS keyframes on the existing reveal attribute, `translate` only, the codebase's `--ease-out` and `--dur-reveal`, 48px and 16px distances and a 0.12s beat. Depth: one passive listener, writes in rAF, the value written on the layer itself, `@property --depth` not inherited. Reduced motion: no travel. |
+| superpowers:systematic-debugging | TASK-108, the seam seen in the first arrival GIF | A luminance-step probe (depth live vs off), then in-page hypothesis tests. It found two root causes: the hero mask riding the moving layer, and negative backdrop offsets. Fixed in `e4e7187`. |
+| ecc:browser-qa | Round 2 final QA, production build | Smoke at 390, 768, 1440 and 1280 at 200%, keyboard, reduced motion, axe, Lighthouse, console. Found focus rings cut off at the viewport bottom, fixed in `ea51782`. |
+| superpowers:requesting-code-review | After browser QA | An independent reviewer, given only the requirements and the git range. Verdict "with fixes": 1 Important, 6 Minor. |
+| superpowers:receiving-code-review | Before acting on the findings | Reproduced the Important finding on the production build first, then fixed one item at a time, each test-first: `8aaf421`, `ac11b8f`, `32dd711`, `8d8e6c9`, `b6ceac8`. |
+| superpowers:verification-before-completion | Immediately before this handoff | A fresh run of every command under Verification. No implementation work after it; only this handoff, the status file and task frontmatter. |
+
+**Gaps, stated plainly**
+- **The design-pipeline skills were not re-invoked this round.** These are `ecc:frontend-design-direction`, `frontend-design:frontend-design`, `ui-ux-pro-max:ui-ux-pro-max`, `design-taste-frontend` and `ecc:make-interfaces-feel-better`. They were invoked in round 1 for the whole visual system, and round 2 stayed inside it: the same tokens, type and motion vocabulary rows the manager added. Contact's restyle reuses the display step and link style.
+- **TASK-107's contrast regression (1.13:1) was debugged by hypothesis and probe, and my status file does not record a `superpowers:systematic-debugging` invocation for it,** so I do not claim one.
+- **`ecc:e2e-testing` is not applicable.** There is no E2E framework, and the flows are scripted over the DevTools protocol instead.
+
+### Verification
+Fresh at `f607e14` (`agent/frontend`), immediately before this handoff:
+- `npm run typecheck`: exit 0.
+- `npm run lint`: exit 0.
+- `npx vitest run`: **47 files, 551 tests passed**.
+- `npm run build`: exit 0. **JS 83.55 kB gzip, CSS 6.49 kB gzip** (budgets 110 and 25).
+- `scripts/contract-test.sh`: exit 0, 5 files, **162 passed**.
+- `scripts/slop-check.sh`: 19 mechanical hits, all under the brief's existing Justified exceptions. They are the alpha masks on photo edges (now including the clouds' masks), the one window shadow, and the stickman's difference ink (stickman slice files).
+- **Diff review:**
+  - no contract file touched, and nothing outside frontend-owned paths;
+  - no credentials (the only scan matches are "design tokens");
+  - `.env` untracked;
+  - 0 attribution trailers;
+  - 34 commits this round;
+  - 0 em or en dashes in `dist/`.
+
+**Browser** (production build, `vite preview` at :3101, isolated headless Chrome 155 over CDP; scripts in the session scratchpad):
+- **Smoke at 1440, 768, 390 and 640 (1280 at 200%):**
+  - console: 0 errors;
+  - requests: 0 with a 4xx or 5xx status;
+  - LCP: 48–64ms locally;
+  - CLS: 0 to 0.0013;
+  - overflow: none (scrollWidth never exceeds the viewport);
+  - fog: 0 elements left unrevealed after a scroll-through.
+- **Lighthouse:** mobile 97 / 100 / 100 / 100 (LCP 2.3s, CLS 0, TBT 0ms); desktop 100 / 100 / 100 / 100.
+- **axe, WCAG 2.2 AA:** 0 critical. One serious item, which predates round 2; see Known Issues.
+- **Arrivals:**
+  - before reveal, parts sit at −48 / −16px (left plates) and +48 / +16px (right plates);
+  - order: window, then title, then caption;
+  - all parts end at `translate: none`, opacity 1, with no animations left;
+  - prints are delayed 0, 50, 100, 150 and 200ms;
+  - scrolling away and back shows a single state ("1|none|0");
+  - after reduced-motion and print toggles, 0 reveal animations run anywhere.
+- **Depth:**
+  - `--depth` matches values recomputed from layout at every probed scroll position, and clamps at 80;
+  - a resize alone moves nothing;
+  - the hero photograph's top edge stays above the viewport (−11.5px);
+  - every section boundary's luminance step equals the depth-off baseline.
+- **Performance:** `F-108-perf-trace.txt`, 0 long tasks over 50ms at 1440 and 390.
+- **Keyboard (22 stops):**
+  - every stop fully opaque at the moment of focus, with a 2px ring;
+  - windows are scrolled clear of the viewport bottom (`scroll-padding-bottom`);
+  - the nav's Projects, About, Contact and Home links each land with `aria-current`.
+- **Reduced motion (1440 and 390, `?loader=1`):** 10/10 sections revealed; 0 running animations, translated parts or `--depth` writes; `scroll-behavior: auto`.
+- **Hero drift (H-02):** still running, 22.4px in 5s.
+
+### What Was NOT Verified
+- **Browsers other than Chromium.** Firefox and Safari were not run. The code relies on `@property`, the individual `translate` property, `mask-composite`, `:has()` and `Element.getAnimations({ subtree: true })`. All are in current Safari and Firefox, but I did not observe them there. Where `getAnimations` is missing, the settle step falls back to settling on the first reveal `animationend`.
+- **Real phones.** 390 was emulated (touch, mobile viewport). The hero's 12px bleed for an iOS Safari URL bar collapsing at the top of the page is reasoned, not observed on a device.
+- **Screen readers.** No VoiceOver or NVDA pass. Names and roles were checked only by axe and DOM inspection.
+- **Low-end GPUs.** Not measured: the six masked cloud layers and the large hero layer are composited. The trace was unthrottled desktop Chromium; Lighthouse mobile (with CPU throttling) shows TBT 0.
+- **The integrated page.** The stickman is not on this branch, so the arrivals and depth were not exercised together with the live cursor, or on `main`'s :3000.
+- **The deployed site.** Lighthouse and console runs were against the local preview, not production.
+
+### Known Issues
+1. **axe `label-content-name-mismatch` (serious, 4 windows). This predates round 2.** The visible placeholder "screenshot soon" inside an empty window is not part of the contract-defined name (ADR-010: "<title>, <label>, <addressBar>"). It should clear once real screenshots replace the placeholders. Otherwise it needs a contract decision; I made no change.
+2. **A first load of `/#about` lands at the top. This predates round 2.** `<main>` is hidden behind the loader at the moment the browser would scroll to the fragment, and nothing re-scrolls after the release. Fixing it would mean App or loader timing, outside these tasks; I am raising it for the manager.
+3. **At 390, the wrapped Contact sentence's link tap areas overlap vertically by about 12px.** The links are 58px tall on a 46px line pitch. Each link still keeps about 46px to itself, so K-01's 44px holds. This came from the review; I made no change.
+4. **`F-107-*` screenshots were captured before TASK-108.** The clouds had no depth then. They remain valid for M-01, which is about drift; depth is covered by `F-108-*`.
+
+### Commit
+`agent/frontend` at `f607e14` (implementation and evidence), followed by this handoff's docs commit, pushed to `origin/agent/frontend`.

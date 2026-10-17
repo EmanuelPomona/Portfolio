@@ -1,7 +1,7 @@
 ---
 id: TASK-107
 title: Photographic clouds drifting through the page
-status: IN_PROGRESS
+status: REVIEW
 owner: frontend
 branch: agent/frontend
 priority: HIGH
