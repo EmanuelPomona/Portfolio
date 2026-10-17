@@ -16,6 +16,7 @@ Superseded decisions stay here and link their replacement.
 | ADR-009 | Only content-hashed URLs are `immutable`; `/media` revalidates | accepted | 2026-10-16 |
 | ADR-010 | A project window is named by what it shows, and is black until attended | accepted | 2026-10-16 |
 | ADR-011 | Round 2 motion: clouds through the page, scroll depth, a 2.2s loader minimum | accepted | 2026-10-16 |
+| ADR-012 | Project windows may hold a short recording, played only while attended | accepted | 2026-10-16 |
 
 ---
 
@@ -449,3 +450,44 @@ Product-lens risk R1 is loader friction for a recruiter on a phone.
 - **Negative:** every first visit now costs about 1s more before the page; more motion to keep
   inside the performance budget and the contrast measurements.
 - **Risk:** motion over text lowering contrast. M-05 makes X-02 a gate for the new layers.
+
+## ADR-012: Project windows may hold a short recording, played only while attended
+
+**Date:** 2026-10-16. **Status:** accepted. **Deciders:** the owner (the media), manager (the calls).
+
+### Context
+
+The owner supplied the first real project media: a StreetSafe: LA screenshot (1920×958, about 2:1)
+and a Snake AI screen recording (`.mov`, HEVC, 1270×1006, 33.7s, the recording's own macOS title bar
+included). The content contract held only a still image per window. HEVC does not play in Firefox
+and plays in Chrome only with hardware support. There is no ffmpeg on the machine, and ADR-002
+keeps dependencies minimal.
+
+### Decision
+
+- `ProjectScreen` gains an optional `video: { src, width, height }`; when present, `image` is its
+  poster (C-22).
+- A recording is H.264 MP4, muted, title bar cropped, at most 3 MB, produced by `npm run video`, a
+  checked-in macOS AVFoundation script. Source and output are committed (ADR-005's spirit; video is
+  not byte-deterministic, so it is re-run by hand, not checked for freshness).
+- In the window it plays only while attended, pauses on leave, never plays under reduced motion or
+  off-screen, and loads nothing before first attention. It fits `contain` on black.
+- **The StreetSafe screenshot is pre-cropped to 16:10, anchored right** (x 387 to 1920 of 1920,
+  full height), keeping the markers, the reports list, and "Report a hazard". The window's `cover`
+  fit would otherwise cut both the title and the list; the plate caption already names the project.
+
+### Alternatives considered
+
+- **An animated GIF or WebP.** No new code path, but several times larger than H.264 for 34s,
+  and it cannot be paused at rest.
+- **ffmpeg (or `ffmpeg-static`).** Cross-platform and deterministic-ish, but a large new dependency
+  for one asset. Rejected while there is one recording.
+- **Autoplay at rest.** Motion nobody asked for, against "Nothing else moves" and the monochrome-at-rest
+  principle; also costs bandwidth for every visitor.
+- **Ship the HEVC `.mov` as is.** Fails in Firefox and in Chrome without hardware decode.
+
+### Consequences
+
+- **Positive:** the Snake AI window shows the agent actually playing, exactly when someone looks.
+- **Negative:** `npm run video` runs only on macOS; the encode is not byte-identical across runs.
+- **Risk:** a long or large recording bloats the repository. C-22's 3 MB cap guards it.

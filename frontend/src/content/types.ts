@@ -46,11 +46,22 @@ export interface Site {
   readonly heroLinks: readonly Link[];
 }
 
+/** A short screen recording shown in a project window while it is attended (ADR-012). */
+export interface ProjectVideo {
+  /** Root-relative URL of a muted H.264 MP4 committed under frontend/public/media/video/. */
+  readonly src: `/media/video/${string}.mp4`;
+  /** Encoded frame size in px, so the layout is right before the video's metadata loads. */
+  readonly width: number;
+  readonly height: number;
+}
+
 export interface ProjectScreen {
   /** null means no screenshot yet: the window renders its empty state. */
   readonly image: MediaId | null;
   /** Non-empty when image is non-null; null when image is null. */
   readonly alt: string | null;
+  /** Optional recording. When present, `image` is its poster frame and is never null (C-22). */
+  readonly video?: ProjectVideo;
 }
 
 export interface Project {

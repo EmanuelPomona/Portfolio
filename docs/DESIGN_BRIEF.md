@@ -213,7 +213,7 @@ Frontend covers every relevant state from protocol §8.
     - The URL brightens.
     - One soft elevation shadow appears (justified below).
   - Pressed: the stickman cheers. The window itself does not bounce or scale.
-  - Empty, which is every window in v1: the window still comes alive (lights,
+  - Empty (any window without a screenshot yet): the window still comes alive (lights,
     URL, lift). Its screen is a **flat fog-tone panel**, never a photograph,
     with the quiet line "screenshot soon".
   - Error (image failed): identical to empty.
@@ -240,7 +240,7 @@ Each motion has a job. Nothing else moves.
 | Fog-clear reveal | Each section rises from about blur(6px) and 0 opacity to sharp, about 0.9s, staggered no more than 0.06s. It reads as walking out of fog. The filter is removed after settling. |
 | Cloud drift through the page (round 2) | The owner's "clouds hovering slightly within the page". The fog keeps moving behind the plates, so the page feels like air rather than paper. Photographic only, cut from the owner's two photographs; never drawn, never a CSS radial blob. Each layer drifts a few tens of pixels on a cycle of 60s or more, and pauses when its section is off-screen or the tab is hidden. |
 | Scroll depth (round 2) | The owner's "scroll animations", given one job: distance. Backgrounds and clouds travel slower than the plates, so the fog reads as farther away than the windows and prints. Each project window arrives from its own side, with its caption a beat behind; each About print settles into place. Arrivals happen once and never replay. |
-| Attention reveal | The color arrival described above. |
+| Attention reveal | The color arrival described above. A window with a recording (ADR-012) also plays it while attended and pauses when attention leaves: the project literally comes alive, and nothing plays that nobody is looking at. |
 
 Under `prefers-reduced-motion: reduce`, every row is off or becomes an instant or
 opacity-only change.

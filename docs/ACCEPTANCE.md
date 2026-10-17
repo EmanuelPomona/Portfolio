@@ -117,9 +117,10 @@ Otherwise use `npm run dev` after `scripts/bootstrap.sh`. Force the loader with
       - the screen lifts out of black.
 
       Provide paired screenshots, `-rest` and `-attention`.
-- [ ] **W-03** Every v1 window shows the empty state: near-black at rest with
-      "screenshot soon", lifting to a flat fog-tone screen on attention (ADR-010).
-      **No photograph appears inside any window.**
+- [ ] **W-03** A window whose `screen.image` is `null` shows the empty state: near-black at
+      rest with "screenshot soon", lifting to a flat fog-tone screen on attention (ADR-010).
+      A window with a screenshot shows it (W-04). **Nothing but the project's own screenshot or
+      recording ever appears inside a window.**
 - [ ] **W-04** A component test with a fixture image shows that the rest state
       is darkened or desaturated, and the attention state is full color.
 - [ ] **W-05** Activating a window opens `primary.href` in a new tab with
@@ -130,6 +131,15 @@ Otherwise use `npm run dev` after `scripts/bootstrap.sh`. Force the loader with
 - [ ] **W-06** The address field shows exactly `project.addressBar`.
 - [ ] **W-07** At 390 with touch emulation, a window in the viewport's middle band
       shows the attention state, and reverts when it leaves the band.
+- [ ] **W-08** A window with `screen.video` (ADR-012):
+      - at rest shows the poster, desaturated under glass, and the video is paused;
+      - on attention (hover, keyboard focus, coarse center band) plays muted and looping, in
+        color; on leaving, pauses and holds its frame;
+      - never plays under reduced motion, and never plays while off-screen;
+      - makes no video request before the window is first attended (`preload="none"`);
+      - fits the recording with `contain` on black, never stretched or cropped.
+
+      Provide `-rest` and `-attention` screenshots and a short recording of a hover.
 
 ## About (frontend)
 
@@ -239,6 +249,10 @@ Otherwise use `npm run dev` after `scripts/bootstrap.sh`. Force the loader with
 
       `/assets/*` is served `immutable`; `/media/*` is served
       `public, max-age=0, must-revalidate` (ADR-009).
+- [ ] **B-06** `npm run video` turns `media-src/video/<id>.mov` into
+      `public/media/video/<id>.mp4` (H.264, no audio, title bar cropped, ≤ 3 MB) and the poster
+      `media-src/projects/<id>.png`; `npm run media` then makes the poster renditions; C-22
+      passes; `/media/video/<id>.mp4` returns 200 with `video/mp4` on the preview.
 
 ## Performance (all)
 

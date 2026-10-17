@@ -16,6 +16,7 @@
     "test:contract": "npm run test:contract -w frontend",
     "typecheck": "npm run typecheck -w frontend",
     "lint": "npm run lint -w frontend",
-    "media": "npm run media -w frontend"
+    "media": "npm run media -w frontend",
+    "video": "npm run video -w frontend"
   }
 }

@@ -50,6 +50,7 @@ in `docs/DATABASE.md`.
 | `project.secondary` | Small links after the meta line. May be empty, and is never the same URL as `primary`. |
 | `project.addressBar` | Rendered verbatim in the window's address field. |
 | `project.meta` | One line, items joined with " · ". |
+| `project.screen.video` (ADR-012) | A muted, looping, `playsinline` `<video>` in the window's screen, with `poster` from `screen.image`'s rendition and `preload="none"`. Fit is `contain` on the screen's black, since recordings are rarely 16:10. It **plays only while the window is attended** (the same attention as W-02/W-07) and pauses, holding its frame, when attention leaves. At rest it wears the same desaturated glass as a screenshot (W-04). Under reduced motion it never plays: the poster is shown, in color on attention. The `<video>` is `aria-hidden`; the link's name already describes the window. Without `video`, a non-null `image` renders as a still screenshot (`cover`). |
 | `project.screen.image === null` | The window's **empty state**: near-black at rest with the words "screenshot soon"; on attention the screen lifts to a flat fog-tone panel (ADR-010). Never substitute any other image. |
 | `about.description` | Rendered as is. `descriptionIsDraft` is **never** rendered; it exists for the owner's tooling. |
 | `about.classes` | `label` as a small heading, `items` as a list. |
@@ -287,6 +288,14 @@ true.
   `immutable`.
 - **Exit codes:** non-zero on any failure. It never leaves a half-written manifest.
 
+**Project recordings (ADR-012).** `frontend/public/media/video/<project-id>.mp4`: H.264, no
+audio track, at most 3 MB, the recording's own window title bar cropped off. Produced from the
+committed source `frontend/media-src/video/<project-id>.mov` by `npm run video` (a macOS
+AVFoundation script, so no ffmpeg dependency), which also writes the poster frame to
+`frontend/media-src/projects/<project-id>.png` for the image pipeline. Re-run by hand when the
+source changes; the output is committed. `/media/video/*` falls under the `/media` caching rule
+(ADR-009).
+
 ## 4. Flags: `frontend/src/config/flags.ts`
 
 `flags.touchStickman` is `false` in production until the owner approves the touch
@@ -307,6 +316,6 @@ after that approval.
 
 ## 6. Root scripts (stable names)
 
-`dev`, `build`, `preview`, `test`, `test:contract`, `typecheck`, `lint`, `media`.
+`dev`, `build`, `preview`, `test`, `test:contract`, `typecheck`, `lint`, `media`, `video` (ADR-012; macOS only).
 Each one proxies to the `frontend` workspace. CI and `scripts/*.sh` depend on
 these names.
