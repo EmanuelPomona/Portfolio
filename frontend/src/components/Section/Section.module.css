@@ -6,6 +6,9 @@
 .section {
   position: relative;
   isolation: isolate;
+  /* The Mist ground the clouds screen against inside this isolated group (TASK-107). Same tone as
+     the page, so nothing changes where there are no clouds. */
+  background: var(--color-mist);
   padding-block: var(--space-9);
   padding-inline: var(--gutter);
 }

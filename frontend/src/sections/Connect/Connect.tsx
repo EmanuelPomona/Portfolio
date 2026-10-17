@@ -17,7 +17,7 @@ const NEW_TAB_ID = 'contact-new-tab';
 export function Connect({ links, heading }: ConnectProps) {
   const { ref } = useFogReveal<HTMLDivElement>();
   return (
-    <Section id="contact" labelledBy={HEADING_ID} className={styles.section}>
+    <Section id="contact" labelledBy={HEADING_ID} clouds className={styles.section}>
       {/* The h2 sits inside the sentence; the punctuation stays outside every link. */}
       <div ref={ref} className={styles.line} data-fog="self">
         <h2 id={HEADING_ID} className={styles.heading}>
