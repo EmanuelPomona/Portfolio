@@ -1,7 +1,7 @@
 # STATUS: agent/backend
 Task: TASK-305 (IN_PROGRESS). Earlier: 301-303 REVIEW, 304 BLOCKED (contract)
 Round: 0
-Last updated: 2026-10-16T22:20:00Z
+Last updated: 2026-10-16T23:00:00Z
 
 ## Skills invoked so far
 - ecc:contract-first @ TASK-301 start, before validator -> shapes imported from types.ts (no redeclared copies); DATABASE.md is the invariant source; provider check = validate the real exported `content`; fixtures JSON-cloned because heroLinks/contact.links share refs (structuredClone would double-count)
@@ -20,6 +20,7 @@ Last updated: 2026-10-16T22:20:00Z
 - superpowers:test-driven-development @ TASK-305 start (re-invoked; harness: already loaded, unchanged) -> red first for: media pipeline skipping media-src/video, C-21 skipping it, video script behavior, C-22 one violation per clause on both bases
 - ecc:backend-patterns @ TASK-305, before video.swift (re-invoked; harness: already loaded, unchanged) -> transaction: encode + poster to dot-temp files beside the targets, verify codec/no-audio/size/<=3MB, rename(2) into place only if every recording succeeded, temps removed on failure
 - superpowers:requesting-code-review @ TASK-305 pre-handoff (re-invoked; harness: already loaded, unchanged) -> read-only reviewer on 12e9c35..2fb25a6 with TASK-305/ADR-012/API/DATABASE/B-06 and stated decisions; findings pending
+- superpowers:receiving-code-review @ TASK-305 after review verdict With fixes (re-invoked; harness: already loaded) -> verified #1 in code (cleanup only covered successful outputs); fixed 1,2,3,4,5,6,7,8 with tests; declined list accepted (poster jump, ICC, 60fps, corner pixels, INDEX.md)
 - (probe, scratchpad only) all 3 formats byte-stable across 3 processes on this mac; hero 1600w AVIF q50=53.6KB, q60=73.9KB -> chose AVIF q60/effort 4, WebP q80/effort 4, JPEG q80 mozjpeg
 
 ## Done
@@ -85,8 +86,12 @@ OWNER HOLD: no vercel calls of any kind, no git push. Local commits only.
 - [x] site.updated already 2026-10-16 = today local (UTC already 10-17): no bump needed
 - [x] Guide: 16:10 crop, recording section, C-22 row; determinism claim checked: mp4 hash differs each run (size same 485,602), poster byte-identical (d00d51e)
 
+- [x] Review (With fixes): #1 Important partial MP4 leak on failure -> tests 4bc81ab (5 red), fix 8bc3542 (13/13); mutation: dropping catch cleanup leaks out/.demo-app.partial.mp4 (red); #2/#3 cropLeft/cropRight + split odd messages; #5 non-.mov reported; #8 gap tests (posterSeconds range, negative crop, two-recording all-or-nothing, -suppress-warnings invocation)
+- [x] Review #6/#7: shared test util scripts/mp4-boxes.mjs; checks: no unused recording ships, declared size == file (b9dfa7d); mutations (orphan mp4, width 1280) both red, restored
+- [x] Review #4 + guide: edges, trim, size reality, .mov only, cropLeft/Right, C-22 row (1e76b9b)
+
 ## In progress
-- [ ] TASK-305: code review, verification, evidence B-305-media.txt, HANDOFF-2, REVIEW, commit (no push), SendMessage portfolio-38
+- [ ] TASK-305: verification-before-completion, evidence B-305-media.txt, HANDOFF-2, REVIEW, commit (no push), SendMessage portfolio-38
 
 ## Verified
 - Baseline (pre-change) -> typecheck/lint/test all pass on 3ea91a0
