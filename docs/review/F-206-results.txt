@@ -1,0 +1,34 @@
+# F-206 loader (2.2s minimum) runtime checks, headless Chrome 1440x900, 2026-10-17T00:06:45.729Z
+L-01 first-visit mode / boot cover painted ivory             skip (now, after finish)
+L-07 times from navigation start (ms): mounted / exit / gone {"mounted":241,"exit":2437,"gone":2896}
+L-07 visible from mount until exit (ms, >= 2200)             2196
+L-03 exit duration (ms, <= 600)                              459
+L-06 main inert while up / after                             checked below
+page released after finish: body overflow / wheel scroll     {"overflow":"visible","scrollYAfterWheel":600}
+L-04 sessionStorage el:loader-seen after finish              1
+L-04 reload in same tab: data-loader / loader present        ["skip",false]
+console errors/warnings (show run)                           []
+L-06 role/label/min/max                                      ["Loading","0","100"]
+L-06 aria-valuenow sampled every 250ms                       ["0","78","100","100","100"]
+L-06 canvases aria-hidden                                    ["true","true"]
+L-06 <main> inert / aria-busy while up                       [true,"true"]
+L-06 Tab while up reaches (expect no page link)              BODY:100%HomeProjectsAbou
+hero BLOCKED (decode rejects = ready): times (ms from navigation): mounted / exit / gone {"mounted":93,"exit":1381,"gone":1842}
+hero blocked: exit started (ms after mount, cap 4500)        1288
+hero blocked: gone by (ms after navigation start, <= 4500 + exit + mount) 1842
+hero blocked: page usable after: main inert / a link focusable [false,true]
+L-02 hero HANGS: times (ms from navigation): mounted / exit / gone {"mounted":97,"exit":4502,"gone":4957}
+L-02 hero hangs: exit began after mount (ms, cap 4500)       4405
+L-02 hero hangs: gone after navigation start (ms)            4957
+L-02 hero hangs: page usable after (main inert / nav link focusable) [false,true]
+L-03 click at (ms) -> exit began / gone                      {"clickAt":397,"exit":415,"gone":873,"exitLatency":18,"totalAfterClick":476}
+handoff: html.stickman-cursor after exit (pointer moved by the click) false
+L-05 fade mode: data-mode / canvases / meter                 ["fade",0,false]
+L-05 fade times (ms): mounted / exit / gone, fade duration   {"mounted":71,"exit":89,"gone":345,"fade":256}
+# Notes (TASK-206):
+# - L-07: exit began 2195-2196ms after the sheet appeared (two runs); the sheet is on screen until ~2655ms (exit fade 450ms).
+#   The Loader schedules on Date.now() (fake-timer compatible); this observer marks with performance.now(); they differ by a few ms
+#   under load (load average ~18 during these runs). The unit test pins: no exit and no onDone before exactly 2200ms (fake timers).
+# - "hero BLOCKED ... exit started ~1280ms" is the skip: that run presses Tab twice for the L-06 check, and any keydown skips (L-03).
+#   The hero-HANGS run (no input) shows the cap: exit 4502ms after navigation start, page usable after.
+# - L-03: click at ~300ms after mount (397ms from navigation) -> exit began 18ms later, gone 476ms after the click.

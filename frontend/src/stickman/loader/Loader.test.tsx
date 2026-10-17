@@ -61,6 +61,29 @@ describe('Loader timing (show mode)', () => {
     expect(onDone).toHaveBeenCalledTimes(1);
   });
 
+  it('with ready already resolved at mount, still waits the 2.2s minimum', async () => {
+    const onDone = vi.fn();
+    render(<Loader ready={Promise.resolve()} onDone={onDone} />);
+    await advance(2199);
+    expect(leaving()).toBe(false);
+    expect(onDone).not.toHaveBeenCalled();
+    await advance(1);
+    expect(leaving()).toBe(true);
+  });
+
+  it('a skip before the minimum still exits immediately', async () => {
+    const onDone = vi.fn();
+    render(<Loader ready={Promise.resolve()} onDone={onDone} />);
+    await advance(300);
+    act(() => {
+      document.body.dispatchEvent(new (window.PointerEvent ?? MouseEvent)('pointerdown', { bubbles: true }));
+    });
+    await advance(0);
+    expect(leaving()).toBe(true);
+    await advance(EXIT_MS);
+    expect(onDone).toHaveBeenCalledTimes(1);
+  });
+
   it('exits 250ms after a late ready', async () => {
     let settle: () => void = () => {};
     render(<Loader ready={new Promise<void>((r) => (settle = r))} onDone={vi.fn()} />);
@@ -183,8 +206,8 @@ describe('Loader accessibility', () => {
     expect(bar).toHaveAttribute('aria-valuemin', '0');
     expect(bar).toHaveAttribute('aria-valuemax', '100');
     expect(bar).toHaveAttribute('aria-valuenow', '0');
-    await advance(600);
-    // 90·(1 − 0.5³) = 78.75 at 600ms
+    await advance(1100);
+    // 90·(1 − 0.5³) = 78.75 at 1100ms (the ramp reaches 90 at 2200ms)
     expect(Number(bar.getAttribute('aria-valuenow'))).toBeGreaterThanOrEqual(75);
     expect(Number(bar.getAttribute('aria-valuenow'))).toBeLessThanOrEqual(79);
   });
