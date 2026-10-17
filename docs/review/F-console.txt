@@ -1,11 +1,11 @@
-Primary flow console log (round 2): production build (npm run build && vite preview, http://localhost:3101), headless Chrome 155 over CDP, 1440x900, 2026-10-17T01:24:16.159Z
+Primary flow console log (round 2): production build (npm run build && vite preview, http://localhost:3101), headless Chrome 155 over CDP, 1440x900, 2026-10-17T01:49:53.946Z
 Errors+warnings: 0
 [    0ms] navigate http://localhost:3101/?loader=1 (production build, fresh session)
-[ 1690ms] main released after 1339ms
-[ 3301ms] clicked nav Projects: hash=#projects aria-current=Projects section top=72px
-[ 5425ms] hovered SagePlan window: data-state=attention
-[ 7037ms] clicked nav About: hash=#about aria-current=About section top=72px
-[ 9156ms] hovered first print: data-attended=true
-[10764ms] clicked nav Contact: hash=#contact aria-current=Contact section top=452px
-[10764ms] Contact line: "Contact: LinkedIn, Email, GitHub."
-[12371ms] clicked nav Home: hash=#home aria-current=Home section top=0px
+[ 1730ms] main released after 1378ms
+[ 3341ms] clicked nav Projects: hash=#projects aria-current=Projects section top=72px
+[ 5453ms] hovered SagePlan window: data-state=attention
+[ 7063ms] clicked nav About: hash=#about aria-current=About section top=72px
+[ 9169ms] hovered first print: data-attended=true
+[10774ms] clicked nav Contact: hash=#contact aria-current=Contact section top=452px
+[10775ms] Contact line: "Contact: LinkedIn, Email, GitHub."
+[12384ms] clicked nav Home: hash=#home aria-current=Home section top=0px
