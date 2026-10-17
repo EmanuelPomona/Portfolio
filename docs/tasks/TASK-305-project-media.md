@@ -1,7 +1,7 @@
 ---
 id: TASK-305
 title: StreetSafe screenshot, Snake AI recording, npm run video, and C-22
-status: IN_PROGRESS
+status: REVIEW
 owner: backend
 branch: agent/backend
 priority: HIGH

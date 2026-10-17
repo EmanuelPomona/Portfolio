@@ -1,7 +1,7 @@
 # STATUS: agent/backend
-Task: TASK-305 (IN_PROGRESS). Earlier: 301-303 REVIEW, 304 BLOCKED (contract)
+Task: TASK-305 (REVIEW). Earlier: 301-303 REVIEW, 304 BLOCKED (contract)
 Round: 0
-Last updated: 2026-10-16T23:00:00Z
+Last updated: 2026-10-16T23:20:00Z
 
 ## Skills invoked so far
 - ecc:contract-first @ TASK-301 start, before validator -> shapes imported from types.ts (no redeclared copies); DATABASE.md is the invariant source; provider check = validate the real exported `content`; fixtures JSON-cloned because heroLinks/contact.links share refs (structuredClone would double-count)
@@ -21,6 +21,7 @@ Last updated: 2026-10-16T23:00:00Z
 - ecc:backend-patterns @ TASK-305, before video.swift (re-invoked; harness: already loaded, unchanged) -> transaction: encode + poster to dot-temp files beside the targets, verify codec/no-audio/size/<=3MB, rename(2) into place only if every recording succeeded, temps removed on failure
 - superpowers:requesting-code-review @ TASK-305 pre-handoff (re-invoked; harness: already loaded, unchanged) -> read-only reviewer on 12e9c35..2fb25a6 with TASK-305/ADR-012/API/DATABASE/B-06 and stated decisions; findings pending
 - superpowers:receiving-code-review @ TASK-305 after review verdict With fixes (re-invoked; harness: already loaded) -> verified #1 in code (cleanup only covered successful outputs); fixed 1,2,3,4,5,6,7,8 with tests; declined list accepted (poster jump, ICC, 60fps, corner pixels, INDEX.md)
+- superpowers:verification-before-completion @ immediately before HANDOFF-2 (re-invoked; harness: already loaded) -> every TASK-305 claim re-run fresh on 5c82dc8; no implementation after it
 - (probe, scratchpad only) all 3 formats byte-stable across 3 processes on this mac; hero 1600w AVIF q50=53.6KB, q60=73.9KB -> chose AVIF q60/effort 4, WebP q80/effort 4, JPEG q80 mozjpeg
 
 ## Done
@@ -90,8 +91,11 @@ OWNER HOLD: no vercel calls of any kind, no git push. Local commits only.
 - [x] Review #6/#7: shared test util scripts/mp4-boxes.mjs; checks: no unused recording ships, declared size == file (b9dfa7d); mutations (orphan mp4, width 1280) both red, restored
 - [x] Review #4 + guide: edges, trim, size reality, .mov only, cropLeft/Right, C-22 row (1e76b9b)
 
+- [x] Fresh verification on 5c82dc8: npm test 598/598 (48 files) exit 0; typecheck 0; lint 0; build 0; contract-test.sh 185/185 exit 0; media x2 clean; mdls + boxes + decoded frames; crop rows re-measured; poster re-made byte-identical; never-edit files unchanged
+- [x] docs/review/B-305-media.txt; HANDOFF-2; TASK-305 -> REVIEW. Not pushed (owner hold).
+
 ## In progress
-- [ ] TASK-305: verification-before-completion, evidence B-305-media.txt, HANDOFF-2, REVIEW, commit (no push), SendMessage portfolio-38
+- [ ] Reply to manager portfolio-38 via SendMessage
 
 ## Verified
 - Baseline (pre-change) -> typecheck/lint/test all pass on 3ea91a0
