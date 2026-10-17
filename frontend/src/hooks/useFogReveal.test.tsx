@@ -67,6 +67,30 @@ describe('useFogReveal', () => {
     const el = screen.getByTestId('probe');
     expect(el).toHaveAttribute('data-revealed', 'true');
     expect(el).toHaveTextContent('revealed');
+    // Instant, so turning reduced motion off later never plays a reveal for content already shown.
+    expect(el).toHaveAttribute('data-reveal', 'instant');
+  });
+
+  it('settles once its reveal has finished, so a reduced-motion or print toggle never replays it', () => {
+    // Regression (review, round 2): `animation: none !important` under reduced motion or print,
+    // lifted again, restarted every finished reveal: the page blanked and slid back in.
+    render(<ArrivalProbe />);
+    const el = screen.getByTestId('arrival');
+    act(() => io.intersect(el, 0.5));
+    expect(el).toHaveAttribute('data-revealed', 'true');
+    expect(el).not.toHaveAttribute('data-reveal');
+
+    const end = (name: string) => {
+      const event = new Event('animationend', { bubbles: true });
+      Object.defineProperty(event, 'animationName', { value: name });
+      act(() => {
+        el.querySelector('p')!.dispatchEvent(event);
+      });
+    };
+    end('unrelated');
+    expect(el).not.toHaveAttribute('data-reveal');
+    end('arrive');
+    expect(el).toHaveAttribute('data-reveal', 'instant');
   });
 
   it('reveals an element that is already above the viewport', () => {

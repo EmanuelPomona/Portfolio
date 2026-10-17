@@ -120,6 +120,25 @@ describe('Hero', () => {
     }
   });
 
+  it('settles the copy once its reveal has finished, and shows it instantly under reduced motion', () => {
+    const { container, rerender } = render(<Hero site={site} onHeroDecode={() => {}} ready={false} />);
+    const copy = container.querySelector('#home [data-fog]') as HTMLElement;
+    rerender(<Hero site={site} onHeroDecode={() => {}} ready />);
+    expect(copy).not.toHaveAttribute('data-reveal');
+    const event = new Event('animationend', { bubbles: true });
+    Object.defineProperty(event, 'animationName', { value: 'fog-clear' });
+    act(() => {
+      copy.querySelector('h1')!.dispatchEvent(event);
+    });
+    expect(copy).toHaveAttribute('data-reveal', 'instant');
+    cleanup();
+
+    media.restore();
+    media = installMatchMedia({ [REDUCED_MOTION_QUERY]: true });
+    const reduced = render(<Hero site={site} onHeroDecode={() => {}} ready />);
+    expect(reduced.container.querySelector('#home [data-fog]')).toHaveAttribute('data-reveal', 'instant');
+  });
+
   it('holds the copy in the fog until ready, then clears it', () => {
     const { rerender } = render(<Hero site={site} onHeroDecode={() => {}} ready={false} />);
     const copy = screen.getByRole('heading', { level: 1 }).closest('[data-fog]')!;

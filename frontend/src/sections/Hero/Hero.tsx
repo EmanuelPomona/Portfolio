@@ -1,11 +1,13 @@
 // Owner: agent/frontend. The hero (TASK-102, wireframe 1): the alpine photograph, the name as a
 // book's title page, and the owner's "moving thingy", a slow drift of fog across the valley.
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { preload } from 'react-dom';
 import { getMedia, type Link, type Site } from '../../content';
 import { Picture } from '../../components/Picture/Picture';
 import { HERO_PHOTO_SIZES } from '../../components/Picture/sizes';
 import { useDriftPlaying } from '../../hooks/useDriftPlaying';
+import { settleWhenRevealed } from '../../hooks/useFogReveal';
+import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
 import { useScrollDepth } from '../../hooks/useScrollDepth';
 import { DEPTH } from '../../lib/depth';
 import styles from './Hero.module.css';
@@ -59,6 +61,17 @@ export function Hero({ site, onHeroDecode, ready = true }: HeroProps) {
   useScrollDepth(depthLayer, DEPTH.hero);
   const photo = getMedia(site.heroImage);
 
+  // The copy clears once, when the loader hands over. Afterwards (or at once under reduced motion)
+  // it settles to data-reveal="instant", so a media change can never replay it.
+  const [copy, setCopy] = useState<HTMLDivElement | null>(null);
+  const [settled, setSettled] = useState(false);
+  const reduced = usePrefersReducedMotion();
+  if (ready && reduced && !settled) setSettled(true);
+  useEffect(() => {
+    if (!copy || !ready || settled) return;
+    return settleWhenRevealed(copy, () => setSettled(true));
+  }, [copy, ready, settled]);
+
   return (
     <section id="home" ref={setSection} className={styles.hero}>
       <div className={styles.photo} aria-hidden="true">
@@ -70,7 +83,13 @@ export function Hero({ site, onHeroDecode, ready = true }: HeroProps) {
         </div>
       </div>
 
-      <div className={styles.copy} data-fog="stagger" data-revealed={ready ? 'true' : undefined}>
+      <div
+        ref={setCopy}
+        className={styles.copy}
+        data-fog="stagger"
+        data-revealed={ready ? 'true' : undefined}
+        data-reveal={settled ? 'instant' : undefined}
+      >
         <h1 className={styles.name}>{site.name}</h1>
         <p className={styles.tagline}>{site.tagline}</p>
         <ul className={styles.links}>

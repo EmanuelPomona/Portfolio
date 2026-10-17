@@ -23,15 +23,47 @@ function isAbove(entry: IntersectionObserverEntry): boolean {
 /** fogged: waiting. animate: clears (and arrives) with motion. instant: shown at once, no motion. */
 type Reveal = 'fogged' | 'animate' | 'instant';
 
+/** The reveal's own keyframes, in global.css. */
+const REVEAL_ANIMATIONS = new Set(['fog-clear', 'arrive']);
+
+/** True while any reveal keyframe on the element or its parts is still due (running or delayed). */
+function revealPending(el: Element): boolean {
+  if (typeof el.getAnimations !== 'function') return false;
+  return el
+    .getAnimations({ subtree: true })
+    .some((a) => 'animationName' in a && REVEAL_ANIMATIONS.has((a as CSSAnimation).animationName) && a.playState !== 'finished');
+}
+
+/**
+ * Calls `onSettled` once the reveal's last keyframe on `el` (or its parts) has ended or been
+ * cancelled. Setting data-reveal="instant" then retires the animation for good: a finished reveal
+ * that keeps its `animation` declared restarts whenever a media query (reduced motion, print)
+ * removes it and gives it back. The reveal itself never waits for this; it only tidies up.
+ * Returns the cleanup.
+ */
+export function settleWhenRevealed(el: Element, onSettled: () => void): () => void {
+  const onEnd = (event: Event) => {
+    const name = (event as AnimationEvent).animationName;
+    if (REVEAL_ANIMATIONS.has(name) && !revealPending(el)) onSettled();
+  };
+  el.addEventListener('animationend', onEnd);
+  el.addEventListener('animationcancel', onEnd);
+  return () => {
+    el.removeEventListener('animationend', onEnd);
+    el.removeEventListener('animationcancel', onEnd);
+  };
+}
+
 /**
  * Sets data-revealed="true" on the element the first time 15% of it is in view, and never
  * un-reveals. Under reduced motion the element is revealed immediately. The CSS in global.css
  * does the visual work for elements marked data-fog="self" or data-fog="stagger", and for the
  * arrivals of elements that also carry data-arrive (TASK-108).
  *
- * Two cases also set data-reveal="instant", which turns the motion off for good (it is never
- * removed, so nothing replays): an element found entirely above the viewport, and an element that
- * receives focus. Focused content is then fully visible in the same frame (M-04).
+ * data-reveal="instant" turns the motion off for good (it is never removed, so nothing replays).
+ * It is set when an element is found entirely above the viewport, when it receives focus (focused
+ * content is then fully visible in the same frame, M-04), under reduced motion, and once a
+ * reveal that did play has finished.
  */
 export function useFogReveal<T extends HTMLElement>(): {
   ref: (el: T | null) => void;
@@ -42,14 +74,21 @@ export function useFogReveal<T extends HTMLElement>(): {
   const revealed = reveal !== 'fogged';
   const reduced = usePrefersReducedMotion();
 
-  // Latch on reduced motion during render, so the first paint is already revealed.
-  if (reduced && !revealed) setReveal('animate');
+  // Latch on reduced motion during render, so the first paint is already revealed. Instant, so
+  // turning reduced motion off later never plays a reveal for content that is already shown.
+  if (reduced && !revealed) setReveal('instant');
 
   useLayoutEffect(() => {
     if (!element || !revealed) return;
     element.setAttribute('data-revealed', 'true');
     if (reveal === 'instant') element.setAttribute('data-reveal', 'instant');
   }, [element, revealed, reveal]);
+
+  // Once the reveal has played, retire it, so nothing can replay it.
+  useEffect(() => {
+    if (!element || reveal !== 'animate') return;
+    return settleWhenRevealed(element, () => setReveal('instant'));
+  }, [element, reveal]);
 
   // Focus inside, by keyboard or otherwise: show it now, whatever the scroll position or motion.
   useEffect(() => {
