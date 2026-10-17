@@ -1,10 +1,13 @@
 // @vitest-environment node
-// Owner: agent/backend. Content invariants C-01 to C-20 (docs/DATABASE.md), part of `npm run test:contract`.
+// Owner: agent/backend. Content invariants C-01 to C-20 and C-22 (docs/DATABASE.md), part of `npm run test:contract`.
 //
 // Each rule test copies a base content, breaks exactly one rule, and expects exactly one violation with
 // that rule and path. Fixtures set up everything they rely on themselves (dates relative to the base's
 // own `updated`, whole image slots, fresh links), so the suite keeps passing when the owner edits the
 // real content by following README.md. Every rule test runs against two bases to prove it.
+import { existsSync, statSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { content, type Content, type Link, type MediaId } from './index';
 import { validateContent, type RuleId } from './validate';
@@ -36,6 +39,16 @@ function imagePaths(c: Content): string[] {
     'site.sectionsImage',
     ...c.projects.flatMap((p, i) => (p.screen.image === null ? [] : [`projects[${i}].screen.image`])),
     ...c.about.photos.flatMap((ph, i) => (ph.image === null ? [] : [`about.photos[${i}].image`])),
+  ];
+}
+
+/** Every non-null image id `c` references. */
+function imageIds(c: Content): string[] {
+  return [
+    c.site.heroImage,
+    c.site.sectionsImage,
+    ...c.projects.flatMap((p) => (p.screen.image === null ? [] : [p.screen.image])),
+    ...c.about.photos.flatMap((ph) => (ph.image === null ? [] : [ph.image])),
   ];
 }
 
@@ -73,7 +86,7 @@ describe.each([
   const variant = (change: (c: Mutable<Content>) => void) => edit(base, change);
 
   /** Rule and path of every violation, validated as of the base's own date; messages must be readable. */
-  function found(c: Content, opts: { today?: string; mediaIds?: readonly string[] } = {}) {
+  function found(c: Content, opts: Parameters<typeof validateContent>[1] = {}) {
     const violations = validateContent(c, { today, ...opts });
     for (const v of violations) expect(v.message.trim().length).toBeGreaterThan(10);
     return violations.map(({ rule, path }) => ({ rule, path }));
@@ -379,7 +392,7 @@ describe.each([
 
     it('C-11 checks against the mediaIds option when given', () => {
       const c = variant((c) => (c.projects[0]!.screen = { image: NEVER_GENERATED, alt: 'SagePlan requirements dashboard' }));
-      expect(found(c, { mediaIds: [KNOWN_IMAGE, base.site.sectionsImage, NEVER_GENERATED] })).toEqual([]);
+      expect(found(c, { mediaIds: [...imageIds(base), NEVER_GENERATED] })).toEqual([]);
       expect(found(base, { mediaIds: [] })).toEqual(imagePaths(base).map((path) => ({ rule: 'C-11', path })));
     });
 
@@ -408,6 +421,72 @@ describe.each([
         c.about.photos[last]!.id = c.about.photos[0]!.id;
       });
       expect(found(c)).toEqual(one('C-17', `about.photos[${last}].id`));
+    });
+  });
+
+  describe('recording rules (C-22)', () => {
+    const SRC = '/media/video/demo-app.mp4' as const;
+    const recording = { src: SRC, width: 1270, height: 954 };
+    /** Byte sizes of every recording the base already has, plus the fixture's. */
+    const sizes = (extra: Record<string, number> = { [SRC]: 485_602 }) => ({
+      ...Object.fromEntries(base.projects.flatMap((p) => (p.screen.video ? [[p.screen.video.src, 1000]] : []))),
+      ...extra,
+    });
+    /** projects[0] with a poster and a recording; `change` then breaks one clause. */
+    const withRecording = (change: (v: Mutable<NonNullable<Content['projects'][number]['screen']['video']>>, c: Mutable<Content>) => void = () => {}) =>
+      variant((c) => {
+        const video = { ...recording };
+        c.projects[0]!.screen = { image: KNOWN_IMAGE, alt: 'The demo app running in a browser window', video };
+        change(video, c);
+      });
+
+    it('C-22 accepts a recording with a poster, a valid src, a present file, and a landscape size', () => {
+      expect(found(withRecording(), { videoSizes: sizes() })).toEqual([]);
+    });
+
+    it('C-22 flags a recording without a poster image', () => {
+      const c = withRecording((_v, c) => Object.assign(c.projects[0]!.screen, { image: null, alt: null }));
+      expect(found(c, { videoSizes: sizes() })).toEqual(one('C-22', 'projects[0].screen.image'));
+    });
+
+    it('C-22 flags a src outside /media/video/<lowercase-name>.mp4', () => {
+      const c = withRecording((v) => (v.src = '/media/video/Demo_App.mp4'));
+      expect(found(c, { videoSizes: sizes({ '/media/video/Demo_App.mp4': 1000 }) })).toEqual(
+        one('C-22', 'projects[0].screen.video.src'),
+      );
+    });
+
+    it('C-22 flags a recording whose file is missing', () => {
+      expect(found(withRecording(), { videoSizes: sizes({}) })).toEqual(one('C-22', 'projects[0].screen.video.src'));
+    });
+
+    it('C-22 flags a file over 3 MB', () => {
+      expect(found(withRecording(), { videoSizes: sizes({ [SRC]: 3 * 1024 * 1024 + 1 }) })).toEqual(
+        one('C-22', 'projects[0].screen.video.src'),
+      );
+    });
+
+    it('C-22 accepts a file of exactly 3 MB', () => {
+      expect(found(withRecording(), { videoSizes: sizes({ [SRC]: 3 * 1024 * 1024 }) })).toEqual([]);
+    });
+
+    it('C-22 flags a width that is not a positive integer', () => {
+      const c = withRecording((v) => (v.width = 0));
+      expect(found(c, { videoSizes: sizes() })).toEqual(one('C-22', 'projects[0].screen.video.width'));
+    });
+
+    it('C-22 flags a fractional height', () => {
+      const c = withRecording((v) => (v.height = 953.5));
+      expect(found(c, { videoSizes: sizes() })).toEqual(one('C-22', 'projects[0].screen.video.height'));
+    });
+
+    it('C-22 flags a recording taller than it is wide', () => {
+      const c = withRecording((v) => Object.assign(v, { width: 954, height: 1270 }));
+      expect(found(c, { videoSizes: sizes() })).toEqual(one('C-22', 'projects[0].screen.video'));
+    });
+
+    it('C-22 checks the file only when videoSizes is given', () => {
+      expect(found(withRecording())).toEqual([]);
     });
   });
 
@@ -484,9 +563,21 @@ describe.each([
   });
 });
 
+/** Byte size of every recording the content references, read from frontend/public (missing files left out). */
+function recordingSizes(c: Content): Record<string, number> {
+  const publicDir = fileURLToPath(new URL('../../public', import.meta.url));
+  return Object.fromEntries(
+    c.projects.flatMap((p) => {
+      const src = p.screen.video?.src;
+      const file = src && path.join(publicDir, src);
+      return file && existsSync(file) ? [[src, statSync(file).size]] : [];
+    }),
+  );
+}
+
 describe('the real content', () => {
-  it('satisfies every invariant C-01 to C-20', () => {
-    const violations = validateContent(content);
+  it('satisfies every invariant C-01 to C-20 and C-22', () => {
+    const violations = validateContent(content, { videoSizes: recordingSizes(content) });
     const report = violations.map((v) => `  ${v.rule} at ${v.path}: ${v.message}`).join('\n');
     expect(violations, `The content has problems. Fix each one, then run npm run test:contract again.\n${report}\n`).toEqual([]);
   });

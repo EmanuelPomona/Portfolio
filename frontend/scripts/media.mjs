@@ -20,6 +20,11 @@
 // 16-bit sources; the tests pin it). Every rendition is resized from that decode with lanczos3.
 // No metadata (EXIF, ICC, XMP) and no timestamps are written. Sources are processed in sorted order.
 //
+// Recordings in media-src/video/ are not images: `npm run video` (scripts/video.swift, ADR-012) turns
+// them into public/media/video/<id>.mp4 plus a poster PNG in media-src/projects/, which this pipeline
+// then processes like any screenshot. Stale cleanup only ever deletes files named like renditions,
+// so the MP4s are never touched here.
+//
 // Failure: every problem (a badly named file, an unsupported type, an unreadable image) is reported
 // as `media-src/<path>: <reason>`, and the run exits 1 WITHOUT touching public/media or the manifest.
 // On success it writes changed renditions, deletes stale ones (only files named like renditions), and
@@ -41,6 +46,8 @@ import {
 
 const FRONTEND = fileURLToPath(new URL('..', import.meta.url));
 const IMAGE_EXTENSIONS = new Set(['.png', '.jpg', '.jpeg', '.webp']);
+/** media-src/video/ holds recordings for `npm run video`; this pipeline skips it. */
+const VIDEO_DIR = 'video';
 /** @type {[ext: 'avif' | 'webp' | 'jpg', encode: (s: sharp.Sharp) => sharp.Sharp][]} */
 const FORMATS = [
   ['avif', (s) => s.avif({ quality: 60, effort: 4, chromaSubsampling: '4:4:4' })],
@@ -85,7 +92,7 @@ async function discover(srcDir) {
   const byId = new Map();
   for (const rel of await listFiles(srcDir)) {
     const ignored = rel.split('/').some((part) => part.startsWith('.')) || rel.toLowerCase().endsWith('.md');
-    if (ignored) continue;
+    if (ignored || rel.startsWith(`${VIDEO_DIR}/`)) continue; // recordings belong to npm run video (ADR-012)
     if (!IMAGE_EXTENSIONS.has(path.extname(rel).toLowerCase())) {
       problems.push(`media-src/${rel}: unsupported file type; save it as .png, .jpg, or .webp`);
       continue;

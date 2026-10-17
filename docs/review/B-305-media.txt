@@ -1,0 +1,60 @@
+B-305 project media evidence (TASK-305), agent/backend, 2026-10-16 (PDT)
+Everything below was re-run fresh on HEAD 5c82dc8, after superpowers:verification-before-completion.
+Owner hold respected: no vercel calls, no git push (B-06's preview line is therefore not verified).
+
+== Snake AI recording ==
+Source:   frontend/media-src/video/snake-ai.mov (byte-identical copy of docs/inputs/"Untitled 2.mov",
+          sha256 9aec69fcab6d0a6a8568620b8d4054c28a1469cc2ac0f1491e22fdd8665435f6)
+          QuickTime, one video track hvc1 (HEVC), 1270x1006, 60.02 fps, identity transform, 33.69 s, no audio.
+Settings: frontend/media-src/video/snake-ai.json = { "cropTop": 51, "cropBottom": 1, "posterSeconds": 12 }
+
+Crop rows (measured, median luminance of x 200..1069 on decoded source frames):
+  source frame 0s  (1270x1006): row 49=59 row 50=54 row 51=0 row 52=0
+  source frame 12s (1270x1006): row 49=57 row 50=57 row 51=0 row 52=0
+  source frame 30s (1270x1006): row 49=57 row 50=57 row 51=0 row 52=0
+  -> rows 0..50 are the "Snake RL" title bar (grey ~57); row 51 is the first row of the app's content.
+  -> row 1005 (the last) holds only the window's rounded-corner pixels at x 0..2 and 1267..1269
+     (rows 1000..1005 likewise); it is cropped to make the height even: rows 51..1004 = 954 rows.
+     A few faint corner pixels remain in rows 1000..1004 at the extreme left/right columns.
+
+Output (npm run video):
+  snake-ai.mov: public/media/video/snake-ai.mp4 (H.264, 1270x954, 33.7s, 485602 bytes, no audio),
+                media-src/projects/snake-ai.png (poster at 11.989s)
+  MP4 per Spotlight (mdls): kMDItemCodecs = ( "H.264" ) kMDItemDurationSeconds = 33.7 kMDItemFSSize = 485602
+                            kMDItemMediaTypes = ( Video ) kMDItemPixelHeight = 954 kMDItemPixelWidth = 1270
+  MP4 per its boxes:        top-level ftyp(28) moov(27484) mdat(458090) (moov first: plays while downloading);
+                            sample format avc1; track handlers: vide only (no soun = no audio); tkhd 1270x954
+  Size: 485,602 bytes, under the 3 MB cap (3,145,728 bytes).
+  Decoded MP4 frames at 1 s and 12 s: 1270x954, row 0 max channel value 0 (no title bar).
+  Poster frame time: requested 12 s, exact frame 11.989 s (tolerance zero). It shows "Score: 11", the
+    green snake and the red food. The poster re-made in a temp folder is byte-identical to the
+    committed one; the MP4 is not byte-identical run to run (same size), as ADR-012 accepts.
+
+== StreetSafe: LA screenshot ==
+Source: docs/inputs/Screenshot 2026-10-14 at 4.56.11<U+202F>PM copy.png, 1920x958 RGBA, no EXIF orientation.
+Crop:   x 387..1920, y 0..958, after the pipeline's prepareSource (alpha flattened onto Ivory).
+Output: frontend/media-src/projects/streetsafe-la.png  1533x958, 3 channels, 578,586 bytes (16:10 = 1.6002)
+        Keeps the orange hazard markers, the "25 reports" list, and "Report a hazard".
+
+== Both PNG sources (sharp metadata) ==
+  media-src/projects/streetsafe-la.png 1533x958 channels 3 578586 bytes
+  media-src/projects/snake-ai.png      1270x954 channels 3  28847 bytes   <- the poster
+
+== npm run media (B-02) ==
+  npm run media: 4 image(s), 36 renditions (0 written, 0 stale removed), manifest unchanged.
+  npm run media: 4 image(s), 36 renditions (0 written, 0 stale removed), manifest unchanged.
+  git status: 0 changed paths
+  Widths: projects/snake-ai 640, 1024, 1270; projects/streetsafe-la 640, 1024, 1533.
+
+== Gates ==
+  npm test                 exit 0   Test Files 48 passed (48), Tests 598 passed (598)
+  npm run typecheck        exit 0
+  npm run lint             exit 0
+  npm run build            exit 0   dist/assets/index-BboVf9C3.js 264.03 kB (83.99 kB gzip); index-UMwyIuSq.css 24.37 kB (6.49 kB gzip)
+  scripts/contract-test.sh exit 0   "no HTTP API declared ... running module contract tests"; 5 files, 185 passed
+  C-22: content.contract.test.ts (one violation per clause, both bases) and the real-content gate
+        (validateContent(content, { videoSizes from disk }) returns []) pass inside the counts above.
+  Never-edit files (types.ts, media.ts, index.html, vite.config.ts, components/sections/app/hooks/
+  styles/stickman): no diff in 12e9c35..HEAD.
+
+Poster PNG: frontend/media-src/projects/snake-ai.png

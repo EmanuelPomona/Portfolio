@@ -491,3 +491,6 @@ keeps dependencies minimal.
 - **Positive:** the Snake AI window shows the agent actually playing, exactly when someone looks.
 - **Negative:** `npm run video` runs only on macOS; the encode is not byte-identical across runs.
 - **Risk:** a long or large recording bloats the repository. C-22's 3 MB cap guards it.
+- **Amended at round 3 integration:** `video.posterTime` (optional, seconds). The poster is a
+  mid-recording frame chosen to show the game, so the first play starts there instead of jumping
+  back to 0.

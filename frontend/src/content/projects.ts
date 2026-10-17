@@ -23,7 +23,10 @@ export const projects: readonly Project[] = [
     primary: { kind: 'code', label: 'Code', href: 'https://github.com/EmanuelPomona/Street-Safe-LA' },
     secondary: [{ kind: 'devpost', label: 'Devpost', href: 'https://devpost.com/software/street-safe-la' }],
     addressBar: 'github.com/EmanuelPomona/Street-Safe-LA',
-    screen: { image: null, alt: null },
+    screen: {
+      image: 'projects/streetsafe-la',
+      alt: 'Street-Safe: LA map of Los Angeles with orange hazard markers beside a list of 25 recent reports',
+    },
   },
   {
     id: 'revelation-youth',
@@ -45,6 +48,10 @@ export const projects: readonly Project[] = [
     primary: { kind: 'code', label: 'Code', href: 'https://github.com/EmanuelPomona/Snake-AI' },
     secondary: [],
     addressBar: 'github.com/EmanuelPomona/Snake-AI',
-    screen: { image: null, alt: null },
+    screen: {
+      image: 'projects/snake-ai',
+      alt: 'The trained agent playing Snake: a green snake chasing a red square on a black field',
+      video: { src: '/media/video/snake-ai.mp4', width: 1270, height: 954 },
+    },
   },
 ];

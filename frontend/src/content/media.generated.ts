@@ -42,5 +42,45 @@ export const mediaManifest = {
       "src": "/media/backgrounds/evergreen-forest-1024.jpg",
       "srcset": "/media/backgrounds/evergreen-forest-640.jpg 640w, /media/backgrounds/evergreen-forest-1024.jpg 1024w"
     }
+  },
+  "projects/snake-ai": {
+    "id": "projects/snake-ai",
+    "width": 1270,
+    "height": 954,
+    "placeholder": "#010500",
+    "sources": [
+      {
+        "type": "image/avif",
+        "srcset": "/media/projects/snake-ai-640.avif 640w, /media/projects/snake-ai-1024.avif 1024w, /media/projects/snake-ai-1270.avif 1270w"
+      },
+      {
+        "type": "image/webp",
+        "srcset": "/media/projects/snake-ai-640.webp 640w, /media/projects/snake-ai-1024.webp 1024w, /media/projects/snake-ai-1270.webp 1270w"
+      }
+    ],
+    "fallback": {
+      "src": "/media/projects/snake-ai-1270.jpg",
+      "srcset": "/media/projects/snake-ai-640.jpg 640w, /media/projects/snake-ai-1024.jpg 1024w, /media/projects/snake-ai-1270.jpg 1270w"
+    }
+  },
+  "projects/streetsafe-la": {
+    "id": "projects/streetsafe-la",
+    "width": 1533,
+    "height": 958,
+    "placeholder": "#e3e5e1",
+    "sources": [
+      {
+        "type": "image/avif",
+        "srcset": "/media/projects/streetsafe-la-640.avif 640w, /media/projects/streetsafe-la-1024.avif 1024w, /media/projects/streetsafe-la-1533.avif 1533w"
+      },
+      {
+        "type": "image/webp",
+        "srcset": "/media/projects/streetsafe-la-640.webp 640w, /media/projects/streetsafe-la-1024.webp 1024w, /media/projects/streetsafe-la-1533.webp 1533w"
+      }
+    ],
+    "fallback": {
+      "src": "/media/projects/streetsafe-la-1533.jpg",
+      "srcset": "/media/projects/streetsafe-la-640.jpg 640w, /media/projects/streetsafe-la-1024.jpg 1024w, /media/projects/streetsafe-la-1533.jpg 1533w"
+    }
   }
 } as const satisfies Record<string, MediaAsset>;

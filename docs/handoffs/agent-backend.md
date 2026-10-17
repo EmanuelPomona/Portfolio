@@ -406,3 +406,190 @@ claimed: contract-first and TDD at 9%, backend-patterns at 29%, systematic-debug
 
 `agent/backend` at the commit that adds this handoff. It has 57 commits since baseline `3ea91a0`, each
 a single change, and is pushed to `origin/agent/backend`.
+
+## HANDOFF-2 — agent/backend — 2026-10-16
+
+### Summary
+
+TASK-305 is implemented, reviewed, fixed after review, and verified. It is set to `REVIEW`.
+
+**What shipped (owner hold: committed locally only, no deploy, no push)**
+- **StreetSafe: LA:** the window now shows the owner's screenshot.
+- **Snake AI:** the window holds a 33.7 s H.264 recording plus its poster.
+- **`npm run video`:** a new macOS AVFoundation script, with no ffmpeg and no new dependency.
+- **Content rule C-22:** enforced, with tests.
+- **Owner guide:** explains screenshots (crop to 16:10 first) and recordings.
+- SagePlan and Revelation Youth stay empty, as specified.
+
+**The MP4**
+- `frontend/public/media/video/snake-ai.mp4`.
+- **Codec and tracks:** H.264 (`avc1`), a single video track, no audio track.
+- **Size:** 1270×954 (even), 33.7 s, **485,602 bytes**, against a 3,145,728-byte cap.
+- **Streams while downloading:** `moov` comes before `mdat`.
+- **Title-bar crop:** rows 0 to 50 removed. Row 51 is the measured first row of content.
+- **Bottom row:** one corner row removed so the height is even.
+- **Poster:** `frontend/media-src/projects/snake-ai.png`, frame 11.989 s (requested 12 s), the same
+  crop, showing both the snake and the food.
+
+### Tasks Completed
+
+TASK-305: StreetSafe screenshot, Snake AI recording, `npm run video`, and C-22. Set to `REVIEW`.
+
+- **B-06** (except the preview line, which the owner hold blocks):
+  - `npm run video` turns `media-src/video/snake-ai.mov` into `public/media/video/snake-ai.mp4`
+    (H.264, no audio, title bar cropped, ≤ 3 MB) and the poster `media-src/projects/snake-ai.png`;
+  - `npm run media` then makes the poster renditions (640, 1024, 1270);
+  - C-22 passes.
+- **B-01, B-02, C-21 still pass.** `npm run media` run twice printed "0 written … manifest unchanged",
+  and `git status` showed 0 changed paths.
+  - `npm run media` and C-21 now skip `media-src/video/`. Before that change, putting the `.mov`
+    there broke both of them. The fix was test-first.
+- **C-22: one test per clause, on both bases.** There are 7 failing cases (video without image; bad
+  `src`; missing file; over 3 MB; width not a positive integer; fractional height; `width < height`),
+  each run on the real content and on the owner-edited content. There are also boundary tests at
+  exactly 3 MiB, plus a test that `videoSizes` is optional.
+- **`validateContent(content)` returns `[]`** for the real content, with the actual file sizes read
+  from disk.
+- **Evidence:** `docs/review/B-305-media.txt`. It holds:
+  - the MP4's codec, dimensions, duration, size and audio check, from both `mdls` and the box parse;
+  - the poster frame time;
+  - the crop rows, measured on three source frames;
+  - both PNGs' dimensions;
+  - the test, typecheck, lint, build and contract output;
+  - the poster's path.
+- **Content values** match the task's text: the `streetsafe-la` and `snake-ai` screens.
+  - `video: { src: '/media/video/snake-ai.mp4', width: 1270, height: 954 }`.
+  - `site.updated` was already 2026-10-16, today in PDT, so it needed no bump. In UTC it is already
+    2026-10-17.
+
+### Files Changed
+
+All on `agent/backend` since `12e9c35`, committed locally and not pushed (the commit count is under Commit).
+
+**Media sources** (`frontend/media-src/`)
+- `projects/streetsafe-la.png` (new): the screenshot cropped to 16:10.
+- `video/snake-ai.mov` (new): byte-identical to the input recording.
+- `video/snake-ai.json` (new): the measured crop and poster settings.
+- `projects/snake-ai.png` (new): the poster.
+
+**Generated output**
+- `frontend/public/media/video/snake-ai.mp4` (new).
+- `frontend/public/media/projects/*` (new): 18 renditions.
+- `frontend/src/content/media.generated.ts` (regenerated).
+
+**Scripts** (`frontend/scripts/`)
+- `video.swift` (new).
+- `video.test.mjs` (new): 13 tests.
+- `mp4-boxes.mjs` and `mp4-boxes.d.mts` (new): a test utility that reads MP4 boxes.
+- `media.mjs`: skips `media-src/video/`.
+- `media.test.mjs`: plus 1 test.
+
+**Content** (`frontend/src/content/`)
+- `validate.ts`: C-22, and the `videoSizes` option.
+- `content.contract.test.ts`: C-22 tests; the real-content gate reads file sizes; the C-11 fixture now
+  derives its ids from the content.
+- `media.contract.test.ts`: C-21 skips `video/`; recording checks added.
+- `projects.ts`: the two screens.
+- `README.md`: the owner guide.
+
+**Other**
+- `frontend/package.json`: the `"video"` script, which TASK-305 lists in its scope.
+- `docs/review/B-305-media.txt`
+- `docs/tasks/TASK-305-project-media.md` (status only) and `docs/tasks/INDEX.md`
+- `docs/status/agent-backend.md`
+- this file
+
+**Untouched:** `types.ts`, `media.ts`, `index.html`, `vite.config.ts`, and every frontend component
+or test. `git diff 12e9c35..HEAD` over them is empty.
+
+### Contracts
+
+- **`validateContent(c, opts?)`** gains an additive option:
+  `videoSizes?: Readonly<Record<string, number>>`, mapping a URL to its size in bytes. The validator
+  stays I/O-free, so C-22's file clauses run only when the caller passes it. The real-content gate
+  does.
+  - `RuleId` gains `'C-22'`. 3 MB is 3 × 1024 × 1024 bytes everywhere.
+- **`npm run video`** (macOS only; it runs `swift -suppress-warnings scripts/video.swift`):
+  - **Inputs:** `media-src/video/<id>.mov` plus `<id>.json`, which takes `cropTop`, `cropBottom`,
+    `posterSeconds`, and the optional `cropLeft` and `cropRight`.
+  - **Outputs:** `public/media/video/<id>.mp4` and `media-src/projects/<id>.png`.
+  - **Failure:** all-or-nothing. It exits 1, prints `media-src/video/<file>: <reason>`, and leaves no
+    partial files.
+  - **Other files:** any file other than `.mov` in `media-src/video` is reported as a problem.
+- **Not a contract change:** `media-src/video/` is invisible to `npm run media` and to C-21.
+- **For frontend (TASK-110):**
+  - `screen.video` is set on `snake-ai`. Its poster is the `projects/snake-ai` MediaAsset.
+  - The `streetsafe-la` screenshot is exactly 16:10 (1533×958).
+- **Dependencies:** none.
+
+### Skills Used
+
+| Skill | Stage invoked | What it actually changed |
+|---|---|---|
+| superpowers:test-driven-development | Start of TASK-305. The call returned "already loaded, instructions unchanged" | Each piece started with a failing test and then passed: the `media-src/video` skip; the C-21 skip, red only once the `.mov` was present; the 13 `npm run video` tests; C-22 with 14 failures; the review fixes with 5 failures. Mutation checks: a crop with no translate, cleanup removed, an orphan MP4, and a wrong declared width each turned the matching test red. |
+| ecc:backend-patterns | Before writing `video.swift`. The call returned "already loaded, instructions unchanged" | Treat each run as a transaction. Encode the MP4 and the poster to dot-prefixed temporary files, check codec, audio and size, and only then `rename(2)` them into place, and only if every recording succeeded. A failed run removes its temporary files (fixed after review). |
+| superpowers:requesting-code-review | Before the handoff, on `12e9c35..2fb25a6`. The call returned "already loaded, instructions unchanged" | A read-only reviewer independently verified the crop: the MP4 aligns with source row 51, and the poster is pixel-identical. Verdict "With fixes": 1 Important, 7 Minor. |
+| superpowers:receiving-code-review | After that verdict. The call returned "already loaded, instructions unchanged" | Finding #1 (partial MP4 leak) was confirmed in the code before acting. Findings 1 to 8 were fixed, each with tests. The reviewer's "declined to judge" list was accepted. |
+| superpowers:verification-before-completion | Immediately before this handoff. The call returned "already loaded, instructions unchanged" | Every result under Verification was produced fresh on `5c82dc8`. No implementation work followed. |
+
+Every TASK-305 invocation returned "already loaded". The instructions in force are the ones loaded
+earlier in this session and recorded under HANDOFF-1.
+
+### Verification
+
+Fresh on HEAD `5c82dc8`. Full detail is in `docs/review/B-305-media.txt`.
+
+```
+npm test                 exit 0   Test Files 48 passed (48), Tests 598 passed (598)   (video.test.mjs 13/13 ran on darwin)
+npm run typecheck        exit 0
+npm run lint             exit 0
+npm run build            exit 0   index-BboVf9C3.js 264.03 kB (83.99 kB gzip); index-UMwyIuSq.css 24.37 kB (6.49 kB gzip)
+scripts/contract-test.sh exit 0   5 files, 185 passed
+npm run media (x2)       "4 image(s), 36 renditions (0 written, 0 stale removed), manifest unchanged."; git status clean
+mdls snake-ai.mp4        H.264, Video only, 1270x954, 33.7 s, 485602 bytes
+MP4 boxes                ftyp(28) moov(27484) mdat(458090); avc1; handlers: vide; tkhd 1270x954
+crop rows (src frames)   0 s: row50=54 row51=0 | 12 s: row50=57 row51=0 | 30 s: row50=57 row51=0
+decoded MP4 frames       1 s and 12 s: row 0 max 0 (no title bar)
+poster                   11.989 s; re-made in a temp folder it is byte-identical to the committed PNG
+scripts/audit-skills.sh  exit 0, "all claims corroborated by the transcript"; TASK-305 invocations at
+                         TDD 78%, backend-patterns 80%, requesting/receiving review 90-92%, verification 97%
+```
+
+### What Was NOT Verified
+
+- **B-06's preview line** (`/media/video/snake-ai.mp4` returns 200 with `video/mp4` on the preview).
+  The owner's hold forbids deploying, so this was not checked.
+- **The recording playing in the page.** TASK-110 (frontend) renders it: attention playback, poster,
+  `contain` fit, reduced motion. I checked only the file, and I did not open it in a browser's
+  `<video>` element.
+- **Browser support for this exact encode.** It is H.264 High in MP4, which every current browser
+  plays. I did not test Firefox or Safari.
+- **Running the video tests in CI.** `video.test.mjs` is skipped off macOS, and CI is Linux. The 13
+  tests ran only on this Mac (macOS 26, Swift 6.3.3).
+- **Older macOS.** The AVFoundation calls used are back-deployed, according to the reviewer's SDK
+  check. I did not run the script on anything older than macOS 26.
+- **The MP4 is not byte-identical between runs.** Only its size and contents were checked. ADR-012
+  accepts this.
+- **The owner guide's recording steps** have not been followed by the owner. That includes measuring
+  `cropTop`, Shift-Command-5's "selected portion", and QuickTime's trim and export.
+- **The two corner pixels.** About 7 faint grey corner pixels remain in the MP4's bottom rows. I judged
+  them invisible on black, but no visual review in the page has been done.
+
+### Known Issues
+
+- **The poster jumps.** The poster is the 11.989 s frame, but playback starts at 0 s, so the picture
+  changes the moment the video starts. This is the frontend's decision (TASK-110). If it matters,
+  start playback at the poster time, or pick a poster near the start.
+- **The poster carries a Rec.709 ICC profile,** inherited from the HEVC source. sharp converts it to
+  sRGB for the renditions.
+- **The output is 60 fps,** the source's rate. The file is far below the size cap.
+- **The C-22 file clauses need `videoSizes`.** Called without it, `validateContent` checks only the
+  shape. The only real call, the contract gate, passes it.
+- **This branch edits the shared `docs/tasks/INDEX.md`,** because `scripts/tasks.sh` regenerates it
+  whenever a task status changes. The manager may prefer to regenerate it at integration instead.
+
+### Commit
+
+`agent/backend` at the commit that adds the audit result to this handoff, which builds on
+`5c82dc8`. There are 29 commits since `12e9c35`, this one included. Committed locally only; not
+pushed, because of the owner's hold.

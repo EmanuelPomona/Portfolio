@@ -1,7 +1,7 @@
 # STATUS: agent/backend
-Task: TASK-301, 302, 303 (REVIEW); TASK-304 (BLOCKED, contract)
+Task: TASK-305 (REVIEW). Earlier: 301-303 REVIEW, 304 BLOCKED (contract)
 Round: 0
-Last updated: 2026-10-16T18:40:00Z
+Last updated: 2026-10-16T23:20:00Z
 
 ## Skills invoked so far
 - ecc:contract-first @ TASK-301 start, before validator -> shapes imported from types.ts (no redeclared copies); DATABASE.md is the invariant source; provider check = validate the real exported `content`; fixtures JSON-cloned because heroLinks/contact.links share refs (structuredClone would double-count)
@@ -17,6 +17,11 @@ Last updated: 2026-10-16T18:40:00Z
 - superpowers:requesting-code-review @ pre-handoff, after implementation of 301-304 (range 3ea91a0..255dc97) -> dispatched a read-only general-purpose reviewer with the 4 task specs, DATABASE/API sections, and the known deviations; findings pending
 - superpowers:receiving-code-review @ after review verdict (With fixes) -> verified each finding against code before acting; #1 reproduced (updated +1 day => 64/69 content tests fail); plan: #1 fix, #3 C-21 placeholder check, #4 index.html guard, #5 .JPG hint, #8 og check-then-write, #6 verify in Chrome, #2 -> CCR-3, #7 known issue
 - superpowers:verification-before-completion @ immediately before HANDOFF-1 -> re-ran every check fresh on 43bdcc9; no implementation after it
+- superpowers:test-driven-development @ TASK-305 start (re-invoked; harness: already loaded, unchanged) -> red first for: media pipeline skipping media-src/video, C-21 skipping it, video script behavior, C-22 one violation per clause on both bases
+- ecc:backend-patterns @ TASK-305, before video.swift (re-invoked; harness: already loaded, unchanged) -> transaction: encode + poster to dot-temp files beside the targets, verify codec/no-audio/size/<=3MB, rename(2) into place only if every recording succeeded, temps removed on failure
+- superpowers:requesting-code-review @ TASK-305 pre-handoff (re-invoked; harness: already loaded, unchanged) -> read-only reviewer on 12e9c35..2fb25a6 with TASK-305/ADR-012/API/DATABASE/B-06 and stated decisions; findings pending
+- superpowers:receiving-code-review @ TASK-305 after review verdict With fixes (re-invoked; harness: already loaded) -> verified #1 in code (cleanup only covered successful outputs); fixed 1,2,3,4,5,6,7,8 with tests; declined list accepted (poster jump, ICC, 60fps, corner pixels, INDEX.md)
+- superpowers:verification-before-completion @ immediately before HANDOFF-2 (re-invoked; harness: already loaded) -> every TASK-305 claim re-run fresh on 5c82dc8; no implementation after it
 - (probe, scratchpad only) all 3 formats byte-stable across 3 processes on this mac; hero 1600w AVIF q50=53.6KB, q60=73.9KB -> chose AVIF q60/effort 4, WebP q80/effort 4, JPEG q80 mozjpeg
 
 ## Done
@@ -65,9 +70,34 @@ Last updated: 2026-10-16T18:40:00Z
 - [x] Fresh verification on 43bdcc9 (after superpowers:verification-before-completion): npm test exit 0 209/209 (8 files); typecheck 0; lint 0; build ok; contract-test.sh exit 0 159/159; media x2 clean; hero 75638 B; preview headers/assets re-checked; preview build == HEAD build except Vercel's injected toolbar script
 - [x] HANDOFF-1 written; 301/302/303 -> REVIEW; 304 stays BLOCKED (contract)
 
+## TASK-305 (round 3, assigned by manager portfolio-38 on 12e9c35)
+OWNER HOLD: no vercel calls of any kind, no git push. Local commits only.
+- [x] Read status, ADR-012/009, API §1 screen.video + §3 recordings, DATABASE screen + C-22, ACCEPTANCE B-06, TASK-305
+- [x] Inputs located in the MAIN checkout's docs/inputs (gitignored, not in this worktree); screenshot name has U+202F before PM
+- [x] Found integration gap: media-src/video/*.mov would make `npm run media` fail (unsupported type) and C-21 expect a manifest entry -> both must skip media-src/video/ (TDD)
+
+- [x] media pipeline skips media-src/video (test 0449e10 red -> fix b448a3f); C-21 sources() skips it (red seen with the .mov present -> e8b1bce); .mov copied byte-identical (49dac44)
+- [x] streetsafe-la.png: prepareSource + extract x387 w1533 h958 -> 1533x958, 3ch, 578,586 B; viewed: markers, 25 reports, Report a hazard (b78aeb9)
+- [x] Measured the recording (scratch probe): hvc1 1270x1006 60fps identity transform 33.69s, no audio; rows 0..50 title bar (lum ~57), first content row 51 in frames 0/12/30 s; rows 1000..1005 only rounded-corner pixels at x0-2/1267-1269 -> cropTop 51, cropBottom 1 (even 954); poster 12 s (snake + food)
+- [x] video.swift TDD: tests red (9399310) -> script green 5/5; MP4 own-frame check added (f2078d9) and proven by mutating the crop translate (row 0 = 57 -> red); npm script with -suppress-warnings (a278cdc); sidecar json (8fd5aee)
+- [x] Real npm run video: snake-ai.mp4 H.264 1270x954 33.7s 485,602 B no audio; poster at 11.989 s; boxes ftyp,moov,mdat; mdls H.264/Video/33.7/954x1270; decoded frames 1 s and 12 s row0 max 0 (5c6cde9)
+- [x] npm run media: 4 images, 36 renditions; 2nd run 0 written (0bb8cde)
+- [x] C-22 TDD: 14 red on both bases (d75d6be) -> green (06c5209); real-content gate reads sizes from disk (1fb27ad)
+- [x] Content: streetsafe-la + snake-ai screens (1c36407); exposed a coupled C-11 mediaIds fixture -> derived from content (b0370ad); npm test 588/588
+- [x] site.updated already 2026-10-16 = today local (UTC already 10-17): no bump needed
+- [x] Guide: 16:10 crop, recording section, C-22 row; determinism claim checked: mp4 hash differs each run (size same 485,602), poster byte-identical (d00d51e)
+
+- [x] Review (With fixes): #1 Important partial MP4 leak on failure -> tests 4bc81ab (5 red), fix 8bc3542 (13/13); mutation: dropping catch cleanup leaks out/.demo-app.partial.mp4 (red); #2/#3 cropLeft/cropRight + split odd messages; #5 non-.mov reported; #8 gap tests (posterSeconds range, negative crop, two-recording all-or-nothing, -suppress-warnings invocation)
+- [x] Review #6/#7: shared test util scripts/mp4-boxes.mjs; checks: no unused recording ships, declared size == file (b9dfa7d); mutations (orphan mp4, width 1280) both red, restored
+- [x] Review #4 + guide: edges, trim, size reality, .mov only, cropLeft/Right, C-22 row (1e76b9b)
+
+- [x] Fresh verification on 5c82dc8: npm test 598/598 (48 files) exit 0; typecheck 0; lint 0; build 0; contract-test.sh 185/185 exit 0; media x2 clean; mdls + boxes + decoded frames; crop rows re-measured; poster re-made byte-identical; never-edit files unchanged
+- [x] docs/review/B-305-media.txt; HANDOFF-2; TASK-305 -> REVIEW. Not pushed (owner hold).
+
+- [x] Replied to manager portfolio-38 via SendMessage (head 8557ef0, criteria, MP4 facts, gate results)
+
 ## In progress
-- [ ] nothing; awaiting manager (CCR-1/2/3), owner decisions (prod deploy, preview toolbar, bypass secret), reviewer
-- [ ] TASK-301: code review + verification deferred to the combined pre-handoff pass (status stays IN_PROGRESS until then)
+- [ ] nothing; TASK-305 in REVIEW, awaiting manager integration / reviewer. Owner hold: no deploy, no push.
 
 ## Verified
 - Baseline (pre-change) -> typecheck/lint/test all pass on 3ea91a0

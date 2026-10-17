@@ -282,6 +282,25 @@ describe('npm run media (pipeline)', { timeout: 60_000 }, () => {
     expect(failure.stderr).not.toContain('rename it to');
   });
 
+  it('leaves recordings in media-src/video to npm run video', async () => {
+    const ws = await workspace();
+    await flatPng(path.join(ws.src, 'life', 'photo-1.png'));
+    await mkdir(path.join(ws.src, 'video'), { recursive: true });
+    await writeFile(path.join(ws.src, 'video', 'demo-app.mov'), 'a QuickTime recording');
+    await mkdir(path.join(ws.out, 'video'), { recursive: true });
+    await writeFile(path.join(ws.out, 'video', 'demo-app.mp4'), 'the encoded recording');
+
+    await ws.run();
+
+    expect(Object.keys(await readManifest(ws.manifest))).toEqual(['life/photo-1']);
+    expect(await listFiles(ws.out)).toEqual([
+      'life/photo-1-300.avif',
+      'life/photo-1-300.jpg',
+      'life/photo-1-300.webp',
+      'video/demo-app.mp4',
+    ]);
+  });
+
   it('an unsupported file type fails the run and names the file', async () => {
     const ws = await workspace();
     await writeFile(path.join(ws.src, 'photo-3.heic'), 'heic bytes');

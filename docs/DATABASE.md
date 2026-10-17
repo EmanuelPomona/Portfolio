@@ -134,7 +134,7 @@ Content
 | C-18 | `contact.links` kinds are unique and include `linkedin`, `email`, and `github`. |
 | C-19 | Every `site.heroLinks` href also appears in `contact.links`. |
 | C-20 | No content string contains placeholder words (case-insensitive): `lorem`, `ipsum`, `todo`, `tbd`, `placeholder`, `coming soon`. |
-| C-22 | When `screen.video` is present: `screen.image` is non-null (the poster); `video.src` matches `^/media/video/[a-z0-9-]+\.mp4$` and the file exists under `frontend/public`; the file is at most 3 MB; `width` and `height` are positive integers, `width` ≥ `height`. Node environment. |
+| C-22 | When `screen.video` is present: `screen.image` is non-null (the poster); `video.src` matches `^/media/video/[a-z0-9-]+\.mp4$` and the file exists under `frontend/public`; the file is at most 3 MB; `width` and `height` are positive integers, `width` ≥ `height`; `posterTime`, when present, is a finite number ≥ 0. Node environment. |
 | C-21 | The media manifest is current. Every source in `media-src/` has an entry, every entry's files exist under `public/media/`, and every non-null `image` points at an existing entry. Node environment. |
 
 ---

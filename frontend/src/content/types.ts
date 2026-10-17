@@ -53,6 +53,9 @@ export interface ProjectVideo {
   /** Encoded frame size in px, so the layout is right before the video's metadata loads. */
   readonly width: number;
   readonly height: number;
+  /** Seconds into the recording where the poster frame was taken. The first play starts here, so
+   * the still flows into motion; later loops start at 0. Omitted means 0. */
+  readonly posterTime?: number;
 }
 
 export interface ProjectScreen {
