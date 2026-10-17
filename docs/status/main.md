@@ -60,6 +60,14 @@ Mode A record archived to `docs/archive/status-main-mode-a.md`.
 ## Blocked on
 - nothing
 
+## Round 3 (owner media) — in progress
+- Owner: "In the MacOS files, can you start replacing the empty stuff with corresponding stuff? ... Untitled 2.mov and the screenshot within inputs"; then "assign task corresponding to the respective agents and ensure that it gets implemented safely and with high quality".
+- Inputs: Screenshot 2026-10-14 (1920x958) = StreetSafe: LA; Untitled 2.mov (HEVC 1270x1006, 33.7s, own title bar) = Snake AI.
+- [x] Contract 2ac1ada: types.ts ProjectVideo + optional screen.video; DATABASE C-22; API §1 video row + §3 recordings; ACCEPTANCE W-03 amended, W-08, B-06; brief; ADR-012 (16:10 right-anchored crop for StreetSafe; H.264 via macOS AVFoundation; play only while attended); root `video` script
+- [x] b03068a: shipped-window tests data-driven (checked with a filled StreetSafe mutation) so backend's content change keeps main green
+- [x] d838259: TASK-305 (backend), TASK-110 (frontend); both carry the owner hold: no deploy, no push
+- [ ] Sync, dispatch; after TASK-305 lands, sync its assets to frontend for real-content evidence; integrate; verify
+
 ## Owner actions (not blockers)
 - 2026-10-16, owner: "dont actually connect the website for now, I will upload images for you to just put into the thingys" -> no deploy, promote, or push until the owner says so; next work = owner's images into the project windows and About photo slots.
 - Production https://emanuel-ling.vercel.app still serves the walking skeleton (backend's first deploy). Promote or take down: owner's call.
