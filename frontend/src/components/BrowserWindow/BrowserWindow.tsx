@@ -34,6 +34,9 @@ export function BrowserWindow({ project, sizes }: BrowserWindowProps) {
         </span>
         <span className={styles.address}>{project.addressBar}</span>
       </span>
+      {/* Keeps the address and the placeholder separate words for text readers (axe label-in-name);
+          whitespace between these two block-level boxes renders nothing. */}
+      {' '}
       <span className={styles.screen}>
         {showImage ? (
           <Picture

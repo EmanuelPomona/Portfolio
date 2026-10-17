@@ -60,6 +60,13 @@ describe('BrowserWindow', () => {
     }
   });
 
+  it('separates the address and the placeholder with whitespace, so their words never fuse', () => {
+    // Text-content readers (axe's label-in-name check among them) join adjacent elements' text with
+    // nothing between them: without a separator they read "...vercel.appscreenshot soon".
+    render(<BrowserWindow project={sageplan} sizes={SIZES} />);
+    expect(screen.getByRole('link').textContent).toMatch(/sageplan\.vercel\.app\s+screenshot soon/);
+  });
+
   it('drops "screenshot soon" from the name once the window shows a screenshot', () => {
     render(<BrowserWindow project={withScreenshot} sizes={SIZES} />);
     expect(screen.getByRole('link')).toHaveAttribute('aria-label', 'SagePlan, Live site, sageplan.vercel.app');
