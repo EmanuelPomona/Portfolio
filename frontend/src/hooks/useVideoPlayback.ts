@@ -34,12 +34,13 @@ function seek(video: HTMLMediaElement, seconds: number): void {
  * an error worth a console line; the poster simply stays.
  */
 export function useVideoPlayback(video: HTMLVideoElement | null, wanted: boolean, startAt = 0): void {
-  const started = useRef(new WeakSet<HTMLVideoElement>());
+  // The element whose first play has happened; a new element (a remount) starts at startAt again.
+  const startedFor = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
     if (!video || !wanted) return;
-    if (!started.current.has(video)) {
-      started.current.add(video);
+    if (startedFor.current !== video) {
+      startedFor.current = video;
       if (startAt > 0) {
         seek(video, startAt);
         if (video.readyState < HAVE_METADATA) {

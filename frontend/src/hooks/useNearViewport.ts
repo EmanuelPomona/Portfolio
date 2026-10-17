@@ -8,14 +8,11 @@ import { useEffect, useState } from 'react';
  * never held back.
  */
 export function useNearViewport(target: Element | null, rootMargin = '50% 0px'): boolean {
-  const [near, setNear] = useState(false);
+  // Without IntersectionObserver there is nothing to wait for: near from the first render.
+  const [near, setNear] = useState(() => typeof IntersectionObserver === 'undefined');
 
   useEffect(() => {
     if (!target || near) return;
-    if (typeof IntersectionObserver === 'undefined') {
-      const id = setTimeout(() => setNear(true), 0);
-      return () => clearTimeout(id);
-    }
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries.some((entry) => entry.isIntersecting)) {

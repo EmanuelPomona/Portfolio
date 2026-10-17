@@ -1,6 +1,6 @@
 import { act, cleanup, render, screen } from '@testing-library/react';
 import { useState } from 'react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { installIntersectionObserver } from '../test-utils/media';
 import { useNearViewport } from './useNearViewport';
 
@@ -40,13 +40,10 @@ describe('useNearViewport', () => {
     io.restore();
     const original = window.IntersectionObserver;
     Reflect.deleteProperty(window, 'IntersectionObserver');
-    vi.useFakeTimers();
     try {
       render(<Probe />);
-      act(() => vi.runAllTimers());
       expect(screen.getByTestId('probe')).toHaveAttribute('data-near', 'yes');
     } finally {
-      vi.useRealTimers();
       window.IntersectionObserver = original;
       io = installIntersectionObserver();
     }
