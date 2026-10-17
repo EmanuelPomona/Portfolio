@@ -47,6 +47,40 @@ async function addRecording(ws, id, settings = SETTINGS) {
   if (settings) await writeFile(path.join(ws.src, `${id}.json`), JSON.stringify(settings));
 }
 
+/** Decode the MP4's frame at `seconds` to a PNG with AVFoundation (test-only snippet, not in the script). */
+async function mp4Frame(mp4, seconds, png) {
+  const code = `
+import AVFoundation
+import ImageIO
+import UniformTypeIdentifiers
+let env = ProcessInfo.processInfo.environment
+let generator = AVAssetImageGenerator(asset: AVURLAsset(url: URL(fileURLWithPath: env["MP4"]!)))
+generator.requestedTimeToleranceBefore = .zero
+generator.requestedTimeToleranceAfter = .zero
+let (image, _) = try await generator.image(at: CMTime(seconds: Double(env["SECONDS"]!)!, preferredTimescale: 600))
+let dest = CGImageDestinationCreateWithURL(URL(fileURLWithPath: env["PNG"]!) as CFURL, UTType.png.identifier as CFString, 1, nil)!
+CGImageDestinationAddImage(dest, image, nil)
+_ = CGImageDestinationFinalize(dest)
+`;
+  await execFileAsync('swift', ['-e', code], { env: { ...process.env, MP4: mp4, SECONDS: String(seconds), PNG: png } });
+  return sharp(png).raw().toBuffer({ resolveWithObject: true });
+}
+
+/** Brightest channel along row y between x0 and x1 (step 4), and counts of snake-green and food-red pixels. */
+function look({ data, info }, y = 0, x0 = 300, x1 = 1100) {
+  const ch = info.channels;
+  let rowMax = 0;
+  for (let x = x0; x < x1; x += 4) rowMax = Math.max(rowMax, ...data.subarray((y * info.width + x) * ch, (y * info.width + x) * ch + 3));
+  let green = 0;
+  let red = 0;
+  for (let i = 0; i < data.length; i += ch) {
+    const [r, g, b] = [data[i], data[i + 1], data[i + 2]];
+    if (g > 180 && r < 80 && b < 80) green++;
+    if (r > 180 && g < 80 && b < 80) red++;
+  }
+  return { rowMax, green, red };
+}
+
 /** Codec, handler types, and track size of an MP4, from its boxes (ISO BMFF). */
 function mp4Info(buf) {
   const info = { handlers: [], formats: [], sizes: [] };
@@ -88,21 +122,18 @@ describe.skipIf(process.platform !== 'darwin')('npm run video (macOS AVFoundatio
     expect(info.handlers).not.toContain('soun');
     expect(info.sizes).toEqual([[1270, 954]]); // 1006 rows minus 51 title-bar rows minus 1 corner row
 
+    // The title bar is grey (about 57) and the game field black, so row 0 must already be the field,
+    // in the poster and in the video itself; both must show the snake and the food.
     const poster = await sharp(path.join(ws.posters, 'demo-app.png')).raw().toBuffer({ resolveWithObject: true });
     expect([poster.info.width, poster.info.height]).toEqual([1270, 954]);
-    const ch = poster.info.channels;
-    const pixel = (x, y) => [...poster.data.subarray((y * 1270 + x) * ch, (y * 1270 + x) * ch + 3)];
-    // The title bar is grey (about 57); the game field is black. Row 0 must already be the field.
-    expect(Math.max(...Array.from({ length: 200 }, (_, i) => Math.max(...pixel(300 + i * 4, 0))))).toBeLessThan(20);
-    let green = 0;
-    let red = 0;
-    for (let i = 0; i < poster.data.length; i += ch) {
-      const [r, g, b] = [poster.data[i], poster.data[i + 1], poster.data[i + 2]];
-      if (g > 180 && r < 80 && b < 80) green++;
-      if (r > 180 && g < 80 && b < 80) red++;
+    const frame = await mp4Frame(path.join(ws.out, 'demo-app.mp4'), 12, path.join(ws.out, '..', 'frame.png'));
+    expect([frame.info.width, frame.info.height]).toEqual([1270, 954]);
+    for (const image of [poster, frame]) {
+      const seen = look(image);
+      expect(seen.rowMax).toBeLessThan(20);
+      expect(seen.green).toBeGreaterThan(1000); // the snake
+      expect(seen.red).toBeGreaterThan(500); // the food
     }
-    expect(green).toBeGreaterThan(1000); // the snake
-    expect(red).toBeGreaterThan(500); // the food
   });
 
   it('fails without a settings file and writes nothing', async () => {
