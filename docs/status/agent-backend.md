@@ -1,7 +1,7 @@
 # STATUS: agent/backend
 Task: TASK-305 (IN_PROGRESS). Earlier: 301-303 REVIEW, 304 BLOCKED (contract)
 Round: 0
-Last updated: 2026-10-16T22:05:00Z
+Last updated: 2026-10-16T22:20:00Z
 
 ## Skills invoked so far
 - ecc:contract-first @ TASK-301 start, before validator -> shapes imported from types.ts (no redeclared copies); DATABASE.md is the invariant source; provider check = validate the real exported `content`; fixtures JSON-cloned because heroLinks/contact.links share refs (structuredClone would double-count)
@@ -18,6 +18,7 @@ Last updated: 2026-10-16T22:05:00Z
 - superpowers:receiving-code-review @ after review verdict (With fixes) -> verified each finding against code before acting; #1 reproduced (updated +1 day => 64/69 content tests fail); plan: #1 fix, #3 C-21 placeholder check, #4 index.html guard, #5 .JPG hint, #8 og check-then-write, #6 verify in Chrome, #2 -> CCR-3, #7 known issue
 - superpowers:verification-before-completion @ immediately before HANDOFF-1 -> re-ran every check fresh on 43bdcc9; no implementation after it
 - superpowers:test-driven-development @ TASK-305 start (re-invoked; harness: already loaded, unchanged) -> red first for: media pipeline skipping media-src/video, C-21 skipping it, video script behavior, C-22 one violation per clause on both bases
+- ecc:backend-patterns @ TASK-305, before video.swift (re-invoked; harness: already loaded, unchanged) -> transaction: encode + poster to dot-temp files beside the targets, verify codec/no-audio/size/<=3MB, rename(2) into place only if every recording succeeded, temps removed on failure
 - (probe, scratchpad only) all 3 formats byte-stable across 3 processes on this mac; hero 1600w AVIF q50=53.6KB, q60=73.9KB -> chose AVIF q60/effort 4, WebP q80/effort 4, JPEG q80 mozjpeg
 
 ## Done
@@ -72,8 +73,19 @@ OWNER HOLD: no vercel calls of any kind, no git push. Local commits only.
 - [x] Inputs located in the MAIN checkout's docs/inputs (gitignored, not in this worktree); screenshot name has U+202F before PM
 - [x] Found integration gap: media-src/video/*.mov would make `npm run media` fail (unsupported type) and C-21 expect a manifest entry -> both must skip media-src/video/ (TDD)
 
+- [x] media pipeline skips media-src/video (test 0449e10 red -> fix b448a3f); C-21 sources() skips it (red seen with the .mov present -> e8b1bce); .mov copied byte-identical (49dac44)
+- [x] streetsafe-la.png: prepareSource + extract x387 w1533 h958 -> 1533x958, 3ch, 578,586 B; viewed: markers, 25 reports, Report a hazard (b78aeb9)
+- [x] Measured the recording (scratch probe): hvc1 1270x1006 60fps identity transform 33.69s, no audio; rows 0..50 title bar (lum ~57), first content row 51 in frames 0/12/30 s; rows 1000..1005 only rounded-corner pixels at x0-2/1267-1269 -> cropTop 51, cropBottom 1 (even 954); poster 12 s (snake + food)
+- [x] video.swift TDD: tests red (9399310) -> script green 5/5; MP4 own-frame check added (f2078d9) and proven by mutating the crop translate (row 0 = 57 -> red); npm script with -suppress-warnings (a278cdc); sidecar json (8fd5aee)
+- [x] Real npm run video: snake-ai.mp4 H.264 1270x954 33.7s 485,602 B no audio; poster at 11.989 s; boxes ftyp,moov,mdat; mdls H.264/Video/33.7/954x1270; decoded frames 1 s and 12 s row0 max 0 (5c6cde9)
+- [x] npm run media: 4 images, 36 renditions; 2nd run 0 written (0bb8cde)
+- [x] C-22 TDD: 14 red on both bases (d75d6be) -> green (06c5209); real-content gate reads sizes from disk (1fb27ad)
+- [x] Content: streetsafe-la + snake-ai screens (1c36407); exposed a coupled C-11 mediaIds fixture -> derived from content (b0370ad); npm test 588/588
+- [x] site.updated already 2026-10-16 = today local (UTC already 10-17): no bump needed
+- [x] Guide: 16:10 crop, recording section, C-22 row; determinism claim checked: mp4 hash differs each run (size same 485,602), poster byte-identical (d00d51e)
+
 ## In progress
-- [ ] TASK-305: TDD the media-src/video exclusion; crop screenshot; copy .mov; video.swift; C-22 TDD; content; guide; evidence
+- [ ] TASK-305: code review, verification, evidence B-305-media.txt, HANDOFF-2, REVIEW, commit (no push), SendMessage portfolio-38
 
 ## Verified
 - Baseline (pre-change) -> typecheck/lint/test all pass on 3ea91a0
