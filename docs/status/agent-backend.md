@@ -17,6 +17,7 @@ Last updated: 2026-10-16T22:05:00Z
 - superpowers:requesting-code-review @ pre-handoff, after implementation of 301-304 (range 3ea91a0..255dc97) -> dispatched a read-only general-purpose reviewer with the 4 task specs, DATABASE/API sections, and the known deviations; findings pending
 - superpowers:receiving-code-review @ after review verdict (With fixes) -> verified each finding against code before acting; #1 reproduced (updated +1 day => 64/69 content tests fail); plan: #1 fix, #3 C-21 placeholder check, #4 index.html guard, #5 .JPG hint, #8 og check-then-write, #6 verify in Chrome, #2 -> CCR-3, #7 known issue
 - superpowers:verification-before-completion @ immediately before HANDOFF-1 -> re-ran every check fresh on 43bdcc9; no implementation after it
+- superpowers:test-driven-development @ TASK-305 start (re-invoked; harness: already loaded, unchanged) -> red first for: media pipeline skipping media-src/video, C-21 skipping it, video script behavior, C-22 one violation per clause on both bases
 - (probe, scratchpad only) all 3 formats byte-stable across 3 processes on this mac; hero 1600w AVIF q50=53.6KB, q60=73.9KB -> chose AVIF q60/effort 4, WebP q80/effort 4, JPEG q80 mozjpeg
 
 ## Done
