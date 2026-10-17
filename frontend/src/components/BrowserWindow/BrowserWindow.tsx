@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { getMedia, type MediaAsset, type Project } from '../../content';
 import { useAttention } from '../../hooks/useAttention';
-import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
+import { useDriftPlaying } from '../../hooks/useDriftPlaying';
 import { useVideoPlayback } from '../../hooks/useVideoPlayback';
 import { Picture } from '../Picture/Picture';
 import styles from './BrowserWindow.module.css';
@@ -37,9 +37,11 @@ export function BrowserWindow({ project, sizes }: BrowserWindowProps) {
   const [failed, setFailed] = useState(false);
   const [videoFailed, setVideoFailed] = useState(false);
   const [video, setVideo] = useState<HTMLVideoElement | null>(null);
-  // Plays only while someone looks at it, and never under reduced motion (the poster stays).
-  const reduced = usePrefersReducedMotion();
-  useVideoPlayback(video, attended && !reduced);
+  // Plays only while someone looks at it AND it may move: on screen, in a visible tab, motion
+  // allowed (useDriftPlaying, the page's one such signal). Attention alone is not enough: keyboard
+  // focus survives scrolling the window out of sight. Under reduced motion the poster stays.
+  const mayMove = useDriftPlaying(video);
+  useVideoPlayback(video, attended && mayMove);
   const { screen, primary } = project;
   const showImage = screen.image !== null && !failed;
   // A recording plays in the screen; if it cannot load, its poster stays as a still.

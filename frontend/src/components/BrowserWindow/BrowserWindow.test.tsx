@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { getMedia, projects, type Project } from '../../content';
 import { FINE_POINTER_QUERY } from '../../hooks/useMediaQuery';
 import { REDUCED_MOTION_QUERY } from '../../hooks/usePrefersReducedMotion';
-import { installMatchMedia } from '../../test-utils/media';
+import { installIntersectionObserver, installMatchMedia } from '../../test-utils/media';
 import { BrowserWindow } from './BrowserWindow';
 import styles from './BrowserWindow.module.css';
 
@@ -165,13 +165,24 @@ function renditionUrls(id: NonNullable<Project['screen']['image']>): string[] {
 
 describe('BrowserWindow with a recording (W-08, ADR-012)', () => {
   let media: ReturnType<typeof installMatchMedia>;
+  let io: ReturnType<typeof installIntersectionObserver>;
+  /** Renders the recording window and brings its screen into view. */
+  const renderOnScreen = (project: Project = withRecording) => {
+    const result = render(<BrowserWindow project={project} sizes={SIZES} />);
+    const video = result.container.querySelector('video');
+    if (video) act(() => io.intersect(video, 1));
+    return result;
+  };
   beforeEach(() => {
     media = installMatchMedia({ [FINE_POINTER_QUERY]: true });
+    io = installIntersectionObserver();
   });
   afterEach(() => {
     cleanup();
     media.restore();
+    io.restore();
     vi.restoreAllMocks();
+    Object.defineProperty(document, 'hidden', { configurable: true, value: false });
   });
 
   it('renders a muted, looping, playsinline video with preload="none" and the poster from screen.image', () => {
@@ -192,10 +203,10 @@ describe('BrowserWindow with a recording (W-08, ADR-012)', () => {
     const play = vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue(undefined);
     const pause = vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => {});
     const load = vi.spyOn(HTMLMediaElement.prototype, 'load').mockImplementation(() => {});
-    const { container } = render(<BrowserWindow project={withRecording} sizes={SIZES} />);
+    const { container } = renderOnScreen();
     const link = screen.getByRole('link');
     const video = container.querySelector('video')!;
-    // Nothing plays, and nothing is fetched, at rest.
+    // Nothing plays at rest (and preload="none", asserted above, means nothing is fetched).
     expect(play).not.toHaveBeenCalled();
 
     fireEvent.mouseEnter(link);
@@ -217,12 +228,43 @@ describe('BrowserWindow with a recording (W-08, ADR-012)', () => {
     expect(play).toHaveBeenCalledTimes(1);
   });
 
+  it('never plays off-screen, even while keyboard focus stays on the window', () => {
+    // Regression (review, TASK-110): focus survives scrolling (Space, PageDown), so attention alone
+    // kept a recording looping out of sight.
+    const play = vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue(undefined);
+    const pause = vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => {});
+    const { container } = renderOnScreen();
+    const link = screen.getByRole('link');
+    const video = container.querySelector('video')!;
+    fireEvent.keyDown(document, { key: 'Tab' });
+    act(() => link.focus());
+    expect(play).toHaveBeenCalledTimes(1);
+    act(() => io.intersect(video, 0));
+    expect(link).toHaveAttribute('data-state', 'attention');
+    expect(pause).toHaveBeenCalledTimes(1);
+    act(() => io.intersect(video, 1));
+    expect(play).toHaveBeenCalledTimes(2);
+  });
+
+  it('pauses while the tab is hidden', () => {
+    const play = vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue(undefined);
+    const pause = vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => {});
+    renderOnScreen();
+    fireEvent.mouseEnter(screen.getByRole('link'));
+    expect(play).toHaveBeenCalledTimes(1);
+    Object.defineProperty(document, 'hidden', { configurable: true, value: true });
+    act(() => {
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+    expect(pause).toHaveBeenCalledTimes(1);
+  });
+
   it('never plays under reduced motion; the poster shows instead', () => {
     media.restore();
     media = installMatchMedia({ [FINE_POINTER_QUERY]: true, [REDUCED_MOTION_QUERY]: true });
     const play = vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue(undefined);
     vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => {});
-    const { container } = render(<BrowserWindow project={withRecording} sizes={SIZES} />);
+    const { container } = renderOnScreen();
     const link = screen.getByRole('link');
     fireEvent.mouseEnter(link);
     // Attention still shows (the glass lifts, color arrives), but nothing moves.
@@ -234,7 +276,7 @@ describe('BrowserWindow with a recording (W-08, ADR-012)', () => {
     media.restore();
     media = installMatchMedia({ [FINE_POINTER_QUERY]: true });
     cleanup();
-    const second = render(<BrowserWindow project={withRecording} sizes={SIZES} />);
+    const second = renderOnScreen();
     const pause = vi.mocked(HTMLMediaElement.prototype.pause);
     pause.mockClear();
     fireEvent.mouseEnter(second.getByRole('link'));
@@ -259,7 +301,7 @@ describe('BrowserWindow with a recording (W-08, ADR-012)', () => {
     const unhandled = vi.fn();
     process.on('unhandledRejection', unhandled);
     try {
-      render(<BrowserWindow project={withRecording} sizes={SIZES} />);
+      renderOnScreen();
       fireEvent.mouseEnter(screen.getByRole('link'));
       expect(calls).toBe(1);
       // Let the rejection settle, and Node's unhandled-rejection check run.
