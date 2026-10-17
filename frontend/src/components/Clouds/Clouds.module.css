@@ -1,0 +1,95 @@
+/*
+ * Clouds through the page (TASK-107, round 2; brief "Motion vocabulary", ADR-011). Two layers cut
+ * from the owner's photographs drift a few tens of pixels on slow strokes behind a section.
+ * - Photographic only: alpha masks shape each layer (the brief's justified mask exception); no
+ *   drawn shapes, no radial blobs.
+ * - Screened over the Mist (Section paints a Mist ground inside its isolated group), so a layer can
+ *   only lighten what is behind the text: contrast can rise, never fall.
+ * - CSS animation, transform only, each stroke 60s or more, alternating (ease-in-out, the hero
+ *   drift's curve). Paused off-screen and in a hidden tab; static under reduced motion.
+ * - Scroll depth (TASK-108) moves each layer by `translate`; the drift keeps `transform`, so the
+ *   two never fight.
+ */
+.clouds {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  /* The blend lives on the wrapper: z-index makes .clouds a stacking context, which isolates
+     blending, so a screen on the layers would only meet .clouds' own transparent backdrop and
+     paint the photos' dark rocks normally. Screened as one group, they meet the section's Mist. */
+  mix-blend-mode: screen;
+}
+
+.layer {
+  --drift-duration: 72s;
+  --travel: 40px;
+  --delay: 0s;
+  position: absolute;
+  mask-image:
+    linear-gradient(to bottom, transparent 0, #000 28%, #000 72%, transparent 100%),
+    linear-gradient(to right, transparent 0, #000 22%, #000 78%, transparent 100%);
+  mask-composite: intersect;
+  transform: translate3d(calc(-1 * var(--travel)), 0, 0);
+  translate: 0 var(--depth, 0px);
+  animation: cloud-drift var(--drift-duration) ease-in-out var(--delay) infinite alternate;
+  animation-play-state: paused;
+}
+
+.layer[data-drift='running'] {
+  animation-play-state: running;
+}
+
+.layer[data-drift='off'] {
+  animation: none;
+}
+
+.image {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* The valley's fog bands, wide and low across the section. */
+.valley {
+  --drift-duration: 84s;
+  --delay: -31s;
+  --travel: 44px;
+  top: 6%;
+  left: -8%;
+  width: 116%;
+  opacity: 0.5;
+}
+
+/* The forest's fog, narrower, drifting the other way. */
+.forest {
+  --drift-duration: 66s;
+  --delay: -12s;
+  --travel: -36px;
+  top: 38%;
+  left: 34%;
+  width: 70%;
+  opacity: 0.42;
+}
+
+/* Contact is short: one band of valley fog only (Clouds.tsx renders just the valley there). */
+[data-clouds='contact'] .valley {
+  top: -30%;
+}
+
+@keyframes cloud-drift {
+  from {
+    transform: translate3d(calc(-1 * var(--travel)), 0, 0);
+  }
+  to {
+    transform: translate3d(var(--travel), 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .layer {
+    animation: none;
+    translate: none;
+  }
+}

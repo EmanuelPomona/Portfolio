@@ -121,6 +121,8 @@
   top: calc(var(--y) * 1cqw);
   width: calc(var(--w) * 1cqw);
   z-index: 1;
+  /* Each print settles into place (TASK-108), on the reveal's own stagger. */
+  --arrive-distance: var(--arrive-near);
 }
 
 .place:has([data-attended='true']),

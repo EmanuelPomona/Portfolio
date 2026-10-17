@@ -3,6 +3,7 @@ import { join } from 'node:path';
 import { cleanup, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { projects, type Project } from '../../content';
+import { fogDelay, globalCss, partDeclaration, resolveNumber } from '../../test-utils/cssTimings';
 import { installIntersectionObserver, installMatchMedia } from '../../test-utils/media';
 import { Projects } from './Projects';
 
@@ -78,6 +79,40 @@ describe('Projects', () => {
   it('data-side alternates left,right,left,right', () => {
     const { container } = render(<Projects projects={projects} heading="Projects" />);
     expect(articles(container).map((a) => a.dataset.side)).toEqual(['left', 'right', 'left', 'right']);
+  });
+
+  it('plates arrive from their own side: data-arrive matches data-side', () => {
+    const { container } = render(<Projects projects={projects} heading="Projects" />);
+    for (const plate of articles(container)) {
+      expect(plate).toHaveAttribute('data-arrive', `from-${plate.dataset.side}`);
+      // The arrival rides the fog reveal the plate already has.
+      expect(plate).toHaveAttribute('data-fog', 'stagger');
+    }
+    // From the left means a negative x offset, from the right a positive one.
+    expect(globalCss).toMatch(/\[data-arrive='from-left'\]\s*\{[^}]*--arrive-dir-x:\s*-1/);
+    expect(globalCss).toMatch(/\[data-arrive='from-right'\]\s*\{[^}]*--arrive-dir-x:\s*1/);
+    // The window travels about 48px; its title and caption about 16px.
+    const distance = (cls: string) => resolveNumber(partDeclaration(css, cls, '--arrive-distance') ?? '0px');
+    expect(distance('window')).toBe(48);
+    expect(distance('title')).toBe(16);
+    expect(distance('caption')).toBe(16);
+  });
+
+  it("the caption's arrival starts after its window's", () => {
+    const { container } = render(<Projects projects={[projects[0]!]} heading="Projects" />);
+    const parts = [...articles(container)[0]!.children];
+    // 1-based child positions, which set each part's fog-clear delay.
+    const nth = (find: (el: Element) => boolean) => parts.findIndex(find) + 1;
+    const title = nth((el) => el.tagName === 'H3');
+    const caption = nth((el) => el.textContent!.includes(projects[0]!.sentence));
+    const windowPart = nth((el) => el.querySelector('a') !== null && el.tagName !== 'H3' && !el.textContent!.includes(projects[0]!.sentence));
+    expect([title, windowPart, caption].every((n) => n > 0)).toBe(true);
+
+    const start = (n: number, cls: string) => fogDelay(n) + resolveNumber(partDeclaration(css, cls, '--arrive-delay') ?? '0s');
+    const windowStart = start(windowPart, 'window');
+    // A beat, not a stagger: clearly after the window has started moving.
+    expect(start(caption, 'caption')).toBeGreaterThanOrEqual(windowStart + 0.1);
+    expect(start(title, 'title')).toBeGreaterThan(windowStart);
   });
 
   it('keeps the backdrop pines out from under the captions where plates alternate (X-02)', () => {

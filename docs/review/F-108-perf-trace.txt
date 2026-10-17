@@ -1,0 +1,16 @@
+TASK-108 performance trace summary: 5s of scrolling with scroll depth, clouds and arrivals live.
+Build: production (npm run build && vite preview, http://localhost:3101) at commit 37ef24f. Headless Chrome 155 over CDP.
+Method: Tracing (devtools.timeline, toplevel) around Input.synthesizeScrollGesture, 4000px at 800px/s (real wheel/touch input through the compositor), after the loader released.
+Long task = a main-thread RunTask over 50ms. Layouts with a JS stack = layouts forced by script (M-03: no layout reads per frame beyond cached values).
+
+1440x900 (mouse wheel): gesture 5.11s, scrolled to 4000px
+  long tasks over 50ms: 0   longest task: 3.6ms   main-thread tasks: 4275
+  animation frame callbacks: 907   layouts: 17 (with JS stack: 0)   style recalcs: 607
+  totals over the 5s: scripting 140ms, style 180ms, layout 4ms, paint 15ms
+
+390x844 (touch): gesture 5.21s, scrolled to 4001px
+  long tasks over 50ms: 0   longest task: 4.2ms   main-thread tasks: 3530
+  animation frame callbacks: 3311   layouts: 16 (with JS stack: 0)   style recalcs: 628
+  totals over the 5s: scripting 183ms, style 205ms, layout 3ms, paint 37ms
+
+Result: 0 long tasks over 50ms at either width; no script-forced layout during scrolling.

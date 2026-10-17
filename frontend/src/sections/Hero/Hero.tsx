@@ -4,7 +4,12 @@ import { useEffect, useState } from 'react';
 import { preload } from 'react-dom';
 import { getMedia, type Link, type Site } from '../../content';
 import { Picture } from '../../components/Picture/Picture';
+import { HERO_PHOTO_SIZES } from '../../components/Picture/sizes';
+import { useDriftPlaying } from '../../hooks/useDriftPlaying';
+import { settleWhenRevealed } from '../../hooks/useFogReveal';
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
+import { useScrollDepth } from '../../hooks/useScrollDepth';
+import { DEPTH } from '../../lib/depth';
 import styles from './Hero.module.css';
 
 interface HeroProps {
@@ -27,35 +32,10 @@ export function preloadHeroImage(site: Site) {
   preload(media.fallback.src, {
     as: 'image',
     fetchPriority: 'high',
-    imageSizes: '100vw',
+    imageSizes: HERO_PHOTO_SIZES,
     imageSrcSet: best ? best.srcset : media.fallback.srcset,
     ...(best ? { type: best.type } : {}),
   });
-}
-
-/** True while the hero is on screen, the tab is visible, and motion is allowed. */
-function useDriftPlaying(target: HTMLElement | null): boolean {
-  const reduced = usePrefersReducedMotion();
-  const [inView, setInView] = useState(false);
-  const [visible, setVisible] = useState(() => typeof document === 'undefined' || !document.hidden);
-
-  useEffect(() => {
-    if (!target || typeof IntersectionObserver === 'undefined') return;
-    const observer = new IntersectionObserver((entries) => {
-      const entry = entries[entries.length - 1];
-      if (entry) setInView(entry.isIntersecting);
-    });
-    observer.observe(target);
-    return () => observer.disconnect();
-  }, [target]);
-
-  useEffect(() => {
-    const onChange = () => setVisible(!document.hidden);
-    document.addEventListener('visibilitychange', onChange);
-    return () => document.removeEventListener('visibilitychange', onChange);
-  }, []);
-
-  return inView && visible && !reduced;
 }
 
 function HeroLink({ link }: { readonly link: Link }) {
@@ -75,18 +55,41 @@ function HeroLink({ link }: { readonly link: Link }) {
 export function Hero({ site, onHeroDecode, ready = true }: HeroProps) {
   const [section, setSection] = useState<HTMLElement | null>(null);
   const playing = useDriftPlaying(section);
+  // The photograph lags the scroll a little (TASK-108): the valley reads as farther than the name.
+  // Only the inner layer moves; the frame and its dissolve mask stay with the hero.
+  const [depthLayer, setDepthLayer] = useState<HTMLDivElement | null>(null);
+  useScrollDepth(depthLayer, DEPTH.hero);
   const photo = getMedia(site.heroImage);
+
+  // The copy clears once, when the loader hands over. Afterwards (or at once under reduced motion)
+  // it settles to data-reveal="instant", so a media change can never replay it.
+  const [copy, setCopy] = useState<HTMLDivElement | null>(null);
+  const [settled, setSettled] = useState(false);
+  const reduced = usePrefersReducedMotion();
+  if (ready && reduced && !settled) setSettled(true);
+  useEffect(() => {
+    if (!copy || !ready || settled) return;
+    return settleWhenRevealed(copy, () => setSettled(true));
+  }, [copy, ready, settled]);
 
   return (
     <section id="home" ref={setSection} className={styles.hero}>
       <div className={styles.photo} aria-hidden="true">
-        <Picture media={photo} alt="" sizes="100vw" priority className={styles.image} onDecode={onHeroDecode} />
-        <div className={styles.drift} data-drift={playing ? 'running' : 'paused'}>
-          <Picture media={photo} alt="" sizes="100vw" className={styles.image} />
+        <div ref={setDepthLayer} className={styles.depth}>
+          <Picture media={photo} alt="" sizes={HERO_PHOTO_SIZES} priority className={styles.image} onDecode={onHeroDecode} />
+          <div className={styles.drift} data-drift={playing ? 'running' : 'paused'}>
+            <Picture media={photo} alt="" sizes={HERO_PHOTO_SIZES} className={styles.image} />
+          </div>
         </div>
       </div>
 
-      <div className={styles.copy} data-fog="stagger" data-revealed={ready ? 'true' : undefined}>
+      <div
+        ref={setCopy}
+        className={styles.copy}
+        data-fog="stagger"
+        data-revealed={ready ? 'true' : undefined}
+        data-reveal={settled ? 'instant' : undefined}
+      >
         <h1 className={styles.name}>{site.name}</h1>
         <p className={styles.tagline}>{site.tagline}</p>
         <ul className={styles.links}>

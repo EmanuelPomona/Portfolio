@@ -1,7 +1,10 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { act, cleanup, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { site } from '../../content';
 import { REDUCED_MOTION_QUERY } from '../../hooks/usePrefersReducedMotion';
+import { installFrames } from '../../test-utils/frames';
 import { installIntersectionObserver, installMatchMedia } from '../../test-utils/media';
 import { Hero } from './Hero';
 
@@ -89,6 +92,51 @@ describe('Hero', () => {
     const hero = document.getElementById('home')!;
     act(() => io.intersect(hero, 1));
     expect(hero.querySelector('[data-drift]')).toHaveAttribute('data-drift', 'paused');
+  });
+
+  it('lets the photograph lag the scroll (--depth) inside a still frame, so no edge ever shows', () => {
+    const frames = installFrames();
+    try {
+      const { container } = render(<Hero site={site} onHeroDecode={() => {}} />);
+      frames.flush();
+      const img = container.querySelector('#home img')!;
+      const frame = img.closest('[aria-hidden="true"]') as HTMLElement;
+      // The layer that moves sits inside the frame; the frame itself (and its dissolve mask) stays.
+      const layer = img.parentElement!.closest('div') as HTMLElement;
+      expect(layer).not.toBe(frame);
+      expect(frame.contains(layer)).toBe(true);
+      expect(layer.style.getPropertyValue('--depth')).toMatch(/^-?[\d.]+px$/);
+      expect(frame.style.getPropertyValue('--depth')).toBe('');
+      // Regression: with the mask on the moving element, its fade slid below the hero and the
+      // hero's clip cut the photo while still opaque (a 0.26 luminance step at the boundary).
+      const css = readFileSync(join(__dirname, 'Hero.module.css'), 'utf8');
+      const photo = css.match(/\.photo\s*\{([^}]*)\}/)![1]!;
+      expect(photo).toMatch(/mask-image/);
+      expect(photo).not.toMatch(/translate/);
+      expect(photo).toMatch(/inset:\s*-\d+px 0 0/);
+      expect(css).toMatch(/\.depth\s*\{[^}]*translate:\s*0 var\(--depth/);
+    } finally {
+      frames.restore();
+    }
+  });
+
+  it('settles the copy once its reveal has finished, and shows it instantly under reduced motion', () => {
+    const { container, rerender } = render(<Hero site={site} onHeroDecode={() => {}} ready={false} />);
+    const copy = container.querySelector('#home [data-fog]') as HTMLElement;
+    rerender(<Hero site={site} onHeroDecode={() => {}} ready />);
+    expect(copy).not.toHaveAttribute('data-reveal');
+    const event = new Event('animationend', { bubbles: true });
+    Object.defineProperty(event, 'animationName', { value: 'fog-clear' });
+    act(() => {
+      copy.querySelector('h1')!.dispatchEvent(event);
+    });
+    expect(copy).toHaveAttribute('data-reveal', 'instant');
+    cleanup();
+
+    media.restore();
+    media = installMatchMedia({ [REDUCED_MOTION_QUERY]: true });
+    const reduced = render(<Hero site={site} onHeroDecode={() => {}} ready />);
+    expect(reduced.container.querySelector('#home [data-fog]')).toHaveAttribute('data-reveal', 'instant');
   });
 
   it('holds the copy in the fog until ready, then clears it', () => {

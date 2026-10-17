@@ -3,6 +3,7 @@ import { join } from 'node:path';
 import { cleanup, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { about, type About as AboutContent, type LifePhoto } from '../../content';
+import { fogDelay, globalCss, partDeclaration, resolveNumber } from '../../test-utils/cssTimings';
 import { installIntersectionObserver, installMatchMedia } from '../../test-utils/media';
 import { About } from './About';
 
@@ -94,6 +95,26 @@ describe('About', () => {
     const captioned: AboutContent = { ...about, photos: about.photos.map((p, i) => (i === 1 ? { ...p, caption: 'A caption' } : p)) };
     const { container } = render(<About about={captioned} heading="About" />);
     expect(container.querySelector('[data-spread]')).toHaveAttribute('data-captioned', 'true');
+  });
+
+  it('About prints settle with a stagger of at most 0.08s per print', () => {
+    const { container } = render(<About about={about} heading="About" />);
+    const spread = container.querySelector('[data-spread]')!;
+    expect(spread).toHaveAttribute('data-arrive', 'settle');
+    expect(spread).toHaveAttribute('data-fog', 'stagger');
+    const aboutCss = readFileSync(join(__dirname, 'About.module.css'), 'utf8');
+    const delay = resolveNumber(partDeclaration(aboutCss, 'place', '--arrive-delay') ?? '0s');
+    const starts = [...spread.children].map((_, i) => fogDelay(i + 1) + delay);
+    expect(starts.length).toBeGreaterThan(1);
+    for (let i = 1; i < starts.length; i++) {
+      const step = starts[i]! - starts[i - 1]!;
+      // A stagger, never all at once, and never slower than 0.08s per print.
+      expect(step).toBeGreaterThan(0);
+      expect(step).toBeLessThanOrEqual(0.08 + 1e-9);
+    }
+    // Each print settles about 16px down into place.
+    expect(resolveNumber(partDeclaration(aboutCss, 'place', '--arrive-distance') ?? '0px')).toBe(16);
+    expect(globalCss).toMatch(/\[data-arrive='settle'\]\s*\{[^}]*--arrive-dir-y:\s*-1/);
   });
 
   it('never renders the draft flag', () => {

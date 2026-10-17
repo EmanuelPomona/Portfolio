@@ -12,6 +12,8 @@ html {
   text-size-adjust: 100%;
   /* Anchor jumps and keyboard focus land below the fixed nav (WCAG 2.2 focus not obscured). */
   scroll-padding-top: calc(var(--nav-h) + var(--space-4));
+  /* ...and clear of the bottom edge, so a focused window's ring is never cut off there. */
+  scroll-padding-bottom: var(--space-4);
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -142,9 +144,19 @@ a:active {
 }
 
 /*
+ * ---- Scroll depth (TASK-108). useScrollDepth writes --depth on a layer itself; the layer's own
+ * rule translates by it. Typed and not inherited, so a write restyles that layer alone.
+ */
+@property --depth {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+
+/*
  * ---- Fog-clear reveal (useFogReveal sets data-revealed). ----
  * data-fog="self": the element itself clears.
- * data-fog="stagger": its direct children clear in sequence, 0.05s apart.
+ * data-fog="stagger": its direct children clear in sequence, --reveal-stagger apart.
  * The animation fills backwards only, so once it ends the element falls back to its base
  * style: opacity 1 and no filter. Nothing depends on animationend.
  */
@@ -166,20 +178,94 @@ a:active {
 
 [data-fog='self'][data-revealed='true'],
 [data-fog='stagger'][data-revealed='true'] > * {
-  animation: fog-clear var(--dur-reveal) var(--ease-out) backwards;
+  animation: fog-clear var(--dur-reveal) var(--ease-out) var(--fog-delay, 0s) backwards;
 }
 
 [data-fog='stagger'][data-revealed='true'] > :nth-child(2) {
-  animation-delay: calc(1 * var(--reveal-stagger));
+  --fog-delay: calc(1 * var(--reveal-stagger));
 }
 [data-fog='stagger'][data-revealed='true'] > :nth-child(3) {
-  animation-delay: calc(2 * var(--reveal-stagger));
+  --fog-delay: calc(2 * var(--reveal-stagger));
 }
 [data-fog='stagger'][data-revealed='true'] > :nth-child(4) {
-  animation-delay: calc(3 * var(--reveal-stagger));
+  --fog-delay: calc(3 * var(--reveal-stagger));
 }
 [data-fog='stagger'][data-revealed='true'] > :nth-child(n + 5) {
-  animation-delay: calc(4 * var(--reveal-stagger));
+  --fog-delay: calc(4 * var(--reveal-stagger));
+}
+
+/*
+ * ---- Arrivals (TASK-108, M-04). ----
+ * An element that reveals can also arrive: data-arrive names the direction, and each moving part
+ * (the element for data-fog="self", its children for "stagger") sets --arrive-distance and, to
+ * trail behind, --arrive-delay. The travel runs with the fog clearing, on the same curve and
+ * duration, so the two read as one gesture. `translate` only, which composes with any transform a
+ * part already has. Once, like the reveal: data-revealed is never removed.
+ */
+@keyframes arrive {
+  from {
+    translate: var(--arrive-x) var(--arrive-y);
+  }
+}
+
+[data-arrive] {
+  --arrive-dir-x: 0;
+  --arrive-dir-y: 0;
+}
+[data-arrive='from-left'] {
+  --arrive-dir-x: -1;
+}
+[data-arrive='from-right'] {
+  --arrive-dir-x: 1;
+}
+/* A print laid down on the page: it comes down into place. */
+[data-arrive='settle'] {
+  --arrive-dir-y: -1;
+}
+
+:where([data-arrive])[data-fog='self'],
+:where([data-arrive])[data-fog='stagger'] > * {
+  --arrive-x: calc(var(--arrive-dir-x) * var(--arrive-distance, 0px));
+  --arrive-y: calc(var(--arrive-dir-y) * var(--arrive-distance, 0px));
+}
+
+/* Waiting in the fog, each part already sits at its starting offset. */
+:where([data-arrive])[data-fog='self']:not([data-revealed='true']),
+:where([data-arrive])[data-fog='stagger']:not([data-revealed='true']) > * {
+  translate: var(--arrive-x) var(--arrive-y);
+}
+
+:where([data-arrive])[data-fog='self'][data-revealed='true'],
+:where([data-arrive])[data-fog='stagger'][data-revealed='true'] > * {
+  animation:
+    fog-clear var(--dur-reveal) var(--ease-out) var(--fog-delay, 0s) backwards,
+    arrive var(--dur-reveal) var(--ease-out) calc(var(--fog-delay, 0s) + var(--arrive-delay, 0s)) backwards;
+}
+
+/*
+ * Revealed by focus, or found above the viewport: no fog and no travel, at once. Last, and at the
+ * same specificity as the rules above, so it wins; set once and never removed, so nothing replays.
+ */
+[data-fog='self'][data-reveal='instant'],
+[data-fog='stagger'][data-reveal='instant'] > * {
+  animation: none;
+}
+
+/*
+ * Focus inside content that is still clearing (the hero copy right after the loader, a plate
+ * mid-arrival): show it fully now. Important declarations outrank the running animation without
+ * touching the `animation` property, so nothing restarts when focus moves on (M-04).
+ */
+[data-fog='self']:focus-within,
+[data-fog='stagger'] > :focus-within {
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+/* Only arrivals travel, so only arrivals have their translate taken over. */
+:where([data-arrive])[data-fog='self']:focus-within,
+:where([data-arrive])[data-fog='stagger'] > :focus-within {
+  translate: none !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -187,6 +273,11 @@ a:active {
   [data-fog] > * {
     opacity: 1 !important;
     animation: none !important;
+  }
+
+  :where([data-arrive])[data-fog],
+  :where([data-arrive])[data-fog] > * {
+    translate: none !important;
   }
 
   *,
@@ -201,5 +292,10 @@ a:active {
   [data-fog] > * {
     opacity: 1 !important;
     animation: none !important;
+  }
+
+  :where([data-arrive])[data-fog],
+  :where([data-arrive])[data-fog] > * {
+    translate: none !important;
   }
 }

@@ -52,6 +52,7 @@ function Spread({ photos }: { readonly photos: readonly LifePhoto[] }) {
       data-fill={photos.length}
       data-captioned={photos.some((p) => p.caption !== null) ? 'true' : undefined}
       data-fog="stagger"
+      data-arrive="settle"
     >
       {photos.map((photo, i) => (
         <div key={photo.id} className={`${styles.place} ${styles[`p${i}`]}`} data-pos={i}>
@@ -68,7 +69,7 @@ export function About({ about, heading }: AboutProps) {
   for (let i = 0; i < about.photos.length; i += PER_SPREAD) spreads.push(about.photos.slice(i, i + PER_SPREAD));
 
   return (
-    <Section id="about" heading={heading} backdrop="evergreen" className={styles.section}>
+    <Section id="about" heading={heading} backdrop="evergreen" clouds className={styles.section}>
       <div ref={ref} className={styles.intro} data-fog="stagger">
         <p className={styles.lede}>{about.description}</p>
         <div className={styles.classes}>
