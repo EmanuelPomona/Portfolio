@@ -1,0 +1,50 @@
+{
+  "streetsafeRest": {
+    "state": "rest",
+    "img": "streetsafe-la-1024.avif",
+    "filter": "grayscale(1)",
+    "label": "StreetSafe: LA, Code, github.com/EmanuelPomona/Street-Safe-LA",
+    "screenshotSoon": false
+  },
+  "streetsafeAttention": {
+    "state": "attention",
+    "filter": "none"
+  },
+  "mp4BeforeAttention": [],
+  "snakeRest": {
+    "state": "rest",
+    "video": true,
+    "paused": true,
+    "currentTime": 0,
+    "preload": "none",
+    "muted": true,
+    "loop": true,
+    "playsInline": true,
+    "ariaHidden": "true",
+    "poster": "snake-ai-1270.webp",
+    "objectFit": "contain",
+    "filter": "grayscale(1)",
+    "label": "Snake AI, Code, github.com/EmanuelPomona/Snake-AI"
+  },
+  "snakeAttention": {
+    "state": "attention",
+    "paused": false,
+    "currentTime": 14.97,
+    "firstPlayingAt": 11.99,
+    "filter": "none"
+  },
+  "mp4AfterAttention": [
+    "[desktop-1440] snake-ai.mp4"
+  ],
+  "snakeAfterLeave": {
+    "state": "rest",
+    "paused": true,
+    "heldFrame": true
+  },
+  "reduced": {
+    "state": "attention",
+    "paused": true,
+    "currentTime": 0,
+    "mp4Requests": []
+  }
+}
