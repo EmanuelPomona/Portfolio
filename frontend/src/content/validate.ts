@@ -250,9 +250,9 @@ export function validateContent(
     photoIds.add(ph.id);
   });
 
-  // C-22: a recording has a poster, a /media/video/<name>.mp4 src, a file of at most 3 MB, and a
-  // landscape size in whole pixels. The file clauses need opts.videoSizes (the validator does no I/O);
-  // the Node contract test fills it from frontend/public.
+  // C-22: a recording has a poster, a /media/video/<name>.mp4 src, a file of at most 3 MB, a landscape
+  // size in whole pixels, and, when given, a posterTime of zero or more seconds. The file clauses need
+  // opts.videoSizes (the validator does no I/O); the Node contract test fills it from frontend/public.
   c.projects.forEach((p, i) => {
     const video = p.screen.video;
     if (!video) return;
@@ -275,6 +275,9 @@ export function validateContent(
     if (!whole(video.height)) add('C-22', `${at}.video.height`, `The recording height must be a whole number of pixels, like 954.`);
     if (whole(video.width) && whole(video.height) && video.width < video.height) {
       add('C-22', `${at}.video`, `The recording is ${video.width}x${video.height}; it must be at least as wide as it is tall.`);
+    }
+    if (video.posterTime !== undefined && !(Number.isFinite(video.posterTime) && video.posterTime >= 0)) {
+      add('C-22', `${at}.video.posterTime`, 'posterTime must be the seconds npm run video printed for the poster, like 11.989.');
     }
   });
 

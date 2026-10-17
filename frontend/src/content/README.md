@@ -92,10 +92,11 @@ A short screen recording plays in a project's window while someone looks at it, 
    npm run video
    ```
 
-   It prints what it wrote, for example:
+   It prints what it wrote, then the exact line to paste into `projects.ts` in step 7, for example:
 
    ```text
    snake-ai.mov: public/media/video/snake-ai.mp4 (H.264, 1270x954, 33.7s, 485602 bytes, no audio), media-src/projects/snake-ai.png (poster at 11.989s)
+     for projects.ts: video: { src: '/media/video/snake-ai.mp4', width: 1270, height: 954, posterTime: 11.989 }
    ```
 
 5. Open the poster, `frontend/media-src/projects/<project id>.png`, in Preview, and check all four
@@ -103,15 +104,19 @@ A short screen recording plays in a project's window while someone looks at it, 
    raise `cropLeft` or `cropRight`; if the app itself is cut, lower the number. Then run
    `npm run video` again. If it fails, it writes nothing, so you can fix the settings and retry.
 6. Run `npm run media`. It makes the web-sized copies of the poster.
-7. In `projects.ts`, set that project's `screen`, using the width and height `npm run video` printed:
+7. In `projects.ts`, set that project's `screen`, pasting the `video: { ... }` line `npm run video`
+   printed:
 
    ```ts
    screen: {
      image: 'projects/snake-ai',
      alt: 'The trained agent playing Snake: a green snake chasing a red square on a black field',
-     video: { src: '/media/video/snake-ai.mp4', width: 1270, height: 954 },
+     video: { src: '/media/video/snake-ai.mp4', width: 1270, height: 954, posterTime: 11.989 },
    },
    ```
+
+   `posterTime` is the moment the poster was taken, in seconds. The first play starts there, so the
+   still picture flows straight into motion; later loops start from the beginning.
 
 8. Set `updated` in `site.ts` to today. Check (section 5) and commit (section 6), including the
    `.mov`, the `.json`, the `.mp4`, and the poster.
@@ -200,7 +205,7 @@ What each rule means:
 | C-19 | A link in the hero row is not also one of the contact links. |
 | C-20 | Some text contains an unfinished word: lorem, ipsum, todo, tbd, placeholder, or "coming soon" (any capitalization, plurals included). |
 | C-21 | The images and `media.generated.ts` are out of step: an image was added, removed, or replaced without running `npm run media`, or a generated file is missing. Run `npm run media` and commit everything it changes. |
-| C-22 | A project recording has no poster `image`, its `src` is not `/media/video/<name>.mp4`, the file is missing or over 3 MB, or its `width` and `height` are not whole numbers with the width at least the height (or differ from the file's real size). Run `npm run video` and copy the size it prints. An encoded recording that no project uses is reported too: delete it. |
+| C-22 | A project recording has no poster `image`, its `src` is not `/media/video/<name>.mp4`, the file is missing or over 3 MB, or its `width` and `height` are not whole numbers with the width at least the height (or differ from the file's real size), or `posterTime` is negative or not a number. Run `npm run video` and copy the size it prints. An encoded recording that no project uses is reported too: delete it. |
 
 **Known false alarms for C-20.** It checks whole words in every piece of text, links
 included, so an honest use of those words is flagged too: "my todos", or a repository named
