@@ -1,10 +1,13 @@
 // @vitest-environment node
-// Owner: agent/backend. Content invariants C-01 to C-20 (docs/DATABASE.md), part of `npm run test:contract`.
+// Owner: agent/backend. Content invariants C-01 to C-20 and C-22 (docs/DATABASE.md), part of `npm run test:contract`.
 //
 // Each rule test copies a base content, breaks exactly one rule, and expects exactly one violation with
 // that rule and path. Fixtures set up everything they rely on themselves (dates relative to the base's
 // own `updated`, whole image slots, fresh links), so the suite keeps passing when the owner edits the
 // real content by following README.md. Every rule test runs against two bases to prove it.
+import { existsSync, statSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { content, type Content, type Link, type MediaId } from './index';
 import { validateContent, type RuleId } from './validate';
@@ -550,9 +553,21 @@ describe.each([
   });
 });
 
+/** Byte size of every recording the content references, read from frontend/public (missing files left out). */
+function recordingSizes(c: Content): Record<string, number> {
+  const publicDir = fileURLToPath(new URL('../../public', import.meta.url));
+  return Object.fromEntries(
+    c.projects.flatMap((p) => {
+      const src = p.screen.video?.src;
+      const file = src && path.join(publicDir, src);
+      return file && existsSync(file) ? [[src, statSync(file).size]] : [];
+    }),
+  );
+}
+
 describe('the real content', () => {
-  it('satisfies every invariant C-01 to C-20', () => {
-    const violations = validateContent(content);
+  it('satisfies every invariant C-01 to C-20 and C-22', () => {
+    const violations = validateContent(content, { videoSizes: recordingSizes(content) });
     const report = violations.map((v) => `  ${v.rule} at ${v.path}: ${v.message}`).join('\n');
     expect(violations, `The content has problems. Fix each one, then run npm run test:contract again.\n${report}\n`).toEqual([]);
   });
