@@ -18,12 +18,16 @@ const RUN_MEDIA = 'Run `npm run media` and commit what it changes.';
 
 const entries = Object.values(mediaManifest);
 
-/** Image sources in media-src, as [id, file] with forward-slash ids. Dotfiles and notes are not sources. */
+/**
+ * Image sources in media-src, as [id, file] with forward-slash ids. Dotfiles and notes are not sources,
+ * and media-src/video/ holds recordings for `npm run video` (C-22 covers those), not images.
+ */
 function sources(): [id: string, file: string][] {
   return readdirSync(MEDIA_SRC, { recursive: true, withFileTypes: true })
     .filter((e) => e.isFile())
     .map((e) => path.relative(MEDIA_SRC, path.join(e.parentPath, e.name)).split(path.sep).join('/'))
     .filter((rel) => !rel.split('/').some((part) => part.startsWith('.')) && !rel.toLowerCase().endsWith('.md'))
+    .filter((rel) => !rel.startsWith('video/'))
     .sort()
     .map((rel): [string, string] => [rel.slice(0, rel.lastIndexOf('.')), path.join(MEDIA_SRC, rel)]);
 }
