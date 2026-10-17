@@ -23,7 +23,7 @@ export function BrowserWindow({ project, sizes }: BrowserWindowProps) {
   // allowed (useDriftPlaying, the page's one such signal). Attention alone is not enough: keyboard
   // focus survives scrolling the window out of sight. Under reduced motion the poster stays.
   const mayMove = useDriftPlaying(video);
-  useVideoPlayback(video, attended && mayMove);
+  useVideoPlayback(video, attended && mayMove, project.screen.video?.posterTime ?? 0);
   // A <video poster> cannot lazy-load, so it is set once the window nears the viewport.
   const near = useNearViewport(video);
   const { screen, primary } = project;

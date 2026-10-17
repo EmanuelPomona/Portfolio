@@ -156,6 +156,12 @@ const withRecording: Project = {
   },
 };
 
+// The same fixture with the poster taken 11.989s in, as the real Snake AI poster is (ADR-012).
+const withPosterTime: Project = {
+  ...withRecording,
+  screen: { ...withRecording.screen, video: { ...withRecording.screen.video!, posterTime: 11.989 } },
+};
+
 /** Every URL the poster's renditions offer: each srcset candidate and the JPEG fallback. */
 function renditionUrls(id: NonNullable<Project['screen']['image']>): string[] {
   const media = getMedia(id);
@@ -239,6 +245,59 @@ describe('BrowserWindow with a recording (W-08, ADR-012)', () => {
     fireEvent.keyDown(document, { key: 'Tab' });
     act(() => link.focus());
     expect(play).toHaveBeenCalledTimes(1);
+  });
+
+  it('the first play starts at posterTime; later loops restart at 0', () => {
+    // The poster is the frame at posterTime, so the still must flow into motion with no jump.
+    const events: string[] = [];
+    const play = vi.spyOn(HTMLMediaElement.prototype, 'play').mockImplementation(() => {
+      events.push('play');
+      return Promise.resolve();
+    });
+    vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => {});
+    const { container } = renderOnScreen(withPosterTime);
+    const video = container.querySelector('video')!;
+    let time = 0;
+    let ready = 0; // HAVE_NOTHING: preload="none" means no metadata before the first play
+    Object.defineProperty(video, 'readyState', { configurable: true, get: () => ready });
+    Object.defineProperty(video, 'currentTime', {
+      configurable: true,
+      get: () => time,
+      set: (t: number) => {
+        time = t;
+        events.push(`seek ${t}`);
+      },
+    });
+    const link = screen.getByRole('link');
+
+    fireEvent.mouseEnter(link);
+    // Seek, then play: before metadata this sets the default playback start position.
+    expect(events).toEqual(['seek 11.989', 'play']);
+    // An engine that dropped it gets it again once the metadata arrives.
+    time = 0;
+    ready = 1;
+    fireEvent(video, new Event('loadedmetadata'));
+    expect(events).toEqual(['seek 11.989', 'play', 'seek 11.989']);
+
+    // Paused and played again, it resumes from the held frame: no seek back to posterTime.
+    fireEvent.mouseLeave(link);
+    time = 20.4;
+    fireEvent.mouseEnter(link);
+    expect(play).toHaveBeenCalledTimes(2);
+    expect(events.filter((e) => e.startsWith('seek'))).toHaveLength(2);
+    fireEvent(video, new Event('loadedmetadata'));
+    expect(events.filter((e) => e.startsWith('seek'))).toHaveLength(2);
+    // Later loops are the native loop, which restarts at 0.
+    expect(video.loop).toBe(true);
+
+    // A recording without posterTime starts at its own beginning: no seek at all.
+    cleanup();
+    const plain = renderOnScreen(withRecording);
+    const plainVideo = plain.container.querySelector('video')!;
+    let seeks = 0;
+    Object.defineProperty(plainVideo, 'currentTime', { configurable: true, get: () => 0, set: () => (seeks += 1) });
+    fireEvent.mouseEnter(plain.getByRole('link'));
+    expect(seeks).toBe(0);
   });
 
   it('never plays off-screen, even while keyboard focus stays on the window', () => {
