@@ -35,12 +35,15 @@ interface BrowserWindowProps {
 export function BrowserWindow({ project, sizes }: BrowserWindowProps) {
   const { ref, attended } = useAttention<HTMLAnchorElement>();
   const [failed, setFailed] = useState(false);
+  const [videoFailed, setVideoFailed] = useState(false);
   const [video, setVideo] = useState<HTMLVideoElement | null>(null);
   // Plays only while someone looks at it, and never under reduced motion (the poster stays).
   const reduced = usePrefersReducedMotion();
   useVideoPlayback(video, attended && !reduced);
   const { screen, primary } = project;
   const showImage = screen.image !== null && !failed;
+  // A recording plays in the screen; if it cannot load, its poster stays as a still.
+  const recording = screen.video && screen.image && !videoFailed ? screen.video : null;
 
   return (
     <a
@@ -64,25 +67,26 @@ export function BrowserWindow({ project, sizes }: BrowserWindowProps) {
           whitespace between these two block-level boxes renders nothing. */}
       {' '}
       <span className={styles.screen}>
-        {screen.video && screen.image ? (
+        {recording ? (
           <video
             ref={setVideo}
             className={styles.video}
-            src={screen.video.src}
-            poster={posterUrl(getMedia(screen.image))}
-            width={screen.video.width}
-            height={screen.video.height}
+            src={recording.src}
+            poster={posterUrl(getMedia(screen.image!))}
+            width={recording.width}
+            height={recording.height}
             muted
             loop
             playsInline
             preload="none"
+            onError={() => setVideoFailed(true)}
           />
         ) : showImage ? (
           <Picture
             media={getMedia(screen.image!)}
             alt={screen.alt ?? ''}
             sizes={sizes}
-            className={styles.cover}
+            className={screen.video ? styles.contain : styles.cover}
             onError={() => setFailed(true)}
           />
         ) : (

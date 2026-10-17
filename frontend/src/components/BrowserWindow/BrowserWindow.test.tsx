@@ -271,4 +271,17 @@ describe('BrowserWindow with a recording (W-08, ADR-012)', () => {
       HTMLMediaElement.prototype.play = original;
     }
   });
+
+  it('falls back to the still poster when the video errors', () => {
+    const { container } = render(<BrowserWindow project={withRecording} sizes={SIZES} />);
+    fireEvent.error(container.querySelector('video')!);
+    expect(container.querySelector('video')).toBeNull();
+    // The poster frame as a still screenshot, fitted the way the recording was: never the empty state.
+    const img = container.querySelector('img')!;
+    expect(img).not.toBeNull();
+    expect(img).toHaveAttribute('src', getMedia('backgrounds/evergreen-forest').fallback.src);
+    expect(img).toHaveClass(styles.contain!);
+    expect(screen.queryByText('screenshot soon')).toBeNull();
+    expect(screen.getByRole('link')).toHaveAccessibleName('SagePlan, Live site, sageplan.vercel.app');
+  });
 });

@@ -88,6 +88,16 @@
   transition: filter var(--dur-release) var(--ease-out);
 }
 
+/* A recording's poster, shown as a still when the recording cannot load: framed like the video. */
+.contain {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: grayscale(1);
+  transition: filter var(--dur-release) var(--ease-out);
+}
+
 .empty {
   position: absolute;
   inset: 0;
