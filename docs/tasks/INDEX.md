@@ -14,6 +14,7 @@ Do not edit by hand — edit the task files and regenerate.
 | TASK-107 | REVIEW | frontend | 0 | Photographic clouds drifting through the page |
 | TASK-108 | REVIEW | frontend | 0 | Scroll depth and arrivals (backgrounds slower, plates from their side, prints settle) |
 | TASK-109 | REVIEW | frontend | 0 | Contact as one sentence, "Contact: LinkedIn, Email, GitHub." |
+| TASK-110 | REVIEW | frontend | 0 | Project windows show screenshots and play recordings while attended |
 | TASK-201 | REVIEW | stickman | 0 | Stickman motion engine, canvas rig, and lab page |
 | TASK-202 | REVIEW | stickman | 0 | StickmanLayer desktop cursor (fine pointer) |
 | TASK-203 | REVIEW | stickman | 0 | Scribbling loader with progress, timing rules, and cursor handoff |
@@ -24,7 +25,6 @@ Do not edit by hand — edit the task files and regenerate.
 | TASK-303 | REVIEW | backend | 0 | Head metadata plugin, favicon, Open Graph image, robots, sitemap |
 | TASK-304 | REVIEW | backend | 0 | Vercel config, security headers, and the preview deployment |
 | TASK-305 | REVIEW | backend | 0 | StreetSafe screenshot, Snake AI recording, npm run video, and C-22 |
-| TASK-110 | READY | frontend | 0 | Project windows show screenshots and play recordings while attended |
 | TASK-205 | BACKLOG | stickman | 0 | Safe-area viewport and real-phone check before the touch flag flips |
 
-**Counts:** BACKLOG 1, READY 1, REVIEW 19
+**Counts:** BACKLOG 1, REVIEW 20
