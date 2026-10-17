@@ -94,15 +94,26 @@ describe('useFogReveal', () => {
   });
 
   it('reveals an element that is already above the viewport', () => {
+    // An observer reports only changes of intersection, so "above" arrives in two real ways.
+    // 1. Its first report finds the element above: the page was restored or jumped past it before
+    //    it was observed.
+    const first = render(<Probe />);
+    const above = first.getByTestId('probe');
+    act(() => io.intersect(above, 0, { top: -900, height: 600 }));
+    expect(above).toHaveAttribute('data-revealed', 'true');
+    expect(above).toHaveAttribute('data-reveal', 'instant');
+    first.unmount();
+
+    // 2. It was crossing the viewport, under 15% of it shown, when a jump carried it off the top.
     render(<Probe />);
-    const el = screen.getByTestId('probe');
-    // Below the viewport and not intersecting: it stays in the fog.
-    act(() => io.intersect(el, 0, { top: 2000, height: 600 }));
-    expect(el).not.toHaveAttribute('data-revealed', 'true');
-    // Entirely above it (a nav jump past it, or a load at #about): revealed at once, no motion.
-    act(() => io.intersect(el, 0, { top: -900, height: 600 }));
-    expect(el).toHaveAttribute('data-revealed', 'true');
-    expect(el).toHaveAttribute('data-reveal', 'instant');
+    const passing = screen.getByTestId('probe');
+    act(() => io.intersect(passing, 0, { top: 2000, height: 600 })); // first report: below
+    expect(passing).not.toHaveAttribute('data-revealed', 'true');
+    act(() => io.intersect(passing, 0.05, { top: 730, height: 600 })); // its top edge enters
+    expect(passing).not.toHaveAttribute('data-revealed', 'true');
+    act(() => io.intersect(passing, 0, { top: -900, height: 600 })); // gone through the top
+    expect(passing).toHaveAttribute('data-revealed', 'true');
+    expect(passing).toHaveAttribute('data-reveal', 'instant');
   });
 
   it('focus within an unrevealed arrival reveals it immediately', () => {
