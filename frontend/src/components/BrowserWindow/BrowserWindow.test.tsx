@@ -14,8 +14,8 @@ const css = readFileSync(join(__dirname, 'BrowserWindow.module.css'), 'utf8');
 
 const sageplan = projects[0]!;
 
-// TEST FIXTURE ONLY (W-04). Shipped content never puts a photograph in a project window.
-// The evergreen photo is 1024x1536 (2:3), so it is also the non-16:10 screenshot case.
+// TEST FIXTURE ONLY (W-04). A window only ever shows its own project's screenshot (W-03); the
+// evergreen photo stands in for one here. It is 1024x1536 (2:3), so it is also the non-16:10 case.
 const withScreenshot: Project = {
   ...sageplan,
   screen: { image: 'backgrounds/evergreen-forest', alt: 'Fixture screenshot' },
@@ -53,9 +53,14 @@ describe('BrowserWindow', () => {
       const link = screen.getByRole('link');
       expect(link.getAttribute('aria-label')).toContain(project.addressBar);
       expect(link.textContent).toContain(project.addressBar);
-      // Every shipped window is empty, so its visible placeholder is part of the name too.
-      expect(link.textContent).toContain('screenshot soon');
-      expect(link.getAttribute('aria-label')).toMatch(/, screenshot soon$/);
+      // An empty window's visible placeholder is part of the name too; a filled one has neither.
+      if (project.screen.image === null) {
+        expect(link.textContent).toContain('screenshot soon');
+        expect(link.getAttribute('aria-label')).toMatch(/, screenshot soon$/);
+      } else {
+        expect(link.textContent).not.toContain('screenshot soon');
+        expect(link.getAttribute('aria-label')).not.toContain('screenshot soon');
+      }
       unmount();
     }
   });
@@ -84,10 +89,12 @@ describe('BrowserWindow', () => {
     expect(container.querySelector('img')).toBeNull();
   });
 
-  it('renders every shipped project window empty (W-03)', () => {
+  it('renders each shipped window empty exactly when its screen.image is null (W-03)', () => {
     for (const project of projects) {
       const { container, unmount } = render(<BrowserWindow project={project} sizes={SIZES} />);
-      expect(container.querySelector('img')).toBeNull();
+      const empty = project.screen.image === null;
+      expect(container.querySelector('img, video') === null).toBe(empty);
+      expect(container.textContent?.includes('screenshot soon')).toBe(empty);
       unmount();
     }
   });
