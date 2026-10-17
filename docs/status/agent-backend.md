@@ -101,8 +101,10 @@ OWNER HOLD: no vercel calls of any kind, no git push. Local commits only.
 - [x] Manager follow-up (13d778b posterTime): C-22 posterTime tests red (1a5755f) -> rule (bf447e6); video prints paste-ready line incl posterTime (test c22bce1 red -> 0dc964d); projects.ts posterTime 11.989 (9ba825b); guide (45ccb94); demo re-encode restored to committed MP4 (same 485,602 B)
 - [x] Fresh on 45ccb94: npm test 606/606 exit 0; typecheck 0; lint 0; build 0; contract 193/193; media x2 clean; HANDOFF-3
 
+- [x] Replied to portfolio-38 (head 4f3d0a7, items 1-3, gates)
+
 ## In progress
-- [ ] Reply to portfolio-38; then idle. Owner hold: no deploy, no push.
+- [ ] nothing; TASK-305 in REVIEW. Owner hold: no deploy, no push.
 
 ## Verified
 - Baseline (pre-change) -> typecheck/lint/test all pass on 3ea91a0
