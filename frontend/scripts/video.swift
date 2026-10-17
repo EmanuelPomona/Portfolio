@@ -7,6 +7,8 @@
 //                                               makes its renditions like any screenshot
 //
 // Usage: swift scripts/video.swift [--src media-src/video] [--out public/media/video] [--posters media-src/projects]
+// `npm run video` adds -suppress-warnings: macOS 26 deprecates AVMutableVideoComposition in favor of a
+// macOS-26-only API, and keeping the older one lets the script run on earlier macOS versions too.
 // Flag values resolve against the current folder; the defaults are frontend/'s own folders.
 //
 // Settings file, next to the recording:
