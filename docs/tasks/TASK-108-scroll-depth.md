@@ -1,7 +1,7 @@
 ---
 id: TASK-108
 title: Scroll depth and arrivals (backgrounds slower, plates from their side, prints settle)
-status: READY
+status: IN_PROGRESS
 owner: frontend
 branch: agent/frontend
 priority: HIGH
