@@ -16,6 +16,10 @@
   z-index: -1;
   overflow: hidden;
   pointer-events: none;
+  /* The blend lives on the wrapper: z-index makes .clouds a stacking context, which isolates
+     blending, so a screen on the layers would only meet .clouds' own transparent backdrop and
+     paint the photos' dark rocks normally. Screened as one group, they meet the section's Mist. */
+  mix-blend-mode: screen;
 }
 
 .layer {
@@ -23,7 +27,6 @@
   --travel: 40px;
   --delay: 0s;
   position: absolute;
-  mix-blend-mode: screen;
   mask-image:
     linear-gradient(to bottom, transparent 0, #000 28%, #000 72%, transparent 100%),
     linear-gradient(to right, transparent 0, #000 22%, #000 78%, transparent 100%);

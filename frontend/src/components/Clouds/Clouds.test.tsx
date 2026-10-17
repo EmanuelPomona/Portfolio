@@ -104,6 +104,13 @@ describe('Clouds', () => {
     expect(css).toMatch(/@media \(prefers-reduced-motion: reduce\)\s*\{[^@]*animation:\s*none/);
   });
 
+  it('screens the cloud group as a whole, so the photos can only lighten what is behind text', () => {
+    // Regression: with the screen blend on the layers, .clouds (a stacking context, via z-index)
+    // isolated it, and the photos' dark rocks painted normally: text contrast fell to 1.13:1.
+    expect(css).toMatch(/\.clouds\s*\{[^}]*mix-blend-mode:\s*screen/);
+    expect(css).not.toMatch(/\.layer\s*\{[^}]*mix-blend-mode/);
+  });
+
   it('animates transform only, on a cycle of at least 60s', () => {
     const keyframes = [...css.matchAll(/@keyframes[^{]+\{((?:[^{}]*\{[^}]*\})*)\s*\}/g)].map((m) => m[1]!);
     expect(keyframes.length).toBeGreaterThan(0);
