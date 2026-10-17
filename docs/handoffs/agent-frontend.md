@@ -516,3 +516,124 @@ Fresh at `f607e14` (`agent/frontend`), immediately before this handoff:
 
 ### Commit
 `agent/frontend` at `f607e14` (implementation and evidence), followed by this handoff's docs commit, pushed to `origin/agent/frontend`.
+
+## HANDOFF-4 — agent/frontend — 2026-10-17
+
+### Summary
+TASK-110 is built, verified on the real media, and moved to `REVIEW`. **Owner hold respected:** everything is committed locally on `agent/frontend`; nothing has been pushed or deployed.
+
+A project window now renders `screen.video` exactly as API.md §1 and ADR-012 describe:
+- **The element:** a muted, looping, `playsinline` `<video>` with `preload="none"`, `aria-hidden`, fitted with `contain` on the screen's black.
+- **At rest:** its poster sits gray under the window's glass.
+- **Attended** (hover, keyboard focus, or the coarse-pointer center band): it plays in color.
+- **When attention leaves:** it pauses, holding its frame.
+- **Never plays:** under reduced motion, off-screen, or in a hidden tab.
+- **Failures:** a rejected `play()` is swallowed silently, and a video error falls back to the still poster.
+- **First play:** it starts at `posterTime` (11.989s for Snake AI), so the poster flows into motion with no jump; later loops restart at 0.
+
+Two independent reviews were run:
+- **First review: "with fixes".** 2 Important findings (playing off-screen through kept keyboard focus; an untested poster picker) and 4 Minor. All are fixed, test-first.
+- **Focused re-review of the fixes and `posterTime`: "Ready".** It found no Critical or Important issue, measured the poster as identical to the recording's frame at 11.989s, and listed 5 optional Minors. The four that are mine are fixed; the fifth is routed to you below.
+
+### Tasks Completed
+- **TASK-110:** W-08 (new), W-03 (amended), W-04, W-05, X-05, and the seven named tests plus the manager's `posterTime` test.
+  - **W-08:**
+    - **Rest:** poster gray under glass, paused (`F-110-snake-rest.png`).
+    - **Attention:** plays muted and looping in color, starting from the poster frame (`F-110-snake-attention.png`, `F-110-snake-hover.gif`).
+    - **Leaving:** pauses, holding its frame.
+    - **Never plays:** under reduced motion, nor off-screen, including with keyboard focus kept on the window while the page scrolls.
+    - **Network:** no `.mp4` request before first attention, and none at all under reduced motion.
+    - **Fit:** `contain` on black.
+  - **W-03:** a window only ever shows its own project's screenshot or recording; the shipped windows are checked against their content, and the data-driven W-03 tests still pass.
+  - **W-04:** the real StreetSafe screenshot is darkened and gray at rest, full color on attention (`F-110-streetsafe-{rest,attention}.png`).
+  - **W-05:** a filled window's name is "<title>, <label>, <addressBar>" with no "screenshot soon". axe reports 0 violations, `label-content-name-mismatch` included, at 1440, 768, 390, and 1280 at 200%.
+  - **X-05:** under reduced motion the recording never plays; the poster shows, in color on attention.
+  - **Named tests:** all seven, by their exact names, in `BrowserWindow.test.tsx`, plus `the first play starts at posterTime; later loops restart at 0`.
+
+### Files Changed
+`frontend/src/` only, plus evidence and status:
+- **Component:** `components/BrowserWindow/BrowserWindow.{tsx,module.css,test.tsx}`.
+- **Poster picker:** `components/BrowserWindow/poster.{ts,test.ts}` (new).
+- **Hooks:**
+  - `hooks/useVideoPlayback.{ts,test.tsx}` (new): play while wanted, pause holding the frame, the first-play seek to `posterTime`, a swallowed rejection, a guarded seek.
+  - `hooks/useNearViewport.{ts,test.tsx}` (new): a latched "about to be seen" signal, for the poster.
+- **Test helper:** `test-utils/media.ts`, which gains `optionsFor()` on the fake IntersectionObserver. This is the frontend's test helper, not the contract `media.ts`.
+- **Evidence:** `docs/review/F-110-*`, refreshed `F-01`, `F-02`, `F-03`, `F-zoom-1280-200pct`, `F-console.txt`, `F-lighthouse-local-*`.
+- **Records:** `docs/status/agent-frontend.md`; `docs/tasks/TASK-110-window-recording.md` (status only).
+
+**Not touched by me:** content, `media-src/`, `public/`, and contract files. My 23 first-parent commits since `9c6cd40` touch only the files above; the content and media came in through your merges of TASK-305.
+
+### Contracts
+None changed; no contract change request.
+- **Consumed:** `ProjectScreen.video`, `ProjectVideo.posterTime`, `getMedia`, `useAttention`, and `useDriftPlaying` (now the one "may this move" signal for the hero, the clouds and window recordings).
+- **New frontend-internal interfaces:**
+  - `useVideoPlayback(video, wanted, startAt?)`;
+  - `useNearViewport(target, rootMargin?)`;
+  - `posterUrl(media)` and `POSTER_WIDTH`.
+
+**Choices made where the task left room:**
+- **`src` sits on the `<video>` itself, not a `<source>` child,** so a 404 or a codec failure fires the video's own `error` event and the poster fallback works.
+- **Poster:** the smallest WebP rendition at least 1280w, else the largest WebP, else the JPEG; never AVIF, because a poster cannot negotiate formats. It is set only once the window is within half a viewport, because a `<video poster>` cannot lazy-load the way the screenshots do.
+- **Playback condition:** `attended && useDriftPlaying(video)`. Attention alone was not enough: keyboard focus survives Space or PageDown scrolling the window out of view, and the recording kept looping out of sight. That was reproduced in the browser, fixed, and re-checked.
+- **First play:** seek to `posterTime`, then play. Before metadata this sets the default playback start position (HTML spec), and it is applied again on `loadedmetadata` for engines that drop it. A refused seek is swallowed, so a throw cannot escape the effect.
+- **`animate` decision:** the play start and stop add no motion of their own. The window's existing glass and color transition carries the state change.
+
+### Skills Used
+| Skill | Stage invoked | What it actually changed |
+|---|---|---|
+| animate | Step 1, before any code | No new animation: the recording joins the window's existing filter transition (gray at rest, color on attention). A fade on play would double the glass fade. |
+| superpowers:test-driven-development | Step 2, before the component code | Each named test and each hook test was watched failing first. It caught a test that could not fail: a `vi.spyOn` on `play()` marks its returned promise handled, so the rejection test uses a plain stub. |
+| ecc:browser-qa | Fixture check, then real-content QA on the production build | W-08 numbers, the seamless start, network, 390 touch, keyboard, reduced motion, axe, console, full-page smoke, Lighthouse. |
+| superpowers:requesting-code-review | After the fixture check; again after the review fixes and `posterTime` | First review "with fixes" (2 Important, 4 Minor); focused re-review "Ready" (0 Critical, 0 Important, 5 Minor). |
+| superpowers:receiving-code-review | Before acting on each review | Reproduced the off-screen finding in the browser before fixing it; fixed one item at a time, test-first. Commits: `f1baa66`, `bb34b65`, `45811c4`, `7367805`, `e4109ff`, `1cb74eb`, `e222cc1`. |
+| superpowers:verification-before-completion | Immediately before this handoff | A fresh run of everything under Verification. No implementation after it; only this handoff, the status file and the task status. |
+
+### Verification
+Fresh at `1de8413` (`agent/frontend`), immediately before this handoff:
+- `npm run typecheck`: exit 0.
+- `npm run lint`: exit 0.
+- `npx vitest run`: **51 files, 629 tests passed**.
+- `npm run build`: exit 0. **JS 84.50 kB gzip, CSS 6.54 kB gzip** (budgets 110 and 25).
+- `scripts/contract-test.sh`: exit 0, **193 passed**.
+- `scripts/slop-check.sh`: 19 hits, the same justified exceptions as HANDOFF-3; none new.
+- **Diff review:** my commits touch no contract, content, `public/` or `media-src/` file; no credentials; `.env` untracked; 0 attribution trailers; 0 em or en dashes in `dist/`.
+- **Push:** not pushed (owner hold). `agent/frontend` is ahead of `origin`.
+
+**Browser, on the real media** (production build, `vite preview` at :3101, headless Chrome 155 over CDP):
+- **Seamless first play:**
+  - the first playing frame is at 11.989s, and the earliest frame with picture data is 11.991–11.998s, so no frame from 0 is ever shown;
+  - the poster against the recording's frame at 11.989s differs by a mean of 0.08 per channel, against 3.14 for a control frame 5s earlier;
+  - the reviewer independently measured 33 differing pixels with AVFoundation.
+- **W-08:**
+  - poster attribute absent at the top of the page; 0 `.mp4` requests at rest;
+  - hover: one request, playing, the playhead advancing from about 12s; leave: paused, holding its frame;
+  - keyboard focus plays; scrolled away with focus kept, it pauses and stays paused;
+  - reduced motion: attention (color) without playing, and 0 requests;
+  - 390 touch: the center band plays it; leaving the band pauses it.
+- **Native loop:** on a fixture with `posterTime: 2`, the first play started at 2.00s and the loop wrapped to 0.01s.
+- **Forced media error** (fixture): the still poster replaces the video, `contain`, with bars in the screen's black `rgb(22, 22, 22)`; name unchanged.
+- **Full-page smoke at 1440, 768, 390 and 640 (1280 at 200%):** console 0, no failed requests, CLS 0 to 0.0005, no overflow, **axe 0 violations**, 22 keyboard stops all opaque with a 2px ring, reduced motion fully static, nav jumps with `aria-current`, hero drift running.
+- **Lighthouse (local preview):**
+  - mobile 94 / 100 / 100 / 100 (LCP 2.4s, CLS 0, TBT 0); desktop 98 / 100 / 100 / 100;
+  - the only flagged items predate this task (the hero AVIF's 5 KiB compression saving and the render-blocking CSS);
+  - the poster is not loaded during Lighthouse's initial page load.
+- **Loader release:** about 2.7s from navigation start in this session's runs. An A/B against the round-2 build (`698da7c`) on the same Chrome measured 2.71s for both builds, so the shift from earlier runs is environmental, not TASK-110.
+
+### What Was NOT Verified
+- **Safari (desktop or iOS) and Firefox.** Chromium only. Two things depend on engine behaviour I did not observe:
+  - Whether WebKit keeps a `currentTime` set before metadata, or drops it. If it drops it, the `loadedmetadata` re-apply is what moves the playhead to `posterTime`, and no frame-accurate capture was made to rule out a one-frame flash of frame 0.
+  - iOS `playsinline` and muted autoplay on a real device. React 19 sets `muted` as a property only.
+- **Real phones.** 390 was touch emulation in Chrome.
+- **Screen readers.** No VoiceOver or NVDA pass; names and roles were checked by axe and the DOM.
+- **The integrated page on `main`, and production.** Everything ran on my branch's local preview; nothing was deployed (owner hold).
+
+### Known Issues
+1. **For you, to route to backend (from the re-review; not blocking with the shipped asset).** `frontend/scripts/video.swift` takes the poster and `posterTime` from the source `.mov` timeline and rounds `posterTime` to the nearest millisecond. The exported MP4 is re-timed to a 60 fps grid, so `posterTime` can land up to 0.5ms before the poster's frame starts.
+   - With the current Snake AI asset this is invisible: the game ticks about every 50ms, and the frame shown at 11.989s is identical to the poster.
+   - A future `posterSeconds` on a tick boundary would show the previous tick on first play, a one-cell jump.
+   - The suggested fix is to take the poster from the written MP4 and round `posterTime` up, not to the nearest.
+2. **The hover GIF's faint colored tints on black come from the 128-color GIF palette,** not the page. The PNG stills are exact.
+3. **Without IntersectionObserver the recording never plays.** The poster still shows. `useDriftPlaying` needs IntersectionObserver, which every browser that plays H.264 inline has.
+
+### Commit
+`agent/frontend` at `1de8413` (implementation and evidence), followed by this handoff's docs commit. **Committed locally only, not pushed (owner hold).**
