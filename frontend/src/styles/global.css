@@ -12,6 +12,8 @@ html {
   text-size-adjust: 100%;
   /* Anchor jumps and keyboard focus land below the fixed nav (WCAG 2.2 focus not obscured). */
   scroll-padding-top: calc(var(--nav-h) + var(--space-4));
+  /* ...and clear of the bottom edge, so a focused window's ring is never cut off there. */
+  scroll-padding-bottom: var(--space-4);
 }
 
 @media (prefers-reduced-motion: no-preference) {

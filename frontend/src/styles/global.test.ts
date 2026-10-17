@@ -15,4 +15,12 @@ describe('global.css', () => {
     const release = css.match(/html\[data-loader='show'\] body:has\(main:not\(\[inert\]\)\)\s*\{([^}]*)\}/);
     expect(release?.[1]).toMatch(/overflow:\s*visible/);
   });
+
+  it('scrolls focused content clear of both viewport edges, ring included', () => {
+    // Measured: tabbing down to a project window scrolled its border box flush with the viewport
+    // bottom, so its 2px ring (3px offset) was cut off. The top already clears the fixed nav.
+    const root = css.match(/\nhtml\s*\{([^}]*)\}/)?.[1] ?? '';
+    expect(root).toMatch(/scroll-padding-top:/);
+    expect(root).toMatch(/scroll-padding-bottom:\s*var\(--space-4\)/);
+  });
 });
