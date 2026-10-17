@@ -1,7 +1,7 @@
 ---
 id: TASK-206
 title: Loader minimum 2.2s, with the scribble and progress paced to match
-status: READY
+status: IN_PROGRESS
 owner: stickman
 branch: agent/stickman
 priority: HIGH

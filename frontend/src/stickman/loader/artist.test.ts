@@ -122,6 +122,22 @@ describe('createLoaderArtist', () => {
     }
   });
 
+  it('the scribble keeps adding path between 1.2s and 2.2s', () => {
+    // the longer minimum must read as more drawing, not a stall
+    const { a, scribbleRec, frames } = harness();
+    a.start();
+    frames(72); // 1.2s
+    scribbleRec.clear();
+    frames(60); // to 2.2s
+    const pts = scribbleRec.calls
+      .filter(([n]) => n === 'lineTo')
+      .map(([, x, y]) => ({ x: x as number, y: y as number }));
+    let length = 0;
+    for (let i = 1; i < pts.length; i++) length += Math.hypot(pts[i]!.x - pts[i - 1]!.x, pts[i]!.y - pts[i - 1]!.y);
+    // three graphite passes trace the same path, so a third of the total is the new line: > 150px per second
+    expect(length / 3).toBeGreaterThan(150);
+  });
+
   it('stop() cancels its frame', () => {
     const { a, frames, pending } = harness();
     a.start();

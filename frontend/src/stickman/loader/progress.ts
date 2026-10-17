@@ -1,7 +1,7 @@
 // Owner: agent/stickman. Loader progress and timing (docs/API.md §2.2). Pure; times in ms from mount.
 
-/** Minimum visible time in show mode (L-07). */
-export const MIN_MS = 1200;
+/** Minimum visible time in show mode (L-07; 2.2s since round 2, ADR-011). The ramp reaches 90 here. */
+export const MIN_MS = 2200;
 /** Hard cap: exit starts here even if the hero never decodes (L-02). */
 export const CAP_MS = 4500;
 /** After ready, progress sprints from its current value to 100 over this long. */
