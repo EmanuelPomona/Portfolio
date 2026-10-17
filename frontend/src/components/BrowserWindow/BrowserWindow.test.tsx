@@ -235,10 +235,40 @@ describe('BrowserWindow with a recording (W-08, ADR-012)', () => {
     media = installMatchMedia({ [FINE_POINTER_QUERY]: true });
     cleanup();
     const second = render(<BrowserWindow project={withRecording} sizes={SIZES} />);
-    const pause = vi.spyOn(HTMLMediaElement.prototype, 'pause');
+    const pause = vi.mocked(HTMLMediaElement.prototype.pause);
+    pause.mockClear();
     fireEvent.mouseEnter(second.getByRole('link'));
     expect(play).toHaveBeenCalledTimes(1);
     act(() => media.set(REDUCED_MOTION_QUERY, true));
     expect(pause).toHaveBeenCalled();
+  });
+
+  it('a rejected play() is swallowed, with no unhandled rejection or console error', async () => {
+    // Browsers reject play() when autoplay policy, a quick hover-out, or a missing codec interrupts
+    // it. That is not an error worth a console line; the poster simply stays.
+    // A plain stub, not vi.spyOn: a spy attaches its own handlers to a returned promise (to record
+    // settledResults), which would mark the rejection handled and make this test unable to fail.
+    const original = HTMLMediaElement.prototype.play;
+    let calls = 0;
+    HTMLMediaElement.prototype.play = function play() {
+      calls += 1;
+      return Promise.reject(new DOMException('The play() request was interrupted by a call to pause().', 'AbortError'));
+    };
+    vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => {});
+    const consoleError = vi.spyOn(console, 'error');
+    const unhandled = vi.fn();
+    process.on('unhandledRejection', unhandled);
+    try {
+      render(<BrowserWindow project={withRecording} sizes={SIZES} />);
+      fireEvent.mouseEnter(screen.getByRole('link'));
+      expect(calls).toBe(1);
+      // Let the rejection settle, and Node's unhandled-rejection check run.
+      await new Promise((resolve) => setTimeout(resolve, 30));
+      expect(unhandled).not.toHaveBeenCalled();
+      expect(consoleError).not.toHaveBeenCalled();
+    } finally {
+      process.off('unhandledRejection', unhandled);
+      HTMLMediaElement.prototype.play = original;
+    }
   });
 });
