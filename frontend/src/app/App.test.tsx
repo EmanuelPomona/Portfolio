@@ -4,7 +4,7 @@ import { installIntersectionObserver, installMatchMedia } from '../test-utils/me
 import { App } from './App';
 
 // App's side of the mount contract (docs/API.md §2.5), independent of how the Loader animates.
-// The stickman module is replaced by a controllable Loader: the real one's timing (1.2s minimum,
+// The stickman module is replaced by a controllable Loader: the real one's timing (2.2s minimum,
 // 4.5s cap, exit) is the stickman slice's, covered by src/stickman/contract.test.tsx.
 const loader = vi.hoisted(() => ({
   ready: null as Promise<unknown> | null,
@@ -94,6 +94,50 @@ describe('App mount contract', () => {
     expect(main).toHaveAttribute('aria-busy', 'false');
     expect(screen.queryByTestId('loader')).toBeNull();
     expect(screen.getByTestId('stickman-layer')).toBeInTheDocument(); // still mounted
+  });
+
+  describe('a link to a section (#about) on a first visit', () => {
+    const scrolled = vi.fn();
+    beforeEach(() => {
+      scrolled.mockReset();
+      Object.defineProperty(Element.prototype, 'scrollIntoView', {
+        configurable: true,
+        value(this: Element) {
+          scrolled(this.id);
+        },
+      });
+      history.replaceState(null, '', '#about');
+    });
+    afterEach(() => {
+      Reflect.deleteProperty(Element.prototype, 'scrollIntoView');
+      history.replaceState(null, '', location.pathname);
+    });
+
+    it('scrolls to the fragment once the loader releases <main>, not before', () => {
+      document.documentElement.dataset.loader = 'show';
+      mockDecode(() => Promise.resolve());
+      render(<App />);
+      expect(scrolled).not.toHaveBeenCalled();
+      act(() => loader.done!());
+      expect(scrolled).toHaveBeenCalledTimes(1);
+      expect(scrolled).toHaveBeenCalledWith('about');
+    });
+
+    it('leaves the fragment to the browser when no loader was shown', () => {
+      document.documentElement.dataset.loader = 'skip';
+      mockDecode(() => new Promise(() => {}));
+      render(<App />);
+      expect(scrolled).not.toHaveBeenCalled();
+    });
+
+    it('does nothing when the fragment names no element', () => {
+      history.replaceState(null, '', '#nowhere');
+      document.documentElement.dataset.loader = 'show';
+      mockDecode(() => Promise.resolve());
+      render(<App />);
+      act(() => loader.done!());
+      expect(scrolled).not.toHaveBeenCalled();
+    });
   });
 
   it('mounts no loader and leaves <main> interactive in skip mode', () => {

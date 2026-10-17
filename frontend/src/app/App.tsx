@@ -2,7 +2,7 @@
 // The page. Keeps the mount contract (docs/API.md §2.5): StickmanLayer always mounted, Loader
 // mounted until onDone, <main> inert and aria-busy while the loader is up, and `ready` created
 // once from the same hero source the hero renders.
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Nav } from '../components/Nav/Nav';
 import { flags } from '../config/flags';
 import { content, type NavItem } from '../content';
@@ -46,7 +46,16 @@ export function App() {
   const { site, projects, about, contact } = content;
   const [heroReady] = useState(createHeroReady);
   const [loaderDone, setLoaderDone] = useState(() => loaderMode() === 'skip');
+  const [loaderShown] = useState(() => !loaderDone);
   const label = (id: string) => site.nav.find((item) => item.id === id)?.label ?? id;
+
+  // A first visit to /#about: while the loader is up <main> is inert, so the browser's own jump to
+  // the fragment lands nowhere. Once the loader releases the page, go there. Skip mode keeps the
+  // browser's native behavior.
+  useEffect(() => {
+    if (!loaderShown || !loaderDone || !location.hash) return;
+    document.getElementById(decodeURIComponent(location.hash.slice(1)))?.scrollIntoView({ block: 'start', behavior: 'instant' });
+  }, [loaderShown, loaderDone]);
 
   return (
     <>
