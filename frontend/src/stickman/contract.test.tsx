@@ -109,6 +109,17 @@ describe('stickman contract', () => {
     expect(document.getElementById('boot-cover')).toBeNull();
   });
 
+  it('Loader in show mode waits the 2.2s minimum even when ready has already settled (ADR-011)', async () => {
+    html.dataset.loader = 'show';
+    mockMatchMedia(() => false);
+    const onDone = vi.fn();
+    render(<Loader ready={Promise.resolve()} onDone={onDone} />);
+    await vi.advanceTimersByTimeAsync(2199);
+    expect(onDone).not.toHaveBeenCalled();
+    await vi.advanceTimersByTimeAsync(2801);
+    expect(onDone).toHaveBeenCalledTimes(1);
+  });
+
   it('Loader in fade mode finishes within 1s of ready', async () => {
     html.dataset.loader = 'fade';
     mockMatchMedia((q) => q.includes('reduce'));
