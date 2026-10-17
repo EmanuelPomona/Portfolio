@@ -79,6 +79,7 @@ export function BrowserWindow({ project, sizes }: BrowserWindowProps) {
             loop
             playsInline
             preload="none"
+            aria-hidden="true"
             onError={() => setVideoFailed(true)}
           />
         ) : showImage ? (

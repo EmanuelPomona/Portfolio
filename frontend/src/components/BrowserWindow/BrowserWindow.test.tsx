@@ -284,4 +284,14 @@ describe('BrowserWindow with a recording (W-08, ADR-012)', () => {
     expect(screen.queryByText('screenshot soon')).toBeNull();
     expect(screen.getByRole('link')).toHaveAccessibleName('SagePlan, Live site, sageplan.vercel.app');
   });
+
+  it('the video is aria-hidden and the window\'s name is unchanged', () => {
+    const { container } = render(<BrowserWindow project={withRecording} sizes={SIZES} />);
+    expect(container.querySelector('video')).toHaveAttribute('aria-hidden', 'true');
+    // The same name as a window with a still screenshot: no "screenshot soon", nothing about video.
+    const still = render(<BrowserWindow project={withScreenshot} sizes={SIZES} />);
+    const names = screen.getAllByRole('link').map((link) => link.getAttribute('aria-label'));
+    expect(names).toEqual(['SagePlan, Live site, sageplan.vercel.app', 'SagePlan, Live site, sageplan.vercel.app']);
+    still.unmount();
+  });
 });
