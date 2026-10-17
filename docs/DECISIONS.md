@@ -405,6 +405,9 @@ say a window is dark at rest.
 
 - **Positive:** the four primary links pass Label in Name. W-03 now matches the brief and the owner.
 - **Negative:** the screen-reader name is longer by the address.
+- **Amended at round 2 integration:** axe still flagged `label-content-name-mismatch` on the empty
+  windows, because "screenshot soon" is visible text inside the link. While the screen is empty the
+  name ends ", screenshot soon"; with a real screenshot it is the three parts only.
 
 ## ADR-011: Round 2 motion: clouds through the page, scroll depth, a 2.2s loader minimum
 

@@ -124,7 +124,8 @@ Otherwise use `npm run dev` after `scripts/bootstrap.sh`. Force the loader with
       is darkened or desaturated, and the attention state is full color.
 - [ ] **W-05** Activating a window opens `primary.href` in a new tab with
       `rel="noopener noreferrer"`. Its accessible name is
-      "<title>, <label>, <addressBar>" (ADR-010), and axe reports no
+      "<title>, <label>, <addressBar>", plus ", screenshot soon" while the screen is
+      empty (ADR-010), and axe reports no
       `label-content-name-mismatch`.
 - [ ] **W-06** The address field shows exactly `project.addressBar`.
 - [ ] **W-07** At 390 with touch emulation, a window in the viewport's middle band

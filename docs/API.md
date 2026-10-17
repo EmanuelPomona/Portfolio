@@ -46,7 +46,7 @@ in `docs/DATABASE.md`.
 | `site.name`, `site.tagline`, `site.heroLinks` | The hero, top to bottom. |
 | `site.heroImage`, `site.sectionsImage` | Decorative backgrounds. Render with `alt=""` or as CSS backgrounds. Never announced to screen readers. |
 | `projects` | Render order. The displayed number is `String(i + 1).padStart(2, '0')`. |
-| `project.primary` | The browser window's link target and its accessible name: "<title>, <primary.label>, <addressBar>" (ADR-010: the name contains the visible address, WCAG 2.5.3). `http(s)` links open in a new tab with `rel="noopener noreferrer"`. |
+| `project.primary` | The browser window's link target and its accessible name: "<title>, <primary.label>, <addressBar>", plus ", screenshot soon" while the screen is empty (ADR-010: the name contains all the visible text, WCAG 2.5.3). `http(s)` links open in a new tab with `rel="noopener noreferrer"`. |
 | `project.secondary` | Small links after the meta line. May be empty, and is never the same URL as `primary`. |
 | `project.addressBar` | Rendered verbatim in the window's address field. |
 | `project.meta` | One line, items joined with " · ". |
