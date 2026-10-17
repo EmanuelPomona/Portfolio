@@ -196,3 +196,71 @@ Runtime, in headless system Chrome over CDP, with evidence in `docs/review/`:
 ### Commit
 
 Final commit and the full log: `git log --oneline 3ea91a0..HEAD` on `agent/stickman` (46+ commits).
+
+## HANDOFF-2 — agent/stickman — 2026-10-16
+
+### Summary
+TASK-206 (ADR-011, owner: "Make the loading screen a little bit longer"). The show-mode minimum is
+now **2.2s** and the progress ramp reaches 90% at 2.2s, so the extra second is more drawing, not a
+stall. Unchanged: the 4.5s cap (also from navigation start), skip, the 450ms exit, and the 250ms
+fade.
+
+### Tasks Completed
+TASK-206: L-07 (round 2), with L-02, L-03, L-05, and L-06 still holding. All named tests are
+present:
+- `progressAt rises to ~90 at 2200ms and holds without ready`
+- `with ready already resolved at mount, still waits the 2.2s minimum`
+- `a skip before the minimum still exits immediately`
+- `the cap is still 4500ms from mount`
+- `the scribble keeps adding path between 1.2s and 2.2s` (more than 150px of new line per second)
+
+### Files Changed
+- `frontend/src/stickman/loader/progress.ts`: `MIN_MS` is now 2200; the ramp derives from it.
+- `frontend/src/stickman/loader/{progress,Loader,artist,scribble}.test.ts(x)`.
+- `docs/review/F-206-results.txt`, plus the loader screenshots `F-206-loader-{100,400,2000,2500,4300}ms.png` and `F-206-after-handoff.png`.
+
+### Contracts
+No interface changes. This passes the planned contract clause ("show mode with `ready` settled does
+not call `onDone` before 2200ms"): with fake timers, nothing leaves before exactly 2200ms.
+
+### Skills Used
+| Skill | Stage invoked | What it actually changed |
+|---|---|---|
+| superpowers:test-driven-development | Before the change | The named tests were RED on 1200 (6 failing), then GREEN after `MIN_MS = 2200`. The scribble bound checks were rewritten to one assertion per seed, so they no longer starve other tests. |
+| superpowers:verification-before-completion | Immediately before this handoff | See Verification. |
+
+### Verification
+Fresh run at `edf2491`:
+- `npm test`: 43 files, **530/530**. The stickman tests alone: 232/232.
+- `npm run test:contract`: 162/162.
+- typecheck and lint: exit 0.
+- build: JS 82.40 KB gzip.
+- Manager-owned files unchanged since 90f4ffb.
+
+Browser checks in headless Chrome (`F-206-results.txt`):
+
+| Criterion | Result |
+|---|---|
+| L-07, hero cached | The exit begins 2195–2196ms after the sheet appears; the sheet is on screen until about 2655ms. |
+| L-02, hero hangs | The exit begins 4502ms after navigation start; the page is usable afterwards. |
+| L-03, click at about 300ms | The exit begins 18ms later; the loader is gone 476ms after the click. |
+| L-05 | Fade 256ms. |
+| Page release | The page scrolls after finish. |
+
+### What Was NOT Verified
+- **L-07's last few ms in the browser.** Measured from when the sheet appears, the exit begins
+  4–5ms before 2200. The Loader schedules on `Date.now()` (needed for fake timers) while the
+  observer uses `performance.now()`, and they differ by a few ms; the load average was 18–24 during
+  these runs. The unit test is exact at 2200. If the reviewer reads L-07 as "the exit must start at
+  ≥ 2200ms by `performance.now()`", this is a 0.2% gap.
+- **The full suite is intermittent under extreme machine load.** At a load average of 18, 2–3
+  frontend-owned tests (About, Projects, Hero, PhotoSlot, useAttention) sometimes exceed vitest's 5s
+  timeout. They pass in isolation (74/74 in 1.7s), and the last full runs passed 530/530. They are
+  not my files; I left them alone.
+- **The owner's feel for the new length.** The owner has not watched the loader yet.
+
+### Known Issues
+None new. HANDOFF-1's Known Issues still apply.
+
+### Commit
+`agent/stickman` @ the commit that adds this section (pushed).
