@@ -186,4 +186,33 @@ describe('BrowserWindow with a recording (W-08, ADR-012)', () => {
     expect(video).toHaveAttribute('src', '/media/video/fixture.mp4');
     expect(renditionUrls('backgrounds/evergreen-forest')).toContain(video.getAttribute('poster'));
   });
+
+  it('plays on attention and pauses, holding its frame, when attention leaves', () => {
+    const play = vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue(undefined);
+    const pause = vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => {});
+    const load = vi.spyOn(HTMLMediaElement.prototype, 'load').mockImplementation(() => {});
+    const { container } = render(<BrowserWindow project={withRecording} sizes={SIZES} />);
+    const link = screen.getByRole('link');
+    const video = container.querySelector('video')!;
+    // Nothing plays, and nothing is fetched, at rest.
+    expect(play).not.toHaveBeenCalled();
+
+    fireEvent.mouseEnter(link);
+    expect(play).toHaveBeenCalledTimes(1);
+    expect(play.mock.contexts[0]).toBe(video);
+
+    // Holding the frame: a pause, never a rewind or a reload.
+    let rewound = false;
+    Object.defineProperty(video, 'currentTime', { configurable: true, get: () => 12.5, set: () => { rewound = true; } });
+    fireEvent.mouseLeave(link);
+    expect(pause).toHaveBeenCalled();
+    expect(rewound).toBe(false);
+    expect(load).not.toHaveBeenCalled();
+
+    // Keyboard focus is attention too.
+    play.mockClear();
+    fireEvent.keyDown(document, { key: 'Tab' });
+    act(() => link.focus());
+    expect(play).toHaveBeenCalledTimes(1);
+  });
 });
