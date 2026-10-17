@@ -110,6 +110,8 @@
   width: 100%;
   height: 100%;
   object-fit: contain;
+  /* Picture paints its placeholder tone inline; the letterbox must stay the screen's black. */
+  background-color: var(--color-screen-off) !important;
   filter: grayscale(1);
   transition: filter var(--dur-release) var(--ease-out);
 }

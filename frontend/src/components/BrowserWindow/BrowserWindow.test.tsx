@@ -348,6 +348,8 @@ describe('BrowserWindow with a recording (W-08, ADR-012)', () => {
     // The same glass as a screenshot (W-04): gray at rest, color on attention; the still fallback too.
     expect(video).toMatch(/filter:\s*grayscale\(1\)/);
     expect(rule('.contain')).toMatch(/object-fit:\s*contain/);
+    // The still fallback's bars are the screen's black too, not Picture's inline placeholder tone.
+    expect(rule('.contain')).toMatch(/background-color:\s*var\(--color-screen-off\)\s*!important/);
     expect(css).toMatch(/\.window\[data-state='attention'\] \.video,\s*\.window\[data-state='attention'\] \.contain\s*\{[^}]*filter:\s*none/);
   });
 });
