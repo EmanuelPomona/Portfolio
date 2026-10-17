@@ -25,9 +25,9 @@ Run every command below in a terminal, from the top folder of the project (the o
      ("I'm"), wrap it in double quotes instead: `"I'm music director."`
 2. Open `site.ts` and set `updated` to today's date, written `YYYY-MM-DD`.
 3. If you rewrote the About description, also set `descriptionIsDraft: false` in `about.ts`.
-4. Check it (section 4), then commit (section 5).
+4. Check it (section 5), then commit (section 6).
 
-A few rules to keep in mind while writing. Section 4 lists all of them.
+A few rules to keep in mind while writing. Section 5 lists all of them.
 - A project sentence is **one** sentence, ends with a period, and is at most 200 characters.
 - **No em dash** (the long dash). Some Mac apps turn `--` into one as you type, and
   Option-Shift-Hyphen types one. Use a comma, a colon, or parentheses.
@@ -35,7 +35,9 @@ A few rules to keep in mind while writing. Section 4 lists all of them.
 
 ## 2. Add a project screenshot
 
-1. Take the screenshot at least 1600 pixels wide, ideally 16:10.
+1. Crop the screenshot to 16:10 first (for example 1600x1000), keeping what matters. The window's
+   screen is 16:10 and the picture fills it, so anything outside 16:10 is cut off at the edges.
+   Aim for at least 1600 pixels wide.
 2. Save it as `frontend/media-src/projects/<project id>.png`. The project id is the `id` in
    `projects.ts`, so SagePlan's is `frontend/media-src/projects/sageplan.png`.
    - The filename must be lowercase words joined by hyphens. `SagePlan Screenshot.PNG` is
@@ -57,9 +59,58 @@ A few rules to keep in mind while writing. Section 4 lists all of them.
    - `image` is the file's path inside `media-src/`, without `.png`.
    - `alt` describes what the screenshot shows, for people using screen readers. Use at least
      8 characters, and not just "screenshot".
-5. Set `updated` in `site.ts` to today. Check (section 4) and commit (section 5).
+5. Set `updated` in `site.ts` to today. Check (section 5) and commit (section 6).
 
-## 3. Add a photo to the collage
+## 3. Add a project recording (macOS only)
+
+A short screen recording plays in a project's window while someone looks at it, like Snake AI's.
+
+1. Record only the app's window (for example with Shift-Command-5) and keep it short: the encoded
+   file must stay under 3 MB. Snake AI's 34 seconds came to about 0.5 MB.
+2. Save it as `frontend/media-src/video/<project id>.mov`, for example `snake-ai.mov`.
+3. Next to it, create `<project id>.json` with three numbers:
+
+   ```json
+   { "cropTop": 51, "cropBottom": 1, "posterSeconds": 12 }
+   ```
+
+   - `cropTop`: how many rows of pixels to cut from the top, to remove the recorded window's title
+     bar. On a Retina screen it is usually around 50 (Snake AI: 51). Step 5 shows how to check it.
+   - `cropBottom`: usually 0. If `npm run video` says the height must be even, change it to 1.
+   - `posterSeconds`: the moment shown as a still picture before the recording plays. Pick one
+     where the important things are on screen.
+4. Run:
+
+   ```bash
+   npm run video
+   ```
+
+   It prints what it wrote, for example:
+
+   ```text
+   snake-ai.mov: public/media/video/snake-ai.mp4 (H.264, 1270x954, 33.7s, 485602 bytes, no audio), media-src/projects/snake-ai.png (poster at 11.989s)
+   ```
+
+5. Open the poster, `frontend/media-src/projects/<project id>.png`, in Preview. If any of the title
+   bar shows at its top, raise `cropTop` and run `npm run video` again; if the app is cut, lower it.
+6. Run `npm run media`. It makes the web-sized copies of the poster.
+7. In `projects.ts`, set that project's `screen`, using the width and height `npm run video` printed:
+
+   ```ts
+   screen: {
+     image: 'projects/snake-ai',
+     alt: 'The trained agent playing Snake: a green snake chasing a red square on a black field',
+     video: { src: '/media/video/snake-ai.mp4', width: 1270, height: 954 },
+   },
+   ```
+
+8. Set `updated` in `site.ts` to today. Check (section 5) and commit (section 6), including the
+   `.mov`, the `.json`, the `.mp4`, and the poster.
+
+Each run of `npm run video` makes a slightly different `.mp4`, even from the same recording (the
+poster comes out the same). That is normal: run it again only when the recording changes.
+
+## 4. Add a photo to the collage
 
 1. Save the photo as `frontend/media-src/life/photo-N.jpg`, where `photo-N` is the `id` of the
    slot in `about.ts`, for example `frontend/media-src/life/photo-2.jpg`.
@@ -84,9 +135,9 @@ A few rules to keep in mind while writing. Section 4 lists all of them.
      caption; never write a stand-in like "caption here".
 4. To add a sixth slot, copy a line and give it the next id (`photo-6`). The collage holds up to
    8.
-5. Set `updated` in `site.ts` to today. Check (section 4) and commit (section 5).
+5. Set `updated` in `site.ts` to today. Check (section 5) and commit (section 6).
 
-## 4. Check your edit
+## 5. Check your edit
 
 ```bash
 npm run test:contract
@@ -140,13 +191,14 @@ What each rule means:
 | C-19 | A link in the hero row is not also one of the contact links. |
 | C-20 | Some text contains an unfinished word: lorem, ipsum, todo, tbd, placeholder, or "coming soon" (any capitalization, plurals included). |
 | C-21 | The images and `media.generated.ts` are out of step: an image was added, removed, or replaced without running `npm run media`, or a generated file is missing. Run `npm run media` and commit everything it changes. |
+| C-22 | A project recording has no poster `image`, its `src` is not `/media/video/<name>.mp4`, the file is missing or over 3 MB, or its `width` and `height` are not whole numbers with the width at least the height. Run `npm run video` and copy the size it prints. |
 
 **Known false alarms for C-20.** It checks whole words in every piece of text, links
 included, so an honest use of those words is flagged too: "my todos", or a repository named
 `todo-app`. Reword the text. If a real link trips it, ask for the rule to be adjusted rather
 than changing the link.
 
-## 5. Commit
+## 6. Commit
 
 ```bash
 git add frontend/src/content frontend/media-src frontend/public/media
