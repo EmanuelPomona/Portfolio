@@ -348,3 +348,148 @@ is left in place. It is not the manager's to remove.
 
 `main` @ the commit that adds this handoff, following `fd239e1`. Merges: `9a68f3e` (backend),
 `5384eaa` (frontend), `a85aacf` (stickman).
+
+## HANDOFF-3 — main — 2026-10-16
+
+### Summary
+
+Round 2 delivers the owner's four requests, implemented by the running agent sessions and
+integrated here in the same session, at the owner's instruction ("Finish all task before getting
+back").
+- **Clouds** drift through the page.
+- **Scroll animations:** depth, plus plate and print arrivals.
+- **The loader** is longer: minimum 1.2s → 2.2s.
+- **Contact** is one sentence: "Contact: LinkedIn, Email, GitHub."
+
+Both merges were clean. The manager added the 2.2s contract clause and fixed two pre-existing
+issues the agents raised: the axe label-in-name failure, and the first-visit deep link. The preview
+was redeployed. All 18 v1 and round 2 tasks are `REVIEW` at round 0, and TASK-205 is `BACKLOG`.
+
+**Preview:** https://emanuel-ling-23mjaa59u-team-boh-buh.vercel.app (`main` @ `5c0f122`; Vercel login
+required). **Local:** `npm run preview` → http://localhost:3000.
+
+### Tasks Completed
+
+| Task | Owner | Criteria | Head |
+|---|---|---|---|
+| TASK-109 Contact as one sentence | frontend | K-01, X-04, H-03 | `3754e22` |
+| TASK-107 Clouds through the page | frontend | M-01, M-02, M-05 (X-02, F-02, F-03), H-02 unchanged | `3754e22` |
+| TASK-108 Scroll depth and arrivals | frontend | M-03, M-04, M-05, X-05, F-03 | `3754e22` |
+| TASK-206 Loader minimum 2.2s | stickman | L-07 (round 2), L-02, L-03, L-05, L-06 | `62bfde3` |
+
+**Manager integration glue** (each fix test-first):
+
+| Commit | Change |
+|---|---|
+| `c4e37dc` | Contract clause: show mode waits 2200ms with `ready` already settled. MIN 1200 turns it red. |
+| `c604165`, `be53f05`, `f83628c` | An empty window's name ends ", screenshot soon", and a whitespace node separates the address from the placeholder. Root cause, found with systematic-debugging in axe 4.14's source: `visibleVirtual` joins sibling text with no separator and reads "appscreenshot". |
+| `279f1fe` | A first visit to `/#about` lands on About once the loader releases `<main>`. Skip mode is untouched. |
+| `f4cbb5f` | The task index was regenerated (verification caught it stale). |
+
+### Files Changed
+
+- **Contracts and decisions** (`0f43d36`, `c604165`): `docs/DESIGN_BRIEF.md` (two motion rows and
+  the Quiet principle), `docs/API.md` §1 and §2.2, `docs/ACCEPTANCE.md` (M-01 to M-05, K-01, L-07,
+  W-05), `docs/DECISIONS.md` (ADR-011, and an ADR-010 amendment), the design spec note.
+- **Plan and tasks:** `docs/superpowers/plans/2026-10-16-round-2.md`, `TASK-107`, `TASK-108`,
+  `TASK-109`, `TASK-206`.
+- **Merged from workers:** frontend (sections, components, hooks, lib, styles, test-utils, and F-107
+  to F-109 evidence); stickman (`loader/progress.ts` and loader tests, F-206 evidence).
+- **Manager glue:** `frontend/src/stickman/contract.test.tsx`,
+  `frontend/src/components/BrowserWindow/BrowserWindow.{tsx,test.tsx}`,
+  `frontend/src/app/App.{tsx,test.tsx}`.
+- **Evidence:** `docs/review/M2-*`.
+- **Records:** `docs/ARCHITECTURE.md` and `.env.example` (`PREVIEW_URL`), `docs/status/main.md`.
+
+### Contracts
+
+- API.md §2.2: the minimum is 2.2s (was 1.2s); the ramp runs over about 2.2s. The cap, skip, exit,
+  and fade are unchanged.
+- API.md §1: the window name is "<title>, <label>, <addressBar>", plus ", screenshot soon" while
+  the screen is empty.
+- No TypeScript contract shape changed. `flags.touchStickman` is still `false`.
+
+### Skills Used
+
+| Skill | Stage invoked | What it actually changed |
+|---|---|---|
+| superpowers:brainstorming | Round 2, before product decisions | The owner opted out of questions, so the readings became recorded manager's calls (ADR-011). |
+| superpowers:writing-plans | Round 2, before the task files | Plan header with global constraints and five review-focus failure modes, each pinned to a named test. |
+| superpowers:test-driven-development | Integration glue | RED then GREEN for the contract clause (mutation-checked), the window name and separator, and the deep link. |
+| superpowers:systematic-debugging | axe still failing after the first name fix | Probes, then axe's source: the real root cause (sibling text fused). A single fix, verified with axe at both widths. |
+| superpowers:verification-before-completion | Immediately before this handoff | Fresh clone CI reproduction, below. It caught the stale index. No implementation after it. |
+
+### Verification
+
+**Worker claims checked:**
+- **Skill audit:** frontend 15/15 corroborated, plus `animate` ×3 and TDD at 66%, checked by hand
+  because the audit regex skips one-word skill names. Stickman 14/14.
+- **Scope:** neither branch touched a contract file, and the two branches share no file.
+
+**Fresh clone of `main` @ `7a7752a`:**
+
+| Check | Result |
+|---|---|
+| CI doc checks | all ok after `f4cbb5f` (index re-checked current) |
+| Secrets, `.env` | none; not committed |
+| `npm ci` | exit 0 |
+| `npm run typecheck` | exit 0 |
+| `npm run lint` | exit 0 |
+| `npm run build` | exit 0; JS **83.65 kB gzip**, CSS **6.49 kB gzip** (budgets 110 and 25); 0 em dashes |
+| `npm test` | **47 files, 562 passed**; on merged `main` the suite also passed twice at load average 29 |
+| `scripts/contract-test.sh` | **5 files, 163 passed** |
+
+**Runtime** (production build, headless Chrome 155 over CDP; `docs/review/M2-results.json`,
+`M2-regression-results.json`):
+
+| Check | Result |
+|---|---|
+| L-07 | `<main>` released 2710ms after navigation start (2.2s minimum + 450ms exit) |
+| K-01 | text reads exactly "Contact: LinkedIn, Email, GitHub."; the `h2` labels the section; hrefs and targets correct; no addresses; links ≥ 58px tall at 390 |
+| M-01, M-02 | clouds running and moving in Projects and About; paused in Contact while it is off-screen; `aria-hidden`; only `alpine-valley-1600.avif` and `evergreen-forest-1024.avif` |
+| M-03 | 8 depth layers, clamped at exactly 80px |
+| M-04 | 4 plates (`from-left`/`from-right` by side) and the collage (`settle`): all revealed and settled |
+| Reduced motion | 0 running animations, 0 depth writes, 0 unrevealed |
+| Round 1 regression | loader, stickman (hidden until the first move; never blocks), window names and attention, wheel, nav `aria-current`, 0 overflow at 1440/768/390, coarse pointer, forced colors: all pass |
+| Console | 0 page entries |
+
+**axe 4.14** (`M2-axe-*.json`):
+- before: `label-content-name-mismatch` serious ×4;
+- after, at 1440 and 390: 0 violations under WCAG 2.2 AA (label-in-name passes 4/4).
+
+**Layout after the separator:** window height equals chrome plus screen plus exactly the 2px border,
+and the screen ratio is still 1.600.
+
+**Deep link:** a first visit to `/?loader=1#about` stays at the top under the loader, then lands
+with About at 72px (= `scroll-padding-top`).
+
+**Preview:** target preview, READY. The CSP and headers match. `/media` is `must-revalidate`. The
+served bundle `index-CWbJ2tPp.js` is identical to the local build.
+
+### What Was NOT Verified
+
+- **The reviewer gate.** No reviewer session was running, so nothing is `APPROVED`. Launch with
+  `--model opus` (ADR-007).
+- **Safari, Firefox, real phones, screen readers, low-end GPUs:** not run, as frontend also states.
+  The new motion relies on `@property`, the individual `translate` property, and `mask-composite`.
+- **Lighthouse after the manager glue.** Frontend's 97/100/100/100 (mobile) predates `279f1fe` and
+  `f83628c`. Both are tiny, but neither was re-scored.
+- **The protected preview in a browser.** Only `vercel curl` was used, as in round 1.
+- **Owner sign-off** on the feel of the drift and arrivals (taste; advisory).
+
+### Known Issues
+
+- **A faint seam (advisory, visual).** A luminance step of about 0.015 at the About → Contact
+  boundary at some scroll positions, where a section clips its cloud layer (`overflow: clip`). It
+  is visible on close inspection. A full-page edge scan finds no new full-width seam compared with
+  round 1.
+- **The wrapped Contact sentence at 390:** link tap areas overlap vertically by about 12px. Each
+  keeps at least 44px (K-01 holds).
+- **Vite's native-config warning** about extensionless imports (carried from round 1).
+- **The owner actions from HANDOFF-2 still stand:** production still serves the skeleton; the
+  preview Toolbar; the bypass secret; `main` not pushed.
+
+### Commit
+
+`main` @ the commit adding this handoff, following `93b8874`. Merges: `0b52d92` (frontend) and
+`2122143` (stickman).
