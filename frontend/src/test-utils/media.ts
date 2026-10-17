@@ -106,14 +106,18 @@ export function installIntersectionObserver() {
     intersect(
       el: Element,
       ratio: number,
-      { height = 1000, viewportHeight = window.innerHeight }: { height?: number; viewportHeight?: number } = {},
+      {
+        height = 1000,
+        viewportHeight = window.innerHeight,
+        top = 0,
+      }: { height?: number; viewportHeight?: number; top?: number } = {},
     ) {
       const visible = height * ratio;
       const entry = {
         target: el,
         isIntersecting: ratio > 0,
         intersectionRatio: ratio,
-        boundingClientRect: { top: 0, bottom: height, height } as DOMRectReadOnly,
+        boundingClientRect: { top, bottom: top + height, height } as DOMRectReadOnly,
         intersectionRect: { top: 0, bottom: visible, height: visible } as DOMRectReadOnly,
         rootBounds: { top: 0, bottom: viewportHeight, height: viewportHeight } as DOMRectReadOnly,
         time: 0,

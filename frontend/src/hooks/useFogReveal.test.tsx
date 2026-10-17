@@ -1,5 +1,6 @@
 import { act, cleanup, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { globalCss } from '../test-utils/cssTimings';
 import { installIntersectionObserver, installMatchMedia } from '../test-utils/media';
 import { useFogReveal } from './useFogReveal';
 import { REDUCED_MOTION_QUERY } from './usePrefersReducedMotion';
@@ -9,6 +10,16 @@ function Probe() {
   return (
     <div ref={ref} data-fog="self" data-testid="probe">
       {revealed ? 'revealed' : 'fogged'}
+    </div>
+  );
+}
+
+function ArrivalProbe() {
+  const { ref } = useFogReveal<HTMLDivElement>();
+  return (
+    <div ref={ref} data-fog="stagger" data-arrive="from-left" data-testid="arrival">
+      <p>Plate</p>
+      <a href="https://example.com/">Live site</a>
     </div>
   );
 }
@@ -56,6 +67,34 @@ describe('useFogReveal', () => {
     const el = screen.getByTestId('probe');
     expect(el).toHaveAttribute('data-revealed', 'true');
     expect(el).toHaveTextContent('revealed');
+  });
+
+  it('reveals an element that is already above the viewport', () => {
+    render(<Probe />);
+    const el = screen.getByTestId('probe');
+    // Below the viewport and not intersecting: it stays in the fog.
+    act(() => io.intersect(el, 0, { top: 2000, height: 600 }));
+    expect(el).not.toHaveAttribute('data-revealed', 'true');
+    // Entirely above it (a nav jump past it, or a load at #about): revealed at once, no motion.
+    act(() => io.intersect(el, 0, { top: -900, height: 600 }));
+    expect(el).toHaveAttribute('data-revealed', 'true');
+    expect(el).toHaveAttribute('data-reveal', 'instant');
+  });
+
+  it('focus within an unrevealed arrival reveals it immediately', () => {
+    render(<ArrivalProbe />);
+    const el = screen.getByTestId('arrival');
+    const link = screen.getByRole('link', { name: 'Live site' });
+    expect(el).not.toHaveAttribute('data-revealed', 'true');
+
+    act(() => link.focus());
+    expect(el).toHaveAttribute('data-revealed', 'true');
+    // Instant: no fog, no travel, so focused content is fully visible in the same frame.
+    expect(el).toHaveAttribute('data-reveal', 'instant');
+    expect(globalCss).toMatch(/\[data-reveal='instant'\][^{]*\{[^}]*animation:\s*none/);
+
+    act(() => link.blur());
+    expect(el).toHaveAttribute('data-revealed', 'true');
   });
 
   it('never un-reveals', () => {

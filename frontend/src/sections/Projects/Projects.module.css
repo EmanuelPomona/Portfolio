@@ -39,13 +39,18 @@
     'caption';
 }
 
+/* Arrivals (TASK-108): the window comes in from its own side; its title and caption follow a beat
+   behind, travelling less. The direction comes from the plate's data-arrive (global.css). */
 .window {
   grid-area: window;
   align-self: start;
+  --arrive-distance: var(--arrive-far);
 }
 
 .title {
   grid-area: title;
+  --arrive-distance: var(--arrive-near);
+  --arrive-delay: var(--arrive-beat);
   margin-block-start: var(--space-5);
   font-family: var(--font-display);
   font-size: var(--step-4);
@@ -67,6 +72,8 @@
 
 .caption {
   grid-area: caption;
+  --arrive-distance: var(--arrive-near);
+  --arrive-delay: var(--arrive-beat);
   max-width: var(--measure);
   margin-block-start: var(--space-3);
 }

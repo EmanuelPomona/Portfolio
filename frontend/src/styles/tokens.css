@@ -88,4 +88,7 @@
   --dur-release: 0.45s; /* attention leaving: exits faster than entrances */
   --dur-hover: 0.18s; /* link color */
   --reveal-stagger: 0.05s; /* sibling stagger, under the brief's 0.06s ceiling */
+  --arrive-far: 48px; /* a project window arriving from its side (TASK-108) */
+  --arrive-near: 16px; /* its title and caption, and a print settling */
+  --arrive-beat: 0.12s; /* how far a caption trails its window: a beat, not a stagger */
 }

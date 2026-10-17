@@ -144,7 +144,7 @@ a:active {
 /*
  * ---- Fog-clear reveal (useFogReveal sets data-revealed). ----
  * data-fog="self": the element itself clears.
- * data-fog="stagger": its direct children clear in sequence, 0.05s apart.
+ * data-fog="stagger": its direct children clear in sequence, --reveal-stagger apart.
  * The animation fills backwards only, so once it ends the element falls back to its base
  * style: opacity 1 and no filter. Nothing depends on animationend.
  */
@@ -166,26 +166,84 @@ a:active {
 
 [data-fog='self'][data-revealed='true'],
 [data-fog='stagger'][data-revealed='true'] > * {
-  animation: fog-clear var(--dur-reveal) var(--ease-out) backwards;
+  animation: fog-clear var(--dur-reveal) var(--ease-out) var(--fog-delay, 0s) backwards;
 }
 
 [data-fog='stagger'][data-revealed='true'] > :nth-child(2) {
-  animation-delay: calc(1 * var(--reveal-stagger));
+  --fog-delay: calc(1 * var(--reveal-stagger));
 }
 [data-fog='stagger'][data-revealed='true'] > :nth-child(3) {
-  animation-delay: calc(2 * var(--reveal-stagger));
+  --fog-delay: calc(2 * var(--reveal-stagger));
 }
 [data-fog='stagger'][data-revealed='true'] > :nth-child(4) {
-  animation-delay: calc(3 * var(--reveal-stagger));
+  --fog-delay: calc(3 * var(--reveal-stagger));
 }
 [data-fog='stagger'][data-revealed='true'] > :nth-child(n + 5) {
-  animation-delay: calc(4 * var(--reveal-stagger));
+  --fog-delay: calc(4 * var(--reveal-stagger));
+}
+
+/*
+ * ---- Arrivals (TASK-108, M-04). ----
+ * An element that reveals can also arrive: data-arrive names the direction, and each moving part
+ * (the element for data-fog="self", its children for "stagger") sets --arrive-distance and, to
+ * trail behind, --arrive-delay. The travel runs with the fog clearing, on the same curve and
+ * duration, so the two read as one gesture. `translate` only, which composes with any transform a
+ * part already has. Once, like the reveal: data-revealed is never removed.
+ */
+@keyframes arrive {
+  from {
+    translate: var(--arrive-x) var(--arrive-y);
+  }
+}
+
+[data-arrive] {
+  --arrive-dir-x: 0;
+  --arrive-dir-y: 0;
+}
+[data-arrive='from-left'] {
+  --arrive-dir-x: -1;
+}
+[data-arrive='from-right'] {
+  --arrive-dir-x: 1;
+}
+/* A print laid down on the page: it comes down into place. */
+[data-arrive='settle'] {
+  --arrive-dir-y: -1;
+}
+
+:where([data-arrive])[data-fog='self'],
+:where([data-arrive])[data-fog='stagger'] > * {
+  --arrive-x: calc(var(--arrive-dir-x) * var(--arrive-distance, 0px));
+  --arrive-y: calc(var(--arrive-dir-y) * var(--arrive-distance, 0px));
+}
+
+/* Waiting in the fog, each part already sits at its starting offset. */
+:where([data-arrive])[data-fog='self']:not([data-revealed='true']),
+:where([data-arrive])[data-fog='stagger']:not([data-revealed='true']) > * {
+  translate: var(--arrive-x) var(--arrive-y);
+}
+
+:where([data-arrive])[data-fog='self'][data-revealed='true'],
+:where([data-arrive])[data-fog='stagger'][data-revealed='true'] > * {
+  animation:
+    fog-clear var(--dur-reveal) var(--ease-out) var(--fog-delay, 0s) backwards,
+    arrive var(--dur-reveal) var(--ease-out) calc(var(--fog-delay, 0s) + var(--arrive-delay, 0s)) backwards;
+}
+
+/*
+ * Revealed by focus, or found above the viewport: no fog and no travel, at once. Last, and at the
+ * same specificity as the rules above, so it wins; set once and never removed, so nothing replays.
+ */
+[data-fog='self'][data-reveal='instant'],
+[data-fog='stagger'][data-reveal='instant'] > * {
+  animation: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
   [data-fog],
   [data-fog] > * {
     opacity: 1 !important;
+    translate: none !important;
     animation: none !important;
   }
 
@@ -200,6 +258,7 @@ a:active {
   [data-fog],
   [data-fog] > * {
     opacity: 1 !important;
+    translate: none !important;
     animation: none !important;
   }
 }

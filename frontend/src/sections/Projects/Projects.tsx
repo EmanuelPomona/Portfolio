@@ -17,13 +17,15 @@ const WINDOW_SIZES = '(min-width: 90rem) 760px, (min-width: 64rem) 54vw, 92vw';
 function Plate({ project, index }: { readonly project: Project; readonly index: number }) {
   const { ref } = useFogReveal<HTMLElement>();
   const number = String(index + 1).padStart(2, '0');
+  const side = index % 2 === 0 ? 'left' : 'right';
   return (
     <article
       ref={ref}
       id={`project-${project.id}`}
       className={styles.plate}
-      data-side={index % 2 === 0 ? 'left' : 'right'}
+      data-side={side}
       data-fog="stagger"
+      data-arrive={`from-${side}`}
     >
       <h3 className={styles.title}>
         {/* The spaces stay outside the hidden slash, so the heading is named "01 SagePlan". */}

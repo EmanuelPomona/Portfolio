@@ -52,6 +52,7 @@ function Spread({ photos }: { readonly photos: readonly LifePhoto[] }) {
       data-fill={photos.length}
       data-captioned={photos.some((p) => p.caption !== null) ? 'true' : undefined}
       data-fog="stagger"
+      data-arrive="settle"
     >
       {photos.map((photo, i) => (
         <div key={photo.id} className={`${styles.place} ${styles[`p${i}`]}`} data-pos={i}>
