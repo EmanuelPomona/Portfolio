@@ -1,13 +1,13 @@
 # STATUS: agent/frontend
 Task: ROUND 3 (manager portfolio-38): TASK-110 window recording. OWNER HOLD: no deploy, no git push; commit locally only. Round 2 (107/108/109) integrated on main (698da7c); manager fixed the axe label-in-name and the /#about deep link on main.
 Round: 3 (project round; task round counters stay with the reviewer)
-Last updated: 2026-10-17T00:10:00Z
+Last updated: 2026-10-17T01:00:00Z
 
 ## ROUND 3 PLAN (TASK-110)
 Specs: ADR-012, API.md §1 project.screen.video row, ACCEPTANCE W-03 (amended), W-04, W-05, W-08, task file (7 named tests). Synced to main @ 12e9c35 (types.ts ProjectVideo, empty-window name logic, data-driven W-03 tests: keep passing).
 - [x] animate recorded (below)
-- [ ] TDD 7 named tests in BrowserWindow.test.tsx (+ hook test for tab-hidden pause): video muted loop playsInline preload="none" poster (webp rendition near window size), src attr on <video> (not <source>, so video error fires), aria-hidden; play while attended && !reduced && tab visible, pause holding frame; rejected play swallowed; error -> still Picture of screen.image (contain); CSS .video contain on black, grayscale at rest, color on attention
-- [ ] browser check with a scratchpad fixture MP4 (never committed)
+- [x] TDD DONE: 7 named tests + 3 hook tests, each RED first (f724c68 video, 6d525ad play/pause, 542c7e7 reduced motion, ef2022a rejected play swallowed + pause only after playing (spy-handled-promise trap found: vi.spyOn marks returned promises handled, so test 4 uses a plain stub), bdb29ea error -> still poster (.contain), 527612b aria-hidden, 08efed5 contain on black CSS, 7083cf5 hook pauses while tab hidden). Suite 48 files / 572. WAS: video muted loop playsInline preload="none" poster (webp rendition near window size), src attr on <video> (not <source>, so video error fires), aria-hidden; play while attended && !reduced && tab visible, pause holding frame; rejected play swallowed; error -> still Picture of screen.image (contain); CSS .video contain on black, grayscale at rest, color on attention
+- [x] Fixture browser check (scratchpad worktree preview110 on :3301, fixture.mp4 = 4s H.264 made by Chrome MediaRecorder; never committed): rest paused, poster evergreen-1024.webp, grayscale, contain, 0 mp4 requests; hover -> 1 request, playing (t advancing), filter none; leave -> paused, frame held (t 1.91 stable); keyboard focus plays; reduced motion: attention without play, 0 requests; 390 touch center band plays, leaving pauses; axe 0; console clean. Visual: rest pair = poster letterboxed on black under glass; attention = recording in color, pillarboxed, lights + shadow. QA-tool note: my stickman-hiding selector [class^=stickman] matched <html class="stickman-cursor"> after the first mouse move and hid the page; use body-scoped selectors.
 - [ ] after manager syncs TASK-305: F-110-streetsafe-{rest,attention}.png, F-110-snake-{rest,attention}.png, F-110-snake-hover.gif, no .mp4 before first attention, reduced motion never plays, 390 touch center band, console clean, axe 0
 - [ ] ecc:browser-qa, requesting-code-review, verification-before-completion (last), TASK-110 REVIEW, HANDOFF-4, commit (NO PUSH), SendMessage portfolio-38
 
