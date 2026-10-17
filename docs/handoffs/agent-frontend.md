@@ -637,3 +637,43 @@ Fresh at `1de8413` (`agent/frontend`), immediately before this handoff:
 
 ### Commit
 `agent/frontend` at `1de8413` (implementation and evidence), followed by this handoff's docs commit. **Committed locally only, not pushed (owner hold).**
+
+## HANDOFF-5 — agent/frontend — 2026-10-17
+
+### Summary
+This fixes the manager's W-08 finding: the letterbox behind a recording is now true black, at rest and on attention, for both the `<video>` (`.video`) and its still fallback (`.contain`). The two are identical. Before the fix, the side bars were `#161616` (`--color-screen-off`) beside the game's `#000000` field, so a playing recording sat in a two-tone frame. TASK-110 stays in `REVIEW`. **Committed locally only; not pushed or deployed (owner hold).**
+
+### Tasks Completed
+TASK-110, W-08: "fits the recording with contain on black".
+
+### Files Changed
+- `frontend/src/components/BrowserWindow/BrowserWindow.module.css`: `.video { background: #000 }` and `.contain { background-color: #000 !important }`, with a comment saying the letterbox matches the recording's own field. The screen itself keeps `--color-screen-off` for screenshots and the empty state.
+- `frontend/src/components/BrowserWindow/BrowserWindow.test.tsx`: the CSS-source test `fits the recording with contain on black` now requires `#000` for both rules. It was watched failing against the old value first.
+- `docs/review/F-110-snake-attention.png` (re-captured, as asked), plus `F-110-snake-rest.png` and `F-110-snake-hover.gif` re-captured so all the Snake AI evidence shows the fix.
+
+### Contracts
+None changed. DESIGN_CONSTRAINTS has no pure-black rule, and `scripts/slop-check.sh` is unchanged at 19 hits, all justified.
+
+### Skills Used
+| Skill | Stage invoked | What it actually changed |
+|---|---|---|
+| superpowers:verification-before-completion | Re-invoked after the fix, immediately before this handoff | The fresh results below. No implementation after it. |
+
+### Verification
+Fresh at `d506406`:
+- `npm run typecheck`: exit 0.
+- `npm run lint`: exit 0.
+- `npx vitest run`: **51 files, 629 passed**.
+- `npm run build`: exit 0, JS 84.50 kB gzip, CSS 6.54 kB gzip.
+- `scripts/contract-test.sh`: 193 passed.
+- **Measured on the new `F-110-snake-attention.png`** (production build at :3101, 1440): left bar `#000000`, game field `#000000`, right bar `#000000`, one continuous black. At rest the bars and field are a uniform `#131313` (the glass over black).
+
+### What Was NOT Verified
+- The still fallback's black letterbox was checked only by the CSS-source test this time. The forced-error browser check from HANDOFF-4 ran against `--color-screen-off`, and the fixture worktree has since been removed.
+- Browsers other than Chromium, as in HANDOFF-4.
+
+### Known Issues
+None new.
+
+### Commit
+`agent/frontend` at `d506406` (fix `d5684fa`, evidence `d506406`), followed by this handoff's docs commit. Local only, not pushed.

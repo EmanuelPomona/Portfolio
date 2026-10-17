@@ -415,13 +415,15 @@ describe('BrowserWindow with a recording (W-08, ADR-012)', () => {
     expect(video).toMatch(/object-fit:\s*contain/);
     expect(video).toMatch(/width:\s*100%/);
     expect(video).toMatch(/height:\s*100%/);
-    expect(video).toMatch(/background(-color)?:\s*var\(--color-screen-off\)/);
+    // True black behind a recording: the letterbox matches the recording's own field, so a playing
+    // recording never sits in a two-tone frame (measured: #161616 bars beside a #000000 game field).
+    expect(video).toMatch(/background(-color)?:\s*#000\b/);
     expect(rule('.screen')).toMatch(/background:\s*var\(--color-screen-off\)/);
     // The same glass as a screenshot (W-04): gray at rest, color on attention; the still fallback too.
     expect(video).toMatch(/filter:\s*grayscale\(1\)/);
     expect(rule('.contain')).toMatch(/object-fit:\s*contain/);
-    // The still fallback's bars are the screen's black too, not Picture's inline placeholder tone.
-    expect(rule('.contain')).toMatch(/background-color:\s*var\(--color-screen-off\)\s*!important/);
+    // The still fallback's bars are the same true black, not Picture's inline placeholder tone.
+    expect(rule('.contain')).toMatch(/background-color:\s*#000\s*!important/);
     expect(css).toMatch(/\.window\[data-state='attention'\] \.video,\s*\.window\[data-state='attention'\] \.contain\s*\{[^}]*filter:\s*none/);
   });
 });
