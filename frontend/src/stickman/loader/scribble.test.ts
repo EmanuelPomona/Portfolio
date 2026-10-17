@@ -9,14 +9,16 @@ describe('createScribble', () => {
     for (const seed of [1, 7, 42, 2026, 99991]) {
       const a = createScribble(seed);
       const b = createScribble(seed);
+      let mismatches = 0;
+      let outside = 0;
       for (let t = 0; t <= 10; t += MS) {
         const p = a(t);
-        expect(b(t)).toEqual(p);
-        expect(p.x).toBeGreaterThanOrEqual(0);
-        expect(p.x).toBeLessThanOrEqual(1);
-        expect(p.y).toBeGreaterThanOrEqual(0);
-        expect(p.y).toBeLessThanOrEqual(1);
+        const q = b(t);
+        if (p.x !== q.x || p.y !== q.y) mismatches++;
+        if (p.x < 0 || p.x > 1 || p.y < 0 || p.y > 1) outside++;
       }
+      expect(mismatches).toBe(0);
+      expect(outside).toBe(0);
     }
   });
 
@@ -31,11 +33,13 @@ describe('createScribble', () => {
     for (const seed of [3, 11, 31337]) {
       const s = createScribble(seed);
       let prev = s(0);
+      let maxStep = 0;
       for (let t = MS; t <= 10; t += MS) {
         const p = s(t);
-        expect(Math.hypot(p.x - prev.x, p.y - prev.y)).toBeLessThan(0.005);
+        maxStep = Math.max(maxStep, Math.hypot(p.x - prev.x, p.y - prev.y));
         prev = p;
       }
+      expect(maxStep).toBeLessThan(0.005);
     }
   });
 
