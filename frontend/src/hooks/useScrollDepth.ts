@@ -19,7 +19,19 @@ interface Layer {
 const layers = new Map<HTMLElement, Layer>();
 let frame = 0;
 let stale = true;
+let viewportHeight = 0;
 let resizeObserver: ResizeObserver | null = null;
+
+/**
+ * The element's top in the document from the layout alone (offsetTop up the offsetParent chain),
+ * which ignores transforms: a layer's own translate, however its CSS maps --depth, and any
+ * transform on an ancestor never move the position it is measured at.
+ */
+function layoutTop(el: HTMLElement): number {
+  let top = 0;
+  for (let node: HTMLElement | null = el; node; node = node.offsetParent as HTMLElement | null) top += node.offsetTop;
+  return top;
+}
 
 function schedule() {
   if (!frame) frame = requestAnimationFrame(update);
@@ -37,15 +49,13 @@ function onResize() {
 function update() {
   frame = 0;
   const scrollY = window.scrollY;
-  const viewportHeight = window.innerHeight;
   if (stale) {
-    // Reads first, all together. Each rect includes the offset this hook wrote, so take it out to
-    // get the layer's own layout position.
+    // Layout reads, all together, only after a mount or a resize; cached for every other frame.
     stale = false;
+    viewportHeight = window.innerHeight;
     for (const [el, layer] of layers) {
-      const rect = el.getBoundingClientRect();
-      layer.top = rect.top + scrollY - (layer.offset ?? 0);
-      layer.height = rect.height;
+      layer.top = layoutTop(el);
+      layer.height = el.offsetHeight;
     }
   }
   for (const [el, layer] of layers) {

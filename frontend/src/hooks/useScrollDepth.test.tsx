@@ -26,16 +26,21 @@ describe('useScrollDepth', () => {
     frames = installFrames();
     setScroll(0);
     Object.defineProperty(window, 'innerHeight', { configurable: true, value: 800 });
-    // Every layer sits at document top 2000, 600px tall (measured at scrollY 0).
+    // Every layer's layout box sits at document top 2000, 600px tall.
+    vi.spyOn(HTMLElement.prototype, 'offsetTop', 'get').mockReturnValue(2000);
+    vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockReturnValue(600);
+    vi.spyOn(HTMLElement.prototype, 'offsetParent', 'get').mockReturnValue(null);
+    // Its painted box is somewhere else: a layer's CSS may map --depth to any translate, so the
+    // transformed rect says nothing reliable about where the layer sits in the layout.
     vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({
-      top: 2000,
-      bottom: 2600,
+      top: 2037,
+      bottom: 2637,
       height: 600,
       left: 0,
       right: 1000,
       width: 1000,
       x: 0,
-      y: 2000,
+      y: 2037,
       toJSON: () => ({}),
     } as DOMRect);
   });
@@ -81,6 +86,36 @@ describe('useScrollDepth', () => {
     frames.flush();
     // 200px past center: the layer lags by 20px.
     expect(depth(el)).toBe('20px');
+  });
+
+  it('a resize alone never moves a layer: positions come from the layout, not the painted box', () => {
+    // Regression (review, round 2): re-measuring subtracted the raw --depth from a rect whose CSS
+    // translate was a mapping of it, so a resize nudged the backdrop.
+    render(<Layer id="a" />);
+    const el = screen.getByTestId('a');
+    setScroll(2100);
+    frames.flush();
+    expect(depth(el)).toBe('20px');
+    window.dispatchEvent(new Event('resize'));
+    frames.flush();
+    expect(depth(el)).toBe('20px');
+  });
+
+  it('reads the viewport height when it measures, not on every frame', () => {
+    render(<Layer id="a" />);
+    const el = screen.getByTestId('a');
+    setScroll(2100);
+    frames.flush();
+    expect(depth(el)).toBe('20px');
+    // A new height is only picked up with the resize that comes with it.
+    Object.defineProperty(window, 'innerHeight', { configurable: true, value: 1000 });
+    window.dispatchEvent(new Event('scroll'));
+    frames.flush();
+    expect(depth(el)).toBe('20px');
+    window.dispatchEvent(new Event('resize'));
+    frames.flush();
+    // Viewport center now 2100 + 500 = 2600, 300px past the layer's center 2300: 30px.
+    expect(depth(el)).toBe('30px');
   });
 
   it('clears depth offsets when reduced motion turns on', () => {
