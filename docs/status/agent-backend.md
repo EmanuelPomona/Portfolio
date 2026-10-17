@@ -1,7 +1,7 @@
 # STATUS: agent/backend
 Task: TASK-305 (REVIEW). Earlier: 301-303 REVIEW, 304 BLOCKED (contract)
 Round: 0
-Last updated: 2026-10-16T23:20:00Z
+Last updated: 2026-10-16T23:45:00Z
 
 ## Skills invoked so far
 - ecc:contract-first @ TASK-301 start, before validator -> shapes imported from types.ts (no redeclared copies); DATABASE.md is the invariant source; provider check = validate the real exported `content`; fixtures JSON-cloned because heroLinks/contact.links share refs (structuredClone would double-count)
@@ -22,6 +22,8 @@ Last updated: 2026-10-16T23:20:00Z
 - superpowers:requesting-code-review @ TASK-305 pre-handoff (re-invoked; harness: already loaded, unchanged) -> read-only reviewer on 12e9c35..2fb25a6 with TASK-305/ADR-012/API/DATABASE/B-06 and stated decisions; findings pending
 - superpowers:receiving-code-review @ TASK-305 after review verdict With fixes (re-invoked; harness: already loaded) -> verified #1 in code (cleanup only covered successful outputs); fixed 1,2,3,4,5,6,7,8 with tests; declined list accepted (poster jump, ICC, 60fps, corner pixels, INDEX.md)
 - superpowers:verification-before-completion @ immediately before HANDOFF-2 (re-invoked; harness: already loaded) -> every TASK-305 claim re-run fresh on 5c82dc8; no implementation after it
+- superpowers:test-driven-development @ posterTime follow-up (already loaded) -> red-first for C-22 posterTime (6 fails) and the printed paste line
+- superpowers:verification-before-completion @ immediately before HANDOFF-3 (already loaded) -> fresh gates on 45ccb94; no implementation after
 - (probe, scratchpad only) all 3 formats byte-stable across 3 processes on this mac; hero 1600w AVIF q50=53.6KB, q60=73.9KB -> chose AVIF q60/effort 4, WebP q80/effort 4, JPEG q80 mozjpeg
 
 ## Done
@@ -96,8 +98,11 @@ OWNER HOLD: no vercel calls of any kind, no git push. Local commits only.
 
 - [x] Replied to manager portfolio-38 via SendMessage (head 8557ef0, criteria, MP4 facts, gate results)
 
+- [x] Manager follow-up (13d778b posterTime): C-22 posterTime tests red (1a5755f) -> rule (bf447e6); video prints paste-ready line incl posterTime (test c22bce1 red -> 0dc964d); projects.ts posterTime 11.989 (9ba825b); guide (45ccb94); demo re-encode restored to committed MP4 (same 485,602 B)
+- [x] Fresh on 45ccb94: npm test 606/606 exit 0; typecheck 0; lint 0; build 0; contract 193/193; media x2 clean; HANDOFF-3
+
 ## In progress
-- [ ] nothing; TASK-305 in REVIEW, awaiting manager integration / reviewer. Owner hold: no deploy, no push.
+- [ ] Reply to portfolio-38; then idle. Owner hold: no deploy, no push.
 
 ## Verified
 - Baseline (pre-change) -> typecheck/lint/test all pass on 3ea91a0
