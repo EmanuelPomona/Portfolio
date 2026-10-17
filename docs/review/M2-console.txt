@@ -1,0 +1,3 @@
+# Console, main round 2, 2026-10-17T01:59:05.173Z
+# base http://localhost:3000; headless Chrome over CDP
+# entries: 0

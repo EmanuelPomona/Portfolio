@@ -1,0 +1,33 @@
+{
+  "version": "4.14.0",
+  "labelInName": {
+    "violations": [
+      {
+        "id": "label-content-name-mismatch",
+        "impact": "serious",
+        "nodes": [
+          "a[href$=\"sageplan.vercel.app\"]",
+          "#project-streetsafe-la > ._window_1jwqh_44 > ._window_kdndx_9[data-state=\"rest\"][data-attended=\"false\"]",
+          "#project-revelation-youth > ._window_1jwqh_44 > ._window_kdndx_9[data-state=\"rest\"][data-attended=\"false\"]",
+          "#project-snake-ai > ._window_1jwqh_44 > ._window_kdndx_9[data-state=\"rest\"][data-attended=\"false\"]"
+        ]
+      }
+    ],
+    "passes": 0
+  },
+  "wcag": {
+    "violations": [
+      {
+        "id": "label-content-name-mismatch",
+        "impact": "serious",
+        "nodes": [
+          "a[href$=\"sageplan.vercel.app\"]",
+          "#project-streetsafe-la > ._window_1jwqh_44 > ._window_kdndx_9[data-state=\"rest\"][data-attended=\"false\"]",
+          "#project-revelation-youth > ._window_1jwqh_44 > ._window_kdndx_9[data-state=\"rest\"][data-attended=\"false\"]",
+          "#project-snake-ai > ._window_1jwqh_44 > ._window_kdndx_9[data-state=\"rest\"][data-attended=\"false\"]"
+        ]
+      }
+    ],
+    "critical": 0
+  }
+}

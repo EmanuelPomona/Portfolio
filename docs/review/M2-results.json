@@ -1,0 +1,125 @@
+{
+  "loader": {
+    "releaseMsFromNavStart": 2710,
+    "mode": "skip"
+  },
+  "contact": {
+    "h2": "Contact",
+    "labelledBy": true,
+    "sentence": "Contact: LinkedIn, Email, GitHub.",
+    "links": [
+      {
+        "text": "LinkedIn",
+        "href": "https://www.linkedin.com/in/emanuel-ling-915a73244",
+        "target": "_blank",
+        "rel": "noopener noreferrer",
+        "h": 105
+      },
+      {
+        "text": "Email",
+        "href": "mailto:emanuelling27@gmail.com",
+        "target": "",
+        "rel": "",
+        "h": 105
+      },
+      {
+        "text": "GitHub",
+        "href": "https://github.com/EmanuelPomona",
+        "target": "_blank",
+        "rel": "noopener noreferrer",
+        "h": 105
+      }
+    ],
+    "addressPrinted": false
+  },
+  "clouds": [
+    {
+      "section": "home",
+      "drift": "paused",
+      "hidden": true,
+      "pe": "auto",
+      "img": "alpine-valley-1600.avif",
+      "moved3s": false
+    },
+    {
+      "section": "projects",
+      "drift": "running",
+      "hidden": true,
+      "pe": "none",
+      "img": "alpine-valley-1600.avif",
+      "moved3s": true
+    },
+    {
+      "section": "projects",
+      "drift": "running",
+      "hidden": true,
+      "pe": "none",
+      "img": "evergreen-forest-1024.avif",
+      "moved3s": true
+    },
+    {
+      "section": "about",
+      "drift": "running",
+      "hidden": true,
+      "pe": "none",
+      "img": "alpine-valley-1600.avif",
+      "moved3s": true
+    },
+    {
+      "section": "about",
+      "drift": "running",
+      "hidden": true,
+      "pe": "none",
+      "img": "evergreen-forest-1024.avif",
+      "moved3s": true
+    },
+    {
+      "section": "contact",
+      "drift": "paused",
+      "hidden": true,
+      "pe": "none",
+      "img": "alpine-valley-1600.avif",
+      "moved3s": false
+    }
+  ],
+  "cloudImages": [
+    "alpine-valley-1600.avif",
+    "evergreen-forest-1024.avif"
+  ],
+  "depth": {
+    "count": 8,
+    "maxAbs": 80
+  },
+  "arrivals": {
+    "count": 5,
+    "kinds": [
+      "from-left",
+      "from-right",
+      "settle"
+    ],
+    "allRevealed": true,
+    "unsettled": 0,
+    "sides": [
+      "left:",
+      "right:",
+      "left:",
+      "right:"
+    ]
+  },
+  "overflow1440": 0,
+  "mobile": {
+    "overflow": 0,
+    "unrevealed": 0,
+    "contactLinkMinH": 58.375
+  },
+  "reduced": {
+    "mode": "skip",
+    "running": 0,
+    "drift": [
+      "paused",
+      "off"
+    ],
+    "depthWrites": 0,
+    "unrevealed": 0
+  }
+}
