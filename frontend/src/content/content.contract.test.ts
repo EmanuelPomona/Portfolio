@@ -42,6 +42,16 @@ function imagePaths(c: Content): string[] {
   ];
 }
 
+/** Every non-null image id `c` references. */
+function imageIds(c: Content): string[] {
+  return [
+    c.site.heroImage,
+    c.site.sectionsImage,
+    ...c.projects.flatMap((p) => (p.screen.image === null ? [] : [p.screen.image])),
+    ...c.about.photos.flatMap((ph) => (ph.image === null ? [] : [ph.image])),
+  ];
+}
+
 /** The day after an ISO date. */
 const nextDay = (iso: string) => new Date(Date.parse(`${iso}T00:00:00Z`) + 86_400_000).toISOString().slice(0, 10);
 
@@ -382,7 +392,7 @@ describe.each([
 
     it('C-11 checks against the mediaIds option when given', () => {
       const c = variant((c) => (c.projects[0]!.screen = { image: NEVER_GENERATED, alt: 'SagePlan requirements dashboard' }));
-      expect(found(c, { mediaIds: [KNOWN_IMAGE, base.site.sectionsImage, NEVER_GENERATED] })).toEqual([]);
+      expect(found(c, { mediaIds: [...imageIds(base), NEVER_GENERATED] })).toEqual([]);
       expect(found(base, { mediaIds: [] })).toEqual(imagePaths(base).map((path) => ({ rule: 'C-11', path })));
     });
 
