@@ -10,6 +10,8 @@ interface SectionProps {
   readonly heading?: string;
   /** "evergreen" paints site.sectionsImage dissolving into Mist. Decorative only. */
   readonly backdrop?: 'evergreen' | 'none';
+  /** Without `heading`: the id of a heading the children render, which then names the section. */
+  readonly labelledBy?: string;
   readonly className?: string;
   readonly children: ReactNode;
 }
@@ -22,13 +24,13 @@ function EvergreenBackdrop() {
   );
 }
 
-export function Section({ id, heading, backdrop = 'none', className, children }: SectionProps) {
+export function Section({ id, heading, backdrop = 'none', labelledBy, className, children }: SectionProps) {
   const headingId = `${id}-heading`;
   const { ref } = useFogReveal<HTMLElement>();
   return (
     <section
       id={id}
-      aria-labelledby={heading ? headingId : undefined}
+      aria-labelledby={heading ? headingId : labelledBy}
       className={className ? `${styles.section} ${className}` : styles.section}
     >
       {backdrop === 'evergreen' && <EvergreenBackdrop />}

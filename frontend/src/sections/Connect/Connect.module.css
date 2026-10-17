@@ -1,50 +1,31 @@
 /*
- * The colophon: three ways to reach Emanuel, set large in the serif with the real address
- * beneath each. A plain stacked list (never three cards in a row), left-aligned on the gutter.
+ * Contact as one sentence, "Contact: LinkedIn, Email, GitHub.", set in the serif at section-heading
+ * scale so it reads as the colophon's last line (round 2, the owner's request). The h2 is part of
+ * the sentence. One line from 768px up; on a phone it may wrap but stays one sentence.
  */
 .section {
   padding-block-end: var(--space-8);
 }
 
-.list {
-  display: grid;
-  gap: var(--space-6);
+.line {
+  font-family: var(--font-display);
+  font-size: var(--step-5);
+  line-height: 1.15;
+  letter-spacing: var(--tracking-display);
+  color: var(--color-ink);
+  text-wrap: balance;
+}
+
+.heading {
+  display: inline;
+  font: inherit;
+  letter-spacing: inherit;
 }
 
 .link {
-  display: inline-flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  padding-block: var(--space-1);
-  text-decoration: none;
-  color: var(--color-ink);
-}
-
-.label {
-  font-family: var(--font-display);
-  font-size: var(--step-4);
-  line-height: 1.05;
-  letter-spacing: -0.01em;
-  text-decoration-line: underline;
-  text-decoration-thickness: 1px;
-  text-decoration-color: var(--color-hairline-strong);
-  text-underline-offset: 0.16em;
-  transition: text-decoration-color var(--dur-hover) ease-out;
-}
-
-.address {
-  font-size: var(--step--1);
-  font-weight: 540;
-  letter-spacing: 0.01em;
-  color: var(--color-ink-2);
-  overflow-wrap: anywhere;
-}
-
-.link:hover .label,
-.link:focus-visible .label {
-  text-decoration-color: currentColor;
-}
-
-.link:active .label {
-  text-decoration-thickness: 2px;
+  /* The v1 hairline underline, set a little lower for the large serif. */
+  text-underline-offset: 0.14em;
+  /* Tap target: the serif at this scale gives a box over 44px tall; the padding widens the hit area
+     without changing the line box, so the sentence never breaks apart. */
+  padding-block: 0.08em;
 }
