@@ -38,9 +38,9 @@ describe('BrowserWindow', () => {
     media.restore();
   });
 
-  it('is one link to primary.href in a new tab, named "<title>, <label>, <addressBar>" (W-05, ADR-010)', () => {
+  it('is one link to primary.href in a new tab, named "<title>, <label>, <addressBar>, screenshot soon" while empty (W-05, ADR-010)', () => {
     render(<BrowserWindow project={sageplan} sizes={SIZES} />);
-    const link = screen.getByRole('link', { name: 'SagePlan, Live site, sageplan.vercel.app' });
+    const link = screen.getByRole('link', { name: 'SagePlan, Live site, sageplan.vercel.app, screenshot soon' });
     expect(link).toHaveAttribute('href', 'https://sageplan.vercel.app');
     expect(link).toHaveAttribute('target', '_blank');
     expect(link).toHaveAttribute('rel', 'noopener noreferrer');
@@ -53,8 +53,16 @@ describe('BrowserWindow', () => {
       const link = screen.getByRole('link');
       expect(link.getAttribute('aria-label')).toContain(project.addressBar);
       expect(link.textContent).toContain(project.addressBar);
+      // Every shipped window is empty, so its visible placeholder is part of the name too.
+      expect(link.textContent).toContain('screenshot soon');
+      expect(link.getAttribute('aria-label')).toMatch(/, screenshot soon$/);
       unmount();
     }
+  });
+
+  it('drops "screenshot soon" from the name once the window shows a screenshot', () => {
+    render(<BrowserWindow project={withScreenshot} sizes={SIZES} />);
+    expect(screen.getByRole('link')).toHaveAttribute('aria-label', 'SagePlan, Live site, sageplan.vercel.app');
   });
 
   it('shows exactly project.addressBar in the address field', () => {
