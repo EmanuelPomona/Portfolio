@@ -186,7 +186,7 @@ describe('BrowserWindow with a recording (W-08, ADR-012)', () => {
   });
 
   it('renders a muted, looping, playsinline video with preload="none" and the poster from screen.image', () => {
-    const { container } = render(<BrowserWindow project={withRecording} sizes={SIZES} />);
+    const { container } = renderOnScreen();
     const video = container.querySelector('video')!;
     expect(video).not.toBeNull();
     expect(video.closest(`.${styles.screen}`)).not.toBeNull();
@@ -197,6 +197,19 @@ describe('BrowserWindow with a recording (W-08, ADR-012)', () => {
     expect(video).not.toHaveAttribute('autoplay');
     expect(video).toHaveAttribute('src', '/media/video/fixture.mp4');
     expect(renditionUrls('backgrounds/evergreen-forest')).toContain(video.getAttribute('poster'));
+  });
+
+  it('loads the poster only once the window nears the viewport', () => {
+    // A <video poster> cannot lazy-load like the screenshots' <img loading="lazy">: without this, the
+    // fourth window's poster would download with the page, alongside the hero photograph.
+    const { container } = render(<BrowserWindow project={withRecording} sizes={SIZES} />);
+    const video = container.querySelector('video')!;
+    expect(video).not.toHaveAttribute('poster');
+    act(() => io.intersect(video, 0.01));
+    expect(renditionUrls('backgrounds/evergreen-forest')).toContain(video.getAttribute('poster'));
+    // Once set it stays, wherever the window goes.
+    act(() => io.intersect(video, 0));
+    expect(video).toHaveAttribute('poster');
   });
 
   it('plays on attention and pauses, holding its frame, when attention leaves', () => {

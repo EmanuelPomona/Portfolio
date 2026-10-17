@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { getMedia, type Project } from '../../content';
 import { useAttention } from '../../hooks/useAttention';
 import { useDriftPlaying } from '../../hooks/useDriftPlaying';
+import { useNearViewport } from '../../hooks/useNearViewport';
 import { useVideoPlayback } from '../../hooks/useVideoPlayback';
 import { Picture } from '../Picture/Picture';
 import styles from './BrowserWindow.module.css';
@@ -23,6 +24,8 @@ export function BrowserWindow({ project, sizes }: BrowserWindowProps) {
   // focus survives scrolling the window out of sight. Under reduced motion the poster stays.
   const mayMove = useDriftPlaying(video);
   useVideoPlayback(video, attended && mayMove);
+  // A <video poster> cannot lazy-load, so it is set once the window nears the viewport.
+  const near = useNearViewport(video);
   const { screen, primary } = project;
   const showImage = screen.image !== null && !failed;
   // A recording plays in the screen; if it cannot load, its poster stays as a still.
@@ -55,7 +58,7 @@ export function BrowserWindow({ project, sizes }: BrowserWindowProps) {
             ref={setVideo}
             className={styles.video}
             src={recording.src}
-            poster={posterUrl(getMedia(screen.image!))}
+            poster={near ? posterUrl(getMedia(screen.image!)) : undefined}
             width={recording.width}
             height={recording.height}
             muted

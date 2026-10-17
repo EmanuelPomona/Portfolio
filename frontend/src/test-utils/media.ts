@@ -129,6 +129,10 @@ export function installIntersectionObserver() {
     watching(el: Element) {
       return observers.some((o) => o.elements.has(el));
     },
+    /** The options of the (last) observer watching `el`, e.g. its rootMargin. */
+    optionsFor(el: Element) {
+      return observers.filter((o) => o.elements.has(el)).at(-1)?.options;
+    },
     restore() {
       window.IntersectionObserver = original;
     },
