@@ -23,8 +23,8 @@ Do not edit by hand — edit the task files and regenerate.
 | TASK-302 | REVIEW | backend | 0 | Deterministic media pipeline (npm run media) and manifest freshness test |
 | TASK-303 | REVIEW | backend | 0 | Head metadata plugin, favicon, Open Graph image, robots, sitemap |
 | TASK-304 | REVIEW | backend | 0 | Vercel config, security headers, and the preview deployment |
+| TASK-305 | IN_PROGRESS | backend | 0 | StreetSafe screenshot, Snake AI recording, npm run video, and C-22 |
 | TASK-110 | READY | frontend | 0 | Project windows show screenshots and play recordings while attended |
-| TASK-305 | READY | backend | 0 | StreetSafe screenshot, Snake AI recording, npm run video, and C-22 |
 | TASK-205 | BACKLOG | stickman | 0 | Safe-area viewport and real-phone check before the touch flag flips |
 
-**Counts:** BACKLOG 1, READY 2, REVIEW 18
+**Counts:** BACKLOG 1, IN_PROGRESS 1, READY 1, REVIEW 18

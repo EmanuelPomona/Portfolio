@@ -1,7 +1,7 @@
 # STATUS: agent/backend
-Task: TASK-301, 302, 303 (REVIEW); TASK-304 (BLOCKED, contract)
+Task: TASK-305 (IN_PROGRESS). Earlier: 301-303 REVIEW, 304 BLOCKED (contract)
 Round: 0
-Last updated: 2026-10-16T18:40:00Z
+Last updated: 2026-10-16T22:05:00Z
 
 ## Skills invoked so far
 - ecc:contract-first @ TASK-301 start, before validator -> shapes imported from types.ts (no redeclared copies); DATABASE.md is the invariant source; provider check = validate the real exported `content`; fixtures JSON-cloned because heroLinks/contact.links share refs (structuredClone would double-count)
@@ -65,9 +65,14 @@ Last updated: 2026-10-16T18:40:00Z
 - [x] Fresh verification on 43bdcc9 (after superpowers:verification-before-completion): npm test exit 0 209/209 (8 files); typecheck 0; lint 0; build ok; contract-test.sh exit 0 159/159; media x2 clean; hero 75638 B; preview headers/assets re-checked; preview build == HEAD build except Vercel's injected toolbar script
 - [x] HANDOFF-1 written; 301/302/303 -> REVIEW; 304 stays BLOCKED (contract)
 
+## TASK-305 (round 3, assigned by manager portfolio-38 on 12e9c35)
+OWNER HOLD: no vercel calls of any kind, no git push. Local commits only.
+- [x] Read status, ADR-012/009, API §1 screen.video + §3 recordings, DATABASE screen + C-22, ACCEPTANCE B-06, TASK-305
+- [x] Inputs located in the MAIN checkout's docs/inputs (gitignored, not in this worktree); screenshot name has U+202F before PM
+- [x] Found integration gap: media-src/video/*.mov would make `npm run media` fail (unsupported type) and C-21 expect a manifest entry -> both must skip media-src/video/ (TDD)
+
 ## In progress
-- [ ] nothing; awaiting manager (CCR-1/2/3), owner decisions (prod deploy, preview toolbar, bypass secret), reviewer
-- [ ] TASK-301: code review + verification deferred to the combined pre-handoff pass (status stays IN_PROGRESS until then)
+- [ ] TASK-305: TDD the media-src/video exclusion; crop screenshot; copy .mov; video.swift; C-22 TDD; content; guide; evidence
 
 ## Verified
 - Baseline (pre-change) -> typecheck/lint/test all pass on 3ea91a0
