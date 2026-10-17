@@ -202,8 +202,9 @@ The reviewer prefers it. `agent/backend` creates the Vercel project, and the
 manager records the URL here and as `PREVIEW_URL` in `.env.example` after
 integration.
 
-Preview URL: https://emanuel-ling-mij8hp576-team-boh-buh.vercel.app (integration round 1,
-`main` @ `3977ba4`, deployment `dpl_3z5XCEwCBied9dY6Gm1xYofpY1K3`).
+Preview URL: https://emanuel-ling-23mjaa59u-team-boh-buh.vercel.app (integration round 2,
+`main` @ `5c0f122`, deployment `dpl_6QvCEn3mdZZEEkjP6uD68B5Gx5ns`). Round 1's preview
+(`emanuel-ling-mij8hp576`, `3977ba4`) is superseded.
 
 - It is behind Vercel Authentication. Open it while logged in to Vercel, or use
   `vercel curl <path> --deployment <url>`.
