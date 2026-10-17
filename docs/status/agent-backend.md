@@ -19,6 +19,7 @@ Last updated: 2026-10-16T22:20:00Z
 - superpowers:verification-before-completion @ immediately before HANDOFF-1 -> re-ran every check fresh on 43bdcc9; no implementation after it
 - superpowers:test-driven-development @ TASK-305 start (re-invoked; harness: already loaded, unchanged) -> red first for: media pipeline skipping media-src/video, C-21 skipping it, video script behavior, C-22 one violation per clause on both bases
 - ecc:backend-patterns @ TASK-305, before video.swift (re-invoked; harness: already loaded, unchanged) -> transaction: encode + poster to dot-temp files beside the targets, verify codec/no-audio/size/<=3MB, rename(2) into place only if every recording succeeded, temps removed on failure
+- superpowers:requesting-code-review @ TASK-305 pre-handoff (re-invoked; harness: already loaded, unchanged) -> read-only reviewer on 12e9c35..2fb25a6 with TASK-305/ADR-012/API/DATABASE/B-06 and stated decisions; findings pending
 - (probe, scratchpad only) all 3 formats byte-stable across 3 processes on this mac; hero 1600w AVIF q50=53.6KB, q60=73.9KB -> chose AVIF q60/effort 4, WebP q80/effort 4, JPEG q80 mozjpeg
 
 ## Done
