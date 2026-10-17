@@ -1,7 +1,7 @@
 # STATUS: main
-Task: ROUND 2 (owner requests: clouds, scroll motion, longer loader, one-line Contact) — planning, then dispatch to running agents, then integration in this same session (owner instruction: "Finish all task before getting back" overrides manager.md's fresh-session rule)
+Task: ROUND 2 — complete: planned, dispatched, integrated, verified; handed to reviewer (owner instruction "Finish all task before getting back" overrode manager.md's fresh-session rule)
 Round: 2
-Last updated: 2026-10-16T21:00:00Z
+Last updated: 2026-10-17T02:30:00Z
 
 Mode A record archived to `docs/archive/status-main-mode-a.md`.
 
@@ -26,8 +26,18 @@ Mode A record archived to `docs/archive/status-main-mode-a.md`.
 - [x] Contracts: 0f43d36 (DESIGN_BRIEF motion rows, API.md §2.2 min 2.2s, ACCEPTANCE M-01..M-05, K-01, L-07, ADR-011)
 - [x] Plan + tasks: 35a945c
 - [x] Synced all worktrees to 90f4ffb; dispatched via SendMessage (delivered, idle-notify on): portfolio-frontend-7c -> 109, 107, 108; portfolio-stickman-50 -> 206
-- [ ] Waiting on both; watching branch task statuses
+- [x] stickman TASK-206 -> REVIEW @ 62bfde3 (checked: scope, MIN_MS 2200, contract files untouched, audit 14/14)
+- [x] frontend TASK-109/107/108 -> REVIEW @ 3754e22 + f118218 (checked: scope, no contract files, no overlap, audit 15/15 + `animate` x3 and TDD @66% verified by hand: the audit regex skips one-word skill names)
+- [x] integrate.sh -> frontend 0b52d92, stickman 2122143; 0 conflicts
+- [x] c4e37dc contract clause: show mode waits 2.2s with ready settled (mutation 1200 -> red)
+- [x] c604165 + be53f05 + f83628c: window name gains ", screenshot soon" while empty, and a whitespace node separates address and placeholder (root cause via systematic-debugging: axe visibleVirtual joins sibling text with no separator -> "appscreenshot"); axe 4.14 now 0 violations at 1440 and 390
+- [x] 279f1fe: first-visit deep link (/#about) lands after the loader (scrollIntoView once <main> releases; skip mode untouched); verified in browser: About top at 72px = scroll-padding-top
+- [x] Preview redeployed: https://emanuel-ling-23mjaa59u-team-boh-buh.vercel.app (main @ 5c0f122), bundle byte-identical to local
+- [x] f4cbb5f: task index regenerated (verification caught it stale)
 - [ ] Integrate, add the 2.2s contract clause, verify, hand off
+
+- superpowers:systematic-debugging @ round 2 integration, axe still failing after the first name fix -> root cause in axe source (visibleVirtual concatenates sibling text without a separator); single fix f83628c
+- superpowers:verification-before-completion @ round 2, immediately before HANDOFF-3 -> fresh clone of 7a7752a: CI doc checks (index stale -> fixed f4cbb5f, re-checked), npm ci 0, typecheck 0, lint 0, build 0, test 47/562, contract 5/163
 
 ## Done
 - [x] Read set; status.sh; overlap check (0 shared files); audit-skills (12/12, 15/15, 14/14 corroborated)
