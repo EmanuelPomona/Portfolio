@@ -61,6 +61,7 @@ Mode A record archived to `docs/archive/status-main-mode-a.md`.
 - nothing
 
 ## Owner actions (not blockers)
+- 2026-10-16, owner: "dont actually connect the website for now, I will upload images for you to just put into the thingys" -> no deploy, promote, or push until the owner says so; next work = owner's images into the project windows and About photo slots.
 - Production https://emanuel-ling.vercel.app still serves the walking skeleton (backend's first deploy). Promote or take down: owner's call.
 - Turn off the Vercel Toolbar for previews (its injected script is blocked by the CSP).
 - Revoke the "Protection Bypass for Automation" secret once review is done.
