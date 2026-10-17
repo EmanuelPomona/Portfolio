@@ -1,8 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { projects, type Project } from '../../content';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { getMedia, projects, type Project } from '../../content';
 import { FINE_POINTER_QUERY } from '../../hooks/useMediaQuery';
 import { installMatchMedia } from '../../test-utils/media';
 import { BrowserWindow } from './BrowserWindow';
@@ -141,5 +141,49 @@ describe('BrowserWindow', () => {
     fireEvent.error(container.querySelector('img')!);
     expect(container.querySelector('img')).toBeNull();
     expect(screen.getByText('screenshot soon')).toBeInTheDocument();
+  });
+});
+
+// TEST FIXTURE ONLY (W-08). A recording only ever shows its own project (W-03); the evergreen photo
+// stands in for the poster frame and the URL is never fetched (jsdom loads no media).
+const withRecording: Project = {
+  ...sageplan,
+  screen: {
+    image: 'backgrounds/evergreen-forest',
+    alt: 'Fixture poster',
+    video: { src: '/media/video/fixture.mp4', width: 1270, height: 940 },
+  },
+};
+
+/** Every URL the poster's renditions offer: each srcset candidate and the JPEG fallback. */
+function renditionUrls(id: NonNullable<Project['screen']['image']>): string[] {
+  const media = getMedia(id);
+  const fromSrcset = (srcset: string) => srcset.split(',').map((c) => c.trim().split(/\s+/)[0]!);
+  return [...media.sources.flatMap((s) => fromSrcset(s.srcset)), ...fromSrcset(media.fallback.srcset), media.fallback.src];
+}
+
+describe('BrowserWindow with a recording (W-08, ADR-012)', () => {
+  let media: ReturnType<typeof installMatchMedia>;
+  beforeEach(() => {
+    media = installMatchMedia({ [FINE_POINTER_QUERY]: true });
+  });
+  afterEach(() => {
+    cleanup();
+    media.restore();
+    vi.restoreAllMocks();
+  });
+
+  it('renders a muted, looping, playsinline video with preload="none" and the poster from screen.image', () => {
+    const { container } = render(<BrowserWindow project={withRecording} sizes={SIZES} />);
+    const video = container.querySelector('video')!;
+    expect(video).not.toBeNull();
+    expect(video.closest(`.${styles.screen}`)).not.toBeNull();
+    expect(video.muted).toBe(true);
+    expect(video).toHaveAttribute('loop');
+    expect(video).toHaveAttribute('playsinline');
+    expect(video).toHaveAttribute('preload', 'none');
+    expect(video).not.toHaveAttribute('autoplay');
+    expect(video).toHaveAttribute('src', '/media/video/fixture.mp4');
+    expect(renditionUrls('backgrounds/evergreen-forest')).toContain(video.getAttribute('poster'));
   });
 });

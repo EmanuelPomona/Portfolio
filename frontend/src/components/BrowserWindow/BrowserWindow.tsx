@@ -1,9 +1,29 @@
 // Owner: agent/frontend. A project as a dark macOS browser window: black until attended (TASK-103).
 import { useState } from 'react';
-import { getMedia, type Project } from '../../content';
+import { getMedia, type MediaAsset, type Project } from '../../content';
 import { useAttention } from '../../hooks/useAttention';
 import { Picture } from '../Picture/Picture';
 import styles from './BrowserWindow.module.css';
+
+/** A window draws at most 760 CSS px wide: this covers it at about 2x without the largest file. */
+const POSTER_WIDTH = 1280;
+
+/**
+ * One URL for <video poster>, which cannot choose from a srcset: the smallest WebP rendition at
+ * least POSTER_WIDTH wide (else the largest), or the JPEG fallback when there is no WebP.
+ */
+function posterUrl(media: MediaAsset): string {
+  const webp = media.sources.find((source) => source.type === 'image/webp');
+  if (!webp) return media.fallback.src;
+  const candidates = webp.srcset
+    .split(',')
+    .map((candidate) => {
+      const [url = '', width = '0'] = candidate.trim().split(/\s+/);
+      return { url, width: Number.parseInt(width, 10) };
+    })
+    .sort((a, b) => a.width - b.width);
+  return (candidates.find((c) => c.width >= POSTER_WIDTH) ?? candidates.at(-1))?.url || media.fallback.src;
+}
 
 interface BrowserWindowProps {
   readonly project: Project;
@@ -38,7 +58,19 @@ export function BrowserWindow({ project, sizes }: BrowserWindowProps) {
           whitespace between these two block-level boxes renders nothing. */}
       {' '}
       <span className={styles.screen}>
-        {showImage ? (
+        {screen.video && screen.image ? (
+          <video
+            className={styles.video}
+            src={screen.video.src}
+            poster={posterUrl(getMedia(screen.image))}
+            width={screen.video.width}
+            height={screen.video.height}
+            muted
+            loop
+            playsInline
+            preload="none"
+          />
+        ) : showImage ? (
           <Picture
             media={getMedia(screen.image!)}
             alt={screen.alt ?? ''}
