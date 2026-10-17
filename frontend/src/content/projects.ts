@@ -51,7 +51,7 @@ export const projects: readonly Project[] = [
     screen: {
       image: 'projects/snake-ai',
       alt: 'The trained agent playing Snake: a green snake chasing a red square on a black field',
-      video: { src: '/media/video/snake-ai.mp4', width: 1270, height: 954 },
+      video: { src: '/media/video/snake-ai.mp4', width: 1270, height: 954, posterTime: 11.989 },
     },
   },
 ];
