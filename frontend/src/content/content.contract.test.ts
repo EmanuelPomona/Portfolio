@@ -485,6 +485,21 @@ describe.each([
       expect(found(c, { videoSizes: sizes() })).toEqual(one('C-22', 'projects[0].screen.video'));
     });
 
+    it('C-22 accepts a posterTime of zero or more seconds', () => {
+      const c = withRecording((v) => (v.posterTime = 11.989));
+      expect(found(c, { videoSizes: sizes() })).toEqual([]);
+    });
+
+    it('C-22 flags a negative posterTime', () => {
+      const c = withRecording((v) => (v.posterTime = -0.5));
+      expect(found(c, { videoSizes: sizes() })).toEqual(one('C-22', 'projects[0].screen.video.posterTime'));
+    });
+
+    it.each([Number.NaN, Number.POSITIVE_INFINITY])('C-22 flags a posterTime of %s', (posterTime) => {
+      const c = withRecording((v) => (v.posterTime = posterTime));
+      expect(found(c, { videoSizes: sizes() })).toEqual(one('C-22', 'projects[0].screen.video.posterTime'));
+    });
+
     it('C-22 checks the file only when videoSizes is given', () => {
       expect(found(withRecording())).toEqual([]);
     });
