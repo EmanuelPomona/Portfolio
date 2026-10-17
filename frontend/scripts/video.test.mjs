@@ -90,7 +90,8 @@ describe.skipIf(process.platform !== 'darwin')('npm run video (macOS AVFoundatio
     const { stdout } = await ws.run();
 
     expect(await ws.files()).toEqual(['out/demo-app.mp4', 'posters/demo-app.png']);
-    expect(stdout).toContain('demo-app.mp4');
+    // The exact line to paste into projects.ts: size and the poster frame's time (posterTime).
+    expect(stdout).toContain("video: { src: '/media/video/demo-app.mp4', width: 1270, height: 954, posterTime: 11.989 }");
     const mp4 = await readFile(path.join(ws.out, 'demo-app.mp4'));
     expect(mp4.length).toBeLessThanOrEqual(MAX_BYTES);
     const info = mp4Info(mp4);

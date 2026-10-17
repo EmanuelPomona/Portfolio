@@ -66,7 +66,11 @@ Mode A record archived to `docs/archive/status-main-mode-a.md`.
 - [x] Contract 2ac1ada: types.ts ProjectVideo + optional screen.video; DATABASE C-22; API §1 video row + §3 recordings; ACCEPTANCE W-03 amended, W-08, B-06; brief; ADR-012 (16:10 right-anchored crop for StreetSafe; H.264 via macOS AVFoundation; play only while attended); root `video` script
 - [x] b03068a: shipped-window tests data-driven (checked with a filled StreetSafe mutation) so backend's content change keeps main green
 - [x] d838259: TASK-305 (backend), TASK-110 (frontend); both carry the owner hold: no deploy, no push
-- [ ] Sync, dispatch; after TASK-305 lands, sync its assets to frontend for real-content evidence; integrate; verify
+- [x] Dispatched (12e9c35): portfolio-backend-c1 -> TASK-305, portfolio-frontend-7c -> TASK-110; push guard on (origin refs unchanged)
+- [x] TASK-305 REVIEW @ 8557ef0 checked: scope (41 files, no forbidden path), audit 12/12, MP4 by mdls (H.264, video only, 1270x954, 33.7s, 485,602 B), crops viewed (StreetSafe 1533x958 right-anchored; Snake poster no title bar)
+- [x] Merged backend by hand (integrate.sh would also take frontend's unfinished branch) -> 0a84041; gates: typecheck/lint/build 0, test 598/598, contract 185/185, index current
+- [x] 13d778b: ProjectVideo.posterTime (poster at 11.989s would jump to 0 on first play); synced: frontend -> 7131efe, others -> 13d778b
+- [ ] backend: posterTime value + C-22 clause (HANDOFF-3); frontend: posterTime seek + real-content evidence (HANDOFF-4); then integrate and verify
 
 ## Owner actions (not blockers)
 - 2026-10-16, owner: "dont actually connect the website for now, I will upload images for you to just put into the thingys" -> no deploy, promote, or push until the owner says so; next work = owner's images into the project windows and About photo slots.

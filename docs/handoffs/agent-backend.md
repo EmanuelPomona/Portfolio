@@ -593,3 +593,89 @@ scripts/audit-skills.sh  exit 0, "all claims corroborated by the transcript"; TA
 `agent/backend` at the commit that adds the audit result to this handoff, which builds on
 `5c82dc8`. There are 29 commits since `12e9c35`, this one included. Committed locally only; not
 pushed, because of the owner's hold.
+
+## HANDOFF-3 — agent/backend — 2026-10-16
+
+### Summary
+
+TASK-305 follow-up for the manager's contract change `13d778b`: `ProjectVideo.posterTime` (ADR-012
+amendment). TASK-305 stays in `REVIEW`. Committed locally only; not pushed (owner hold).
+
+- **Content:** the `snake-ai` video now has `posterTime: 11.989`, the poster's exact frame time as
+  `npm run video` reports it.
+- **C-22:** `posterTime`, when present, must be a finite number ≥ 0. Test-first: the tests failed in
+  `1a5755f`, and the rule went green in `bf447e6`.
+- **`npm run video`** now also prints the line to paste into `projects.ts`, for example:
+  `video: { src: '/media/video/snake-ai.mp4', width: 1270, height: 954, posterTime: 11.989 }`.
+  - `posterTime` is rounded to the millisecond. Seeking there shows the same frame: the frame starts
+    at 11.98867 s and lasts 16.7 ms at 60 fps.
+  - Test-first: the test failed in `c22bce1`, and the script went green in `0dc964d`.
+- **Owner guide:** step 4 shows the printed line, and step 7 says to paste it and explains
+  `posterTime`. The C-22 row mentions `posterTime`.
+
+### Tasks Completed
+
+TASK-305 (still `REVIEW`). The follow-up's three items:
+1. **`posterTime` set** in `projects.ts`.
+2. **C-22 clause, one test per case on both bases:** a negative value, NaN, and Infinity are each
+   flagged at `projects[0].screen.video.posterTime`; 11.989 is accepted.
+3. **Poster time printed** in the paste-ready line, and documented in the guide.
+
+### Files Changed
+
+- `frontend/src/content/projects.ts`
+- `frontend/src/content/validate.ts`
+- `frontend/src/content/content.contract.test.ts`
+- `frontend/scripts/video.swift`
+- `frontend/scripts/video.test.mjs`
+- `frontend/src/content/README.md`
+- this file
+- `docs/status/agent-backend.md`
+
+The MP4 and the poster are unchanged. I ran `npm run video` once to show the printed line. That
+re-encoded the MP4, which ADR-012 says is never byte-identical (it came out the same size,
+485,602 B), so I restored the committed, already-verified file with `git checkout --`. The poster
+came out byte-identical.
+
+### Contracts
+
+- **No new contract.** This implements the manager's `13d778b` (`types.ts` `posterTime?`, and C-22 in
+  DATABASE.md).
+- **`npm run video` output** gains a second line per recording:
+  `  for projects.ts: video: { ... }`.
+
+### Skills Used
+
+| Skill | Stage invoked | What it actually changed |
+|---|---|---|
+| superpowers:test-driven-development | Before the `posterTime` tests. The call returned "already loaded, instructions unchanged" | Six failures on both bases, then the rule. The printed-line test failed first, then the script. |
+| superpowers:verification-before-completion | Immediately before this handoff. The call returned "already loaded, instructions unchanged" | Everything under Verification was produced fresh on `45ccb94`. No implementation work followed. |
+
+### Verification
+
+Fresh on HEAD `45ccb94`:
+
+```
+npm test                 exit 0   Test Files 48 passed (48), Tests 606 passed (606)   (video.test.mjs ran on darwin)
+npm run typecheck        exit 0
+npm run lint             exit 0
+npm run build            exit 0
+scripts/contract-test.sh exit 0   5 files, 193 passed
+npm run media (x2)       "4 image(s), 36 renditions (0 written, 0 stale removed), manifest unchanged."; git status clean
+```
+
+### What Was NOT Verified
+
+- **The first play starting at `posterTime`** in the page. That is TASK-110's playback code. I only
+  checked the value and that the frame lands correctly: 11.989 s falls inside the frame shown in the
+  poster.
+- **The preview** (owner hold), and Firefox and Safari, as before.
+
+### Known Issues
+
+- None new. The HANDOFF-2 notes still apply, except "the poster jumps", which `posterTime` resolves
+  once TASK-110 honors it.
+
+### Commit
+
+`agent/backend` at the commit that adds this handoff. Committed locally only; not pushed (owner hold).

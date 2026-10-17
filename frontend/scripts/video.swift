@@ -25,6 +25,9 @@
 // Only the video track is exported. The encode is not byte-identical across runs (ADR-012), so it is
 // re-run by hand when the source changes, and the output is committed.
 //
+// On success it prints, per recording, what it wrote and the exact `video: { ... }` line for projects.ts,
+// including posterTime: the time of the poster frame, where the first play starts (ADR-012).
+//
 // Failure: every problem is reported as `media-src/video/<file>: <reason>` and the run exits 1. Only
 // .mov recordings are read; any other file in media-src/video (besides the .json settings) is a problem.
 // All output goes to dot-prefixed temporary files first and is checked (codec, no audio, size, 3 MB);
@@ -223,10 +226,13 @@ func encodeInto(_ output: Output, file: String, asset: AVURLAsset, track: AVAsse
     throw Problem(file, "could not write the poster frame")
   }
 
+  // The poster frame's time to the millisecond: seeking there shows that same frame (frames are >= 1 ms long).
+  let posterTime = (CMTimeGetSeconds(actual) * 1000).rounded() / 1000
   var done = output
   done.summary = String(
     format: "%@: public/media/video/%@.mp4 (H.264, %dx%d, %.1fs, %d bytes, no audio), media-src/projects/%@.png (poster at %.3fs)",
     file, output.id, width, height, seconds, bytes, output.id, CMTimeGetSeconds(actual))
+    + "\n  for projects.ts: video: { src: '/media/video/\(output.id).mp4', width: \(width), height: \(height), posterTime: \(posterTime) }"
   return done
 }
 
