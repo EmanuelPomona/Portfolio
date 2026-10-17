@@ -1,13 +1,4 @@
-// Owner: agent/frontend. Small, honest formatting for links and dates (TASK-106).
-
-/** A link's address as a person would say it: no scheme, no "www.", no mailto:, no trailing slash. */
-export function displayAddress(href: string): string {
-  return href
-    .replace(/^mailto:/, '')
-    .replace(/^https?:\/\//, '')
-    .replace(/^www\./, '')
-    .replace(/\/+$/, '');
-}
+// Owner: agent/frontend. Small, honest formatting for dates (TASK-106).
 
 const MONTHS = [
   'January',

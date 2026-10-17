@@ -1,17 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { displayAddress, formatUpdated, yearOf } from './format';
-
-describe('displayAddress', () => {
-  it.each([
-    ['mailto:emanuelling27@gmail.com', 'emanuelling27@gmail.com'],
-    ['https://www.linkedin.com/in/emanuel-ling-915a73244', 'linkedin.com/in/emanuel-ling-915a73244'],
-    ['https://github.com/EmanuelPomona', 'github.com/EmanuelPomona'],
-    ['https://sageplan.vercel.app/', 'sageplan.vercel.app'],
-    ['http://example.com/a/b/', 'example.com/a/b'],
-  ])('%s -> %s', (href, expected) => {
-    expect(displayAddress(href)).toBe(expected);
-  });
-});
+import { formatUpdated, yearOf } from './format';
 
 describe('formatUpdated', () => {
   it('formats an ISO date as "Month YYYY" in English, whatever the visitor locale', () => {
