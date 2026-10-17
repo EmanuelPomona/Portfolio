@@ -11,11 +11,13 @@
 // macOS-26-only API, and keeping the older one lets the script run on earlier macOS versions too.
 // Flag values resolve against the current folder; the defaults are frontend/'s own folders.
 //
-// Settings file, next to the recording:
-//   { "cropTop": 51, "cropBottom": 1, "posterSeconds": 12 }
+// Settings file, next to the recording (cropLeft and cropRight are optional, default 0):
+//   { "cropTop": 51, "cropBottom": 1, "cropLeft": 0, "cropRight": 0, "posterSeconds": 12 }
 //   cropTop        rows to remove from the top: the recorded window's title bar. Measure it on a
 //                  frame: it is the index of the first row of the app's own content.
 //   cropBottom     rows to remove from the bottom, usually 0 or 1 to make the height even.
+//   cropLeft/Right columns to remove from each side, for a recording wider than the window; the
+//                  width must end up even too.
 //   posterSeconds  the moment shown before the video plays.
 //
 // Encoding: AVAssetExportSession, preset HighestQuality (H.264, not HEVC), MP4, optimized for network
@@ -23,9 +25,11 @@
 // Only the video track is exported. The encode is not byte-identical across runs (ADR-012), so it is
 // re-run by hand when the source changes, and the output is committed.
 //
-// Failure: every problem is reported as `media-src/video/<file>: <reason>` and the run exits 1. All
-// output goes to temporary files first and is checked (codec, no audio, size, 3 MB); nothing replaces
-// an existing file unless every recording succeeded.
+// Failure: every problem is reported as `media-src/video/<file>: <reason>` and the run exits 1. Only
+// .mov recordings are read; any other file in media-src/video (besides the .json settings) is a problem.
+// All output goes to dot-prefixed temporary files first and is checked (codec, no audio, size, 3 MB);
+// nothing replaces an existing file unless every recording succeeded, and a failed run removes every
+// temporary file it made.
 import AVFoundation
 import CoreGraphics
 import Foundation
@@ -45,6 +49,8 @@ struct Problem: Error {
 struct Settings: Decodable {
   let cropTop: Int
   let cropBottom: Int
+  let cropLeft: Int?
+  let cropRight: Int?
   let posterSeconds: Double
 }
 
@@ -106,13 +112,18 @@ func encode(_ mov: URL, outDir: URL, posterDir: URL) async throws -> Output {
   guard try await track.load(.preferredTransform).isIdentity else {
     throw Problem(file, "is rotated; record the window upright")
   }
-  let width = Int(natural.width)
+  let cropLeft = settings.cropLeft ?? 0
+  let cropRight = settings.cropRight ?? 0
+  let width = Int(natural.width) - cropLeft - cropRight
   let height = Int(natural.height) - settings.cropTop - settings.cropBottom
-  guard settings.cropTop >= 0, settings.cropBottom >= 0, height > 0 else {
-    throw Problem(file, "cropTop and cropBottom must be 0 or more and leave some of the \(Int(natural.height)) rows")
+  guard settings.cropTop >= 0, settings.cropBottom >= 0, cropLeft >= 0, cropRight >= 0, width > 0, height > 0 else {
+    throw Problem(file, "crops must be 0 or more and leave part of the \(Int(natural.width))x\(Int(natural.height)) frame")
   }
-  guard width % 2 == 0, height % 2 == 0 else {
-    throw Problem(file, "the cropped frame would be \(width)x\(height); both must be even, so change cropBottom by 1")
+  guard width % 2 == 0 else {
+    throw Problem(file, "the cropped frame would be \(width) pixels wide; it must be even, so change cropRight by 1")
+  }
+  guard height % 2 == 0 else {
+    throw Problem(file, "the cropped frame would be \(height) pixels tall; it must be even, so change cropBottom by 1")
   }
   let seconds = CMTimeGetSeconds(duration)
   guard settings.posterSeconds >= 0, settings.posterSeconds < seconds else {
@@ -128,7 +139,27 @@ func encode(_ mov: URL, outDir: URL, posterDir: URL) async throws -> Output {
   )
   try FileManager.default.createDirectory(at: outDir, withIntermediateDirectories: true)
   try FileManager.default.createDirectory(at: posterDir, withIntermediateDirectories: true)
+  removeTemps(output)
+  do {
+    return try await encodeInto(output, file: file, asset: asset, track: track, duration: duration, settings: settings,
+                                crop: CGRect(x: cropLeft, y: settings.cropTop, width: width, height: height))
+  } catch {
+    removeTemps(output) // a failed recording leaves nothing behind
+    throw error
+  }
+}
+
+func removeTemps(_ output: Output) {
   try? FileManager.default.removeItem(at: output.tempVideo)
+  try? FileManager.default.removeItem(at: output.tempPoster)
+}
+
+/// Writes the MP4 and poster to `output`'s temporary files and checks them.
+func encodeInto(_ output: Output, file: String, asset: AVURLAsset, track: AVAssetTrack, duration: CMTime,
+                settings: Settings, crop: CGRect) async throws -> Output {
+  let width = Int(crop.width)
+  let height = Int(crop.height)
+  let seconds = CMTimeGetSeconds(duration)
 
   // Video only: a composition holding just the video track, cropped by moving the frame up.
   let composition = AVMutableComposition()
@@ -137,7 +168,7 @@ func encode(_ mov: URL, outDir: URL, posterDir: URL) async throws -> Output {
   }
   try videoTrack.insertTimeRange(CMTimeRange(start: .zero, duration: duration), of: track, at: .zero)
   let layer = AVMutableVideoCompositionLayerInstruction(assetTrack: videoTrack)
-  layer.setTransform(CGAffineTransform(translationX: 0, y: -CGFloat(settings.cropTop)), at: .zero)
+  layer.setTransform(CGAffineTransform(translationX: -crop.minX, y: -crop.minY), at: .zero)
   let instruction = AVMutableVideoCompositionInstruction()
   instruction.timeRange = CMTimeRange(start: .zero, duration: duration)
   instruction.layerInstructions = [layer]
@@ -186,7 +217,7 @@ func encode(_ mov: URL, outDir: URL, posterDir: URL) async throws -> Output {
   } catch {
     throw Problem(file, "could not read the poster frame (\(error.localizedDescription))")
   }
-  guard let poster = frame.cropping(to: CGRect(x: 0, y: settings.cropTop, width: width, height: height)),
+  guard let poster = frame.cropping(to: crop),
     writePNG(poster, to: output.tempPoster)
   else {
     throw Problem(file, "could not write the poster frame")
@@ -195,20 +226,22 @@ func encode(_ mov: URL, outDir: URL, posterDir: URL) async throws -> Output {
   var done = output
   done.summary = String(
     format: "%@: public/media/video/%@.mp4 (H.264, %dx%d, %.1fs, %d bytes, no audio), media-src/projects/%@.png (poster at %.3fs)",
-    file, id, width, height, seconds, bytes, id, CMTimeGetSeconds(actual))
+    file, output.id, width, height, seconds, bytes, output.id, CMTimeGetSeconds(actual))
   return done
 }
 
 let srcDir = folder("--src", "media-src/video")
 let outDir = folder("--out", "public/media/video")
 let posterDir = folder("--posters", "media-src/projects")
-let recordings = ((try? FileManager.default.contentsOfDirectory(at: srcDir, includingPropertiesForKeys: nil)) ?? [])
-  .filter { $0.pathExtension.lowercased() == "mov" }
+let files = ((try? FileManager.default.contentsOfDirectory(at: srcDir, includingPropertiesForKeys: nil)) ?? [])
+  .filter { !$0.lastPathComponent.hasPrefix(".") && !["json", "md"].contains($0.pathExtension.lowercased()) }
   .sorted { $0.lastPathComponent < $1.lastPathComponent }
 
 var outputs: [Output] = []
-var problems: [String] = []
-for mov in recordings {
+var problems: [String] = files
+  .filter { $0.pathExtension != "mov" }
+  .map { "media-src/video/\($0.lastPathComponent): unsupported file type; export it as .mov (QuickTime Player: File > Export As)" }
+for mov in files where mov.pathExtension == "mov" {
   do {
     outputs.append(try await encode(mov, outDir: outDir, posterDir: posterDir))
   } catch let problem as Problem {
@@ -219,19 +252,19 @@ for mov in recordings {
 }
 
 if !problems.isEmpty {
-  for output in outputs {
-    try? FileManager.default.removeItem(at: output.tempVideo)
-    try? FileManager.default.removeItem(at: output.tempPoster)
-  }
+  outputs.forEach(removeTemps)
   for problem in problems { FileHandle.standardError.write(Data("\(problem)\n".utf8)) }
   FileHandle.standardError.write(Data("npm run video: \(problems.count) problem(s); nothing was written.\n".utf8))
   exit(1)
 }
 
-for output in outputs {
+for (index, output) in outputs.enumerated() {
   // rename(2) replaces the destination atomically.
   guard rename(output.tempVideo.path, output.finalVideo.path) == 0, rename(output.tempPoster.path, output.finalPoster.path) == 0 else {
-    FileHandle.standardError.write(Data("npm run video: could not move \(output.id) into place (errno \(errno))\n".utf8))
+    let reason = String(cString: strerror(errno))
+    outputs[index...].forEach(removeTemps)
+    let moved = index == 0 ? "" : " (\(index) recording(s) before it were already replaced)"
+    FileHandle.standardError.write(Data("npm run video: could not move \(output.id) into place: \(reason)\(moved)\n".utf8))
     exit(1)
   }
   print(output.summary)

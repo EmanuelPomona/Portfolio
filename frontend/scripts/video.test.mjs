@@ -3,7 +3,7 @@
 // AVFoundation, so these tests are skipped elsewhere (CI runs on Linux). The fixture is the real
 // committed recording; the MP4 is checked by reading its boxes here, independently of the Swift code.
 import { execFile } from 'node:child_process';
-import { copyFile, mkdir, mkdtemp, readdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
+import { chmod, copyFile, mkdir, mkdtemp, readdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -257,14 +257,16 @@ describe.skipIf(process.platform !== 'darwin')('npm run video (macOS AVFoundatio
   it('removes its partial files when a check after encoding fails', async () => {
     const ws = await workspace();
     await addRecording(ws, 'demo-app');
-    // A directory where the temporary poster goes makes the poster write fail after the MP4 is encoded.
-    await mkdir(path.join(ws.posters, '.demo-app.partial.png', 'blocker'), { recursive: true });
+    // A read-only posters folder makes the poster write fail after the MP4 is already encoded.
+    await mkdir(ws.posters, { recursive: true });
+    await chmod(ws.posters, 0o555);
 
     const failure = await ws.run().then(() => null, (error) => error);
+    await chmod(ws.posters, 0o755);
 
     expect(failure).toMatchObject({ code: 1 });
-    expect(failure.stderr).toContain('media-src/video/demo-app.mov');
-    expect((await ws.files()).filter((f) => f.startsWith('out/'))).toEqual([]);
+    expect(failure.stderr).toContain('media-src/video/demo-app.mov: could not write the poster frame');
+    expect(await ws.files()).toEqual([]);
   });
 
   it('removes its partial files when moving them into place fails', async () => {
