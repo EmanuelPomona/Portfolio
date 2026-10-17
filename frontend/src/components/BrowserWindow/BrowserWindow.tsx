@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { getMedia, type MediaAsset, type Project } from '../../content';
 import { useAttention } from '../../hooks/useAttention';
+import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
 import { useVideoPlayback } from '../../hooks/useVideoPlayback';
 import { Picture } from '../Picture/Picture';
 import styles from './BrowserWindow.module.css';
@@ -35,7 +36,9 @@ export function BrowserWindow({ project, sizes }: BrowserWindowProps) {
   const { ref, attended } = useAttention<HTMLAnchorElement>();
   const [failed, setFailed] = useState(false);
   const [video, setVideo] = useState<HTMLVideoElement | null>(null);
-  useVideoPlayback(video, attended);
+  // Plays only while someone looks at it, and never under reduced motion (the poster stays).
+  const reduced = usePrefersReducedMotion();
+  useVideoPlayback(video, attended && !reduced);
   const { screen, primary } = project;
   const showImage = screen.image !== null && !failed;
 

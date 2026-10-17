@@ -4,6 +4,7 @@ import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { getMedia, projects, type Project } from '../../content';
 import { FINE_POINTER_QUERY } from '../../hooks/useMediaQuery';
+import { REDUCED_MOTION_QUERY } from '../../hooks/usePrefersReducedMotion';
 import { installMatchMedia } from '../../test-utils/media';
 import { BrowserWindow } from './BrowserWindow';
 import styles from './BrowserWindow.module.css';
@@ -214,5 +215,30 @@ describe('BrowserWindow with a recording (W-08, ADR-012)', () => {
     fireEvent.keyDown(document, { key: 'Tab' });
     act(() => link.focus());
     expect(play).toHaveBeenCalledTimes(1);
+  });
+
+  it('never plays under reduced motion; the poster shows instead', () => {
+    media.restore();
+    media = installMatchMedia({ [FINE_POINTER_QUERY]: true, [REDUCED_MOTION_QUERY]: true });
+    const play = vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue(undefined);
+    vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => {});
+    const { container } = render(<BrowserWindow project={withRecording} sizes={SIZES} />);
+    const link = screen.getByRole('link');
+    fireEvent.mouseEnter(link);
+    // Attention still shows (the glass lifts, color arrives), but nothing moves.
+    expect(link).toHaveAttribute('data-state', 'attention');
+    expect(play).not.toHaveBeenCalled();
+    expect(container.querySelector('video')).toHaveAttribute('poster');
+
+    // Turning reduced motion on mid-play pauses it.
+    media.restore();
+    media = installMatchMedia({ [FINE_POINTER_QUERY]: true });
+    cleanup();
+    const second = render(<BrowserWindow project={withRecording} sizes={SIZES} />);
+    const pause = vi.spyOn(HTMLMediaElement.prototype, 'pause');
+    fireEvent.mouseEnter(second.getByRole('link'));
+    expect(play).toHaveBeenCalledTimes(1);
+    act(() => media.set(REDUCED_MOTION_QUERY, true));
+    expect(pause).toHaveBeenCalled();
   });
 });
