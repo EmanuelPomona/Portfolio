@@ -249,6 +249,18 @@ a:active {
   animation: none;
 }
 
+/*
+ * Focus inside content that is still clearing (the hero copy right after the loader, a plate
+ * mid-arrival): show it fully now. Important declarations outrank the running animation without
+ * touching the `animation` property, so nothing restarts when focus moves on (M-04).
+ */
+[data-fog='self']:focus-within,
+[data-fog='stagger'] > :focus-within {
+  opacity: 1 !important;
+  filter: none !important;
+  translate: none !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   [data-fog],
   [data-fog] > * {

@@ -97,6 +97,18 @@ describe('useFogReveal', () => {
     expect(el).toHaveAttribute('data-revealed', 'true');
   });
 
+  it('shows focused content fully while its reveal is still running, without restarting it', () => {
+    // M-04: the hero copy clears right after the loader, and a keyboard user can tab into it
+    // mid-animation (measured at 0.93 opacity). Important declarations outrank the animation, and
+    // leaving `animation` itself alone means nothing replays when focus moves on.
+    const rule = globalCss.match(/\[data-fog='stagger'\] > :focus-within[^{]*\{([^}]*)\}/)?.[1] ?? '';
+    expect(rule).toMatch(/opacity:\s*1 !important/);
+    expect(rule).toMatch(/filter:\s*none !important/);
+    expect(rule).toMatch(/translate:\s*none !important/);
+    expect(rule).not.toMatch(/animation/);
+    expect(globalCss).toMatch(/\[data-fog='self'\]:focus-within/);
+  });
+
   it('never un-reveals', () => {
     render(<Probe />);
     const el = screen.getByTestId('probe');
