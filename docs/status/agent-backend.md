@@ -94,8 +94,10 @@ OWNER HOLD: no vercel calls of any kind, no git push. Local commits only.
 - [x] Fresh verification on 5c82dc8: npm test 598/598 (48 files) exit 0; typecheck 0; lint 0; build 0; contract-test.sh 185/185 exit 0; media x2 clean; mdls + boxes + decoded frames; crop rows re-measured; poster re-made byte-identical; never-edit files unchanged
 - [x] docs/review/B-305-media.txt; HANDOFF-2; TASK-305 -> REVIEW. Not pushed (owner hold).
 
+- [x] Replied to manager portfolio-38 via SendMessage (head 8557ef0, criteria, MP4 facts, gate results)
+
 ## In progress
-- [ ] Reply to manager portfolio-38 via SendMessage
+- [ ] nothing; TASK-305 in REVIEW, awaiting manager integration / reviewer. Owner hold: no deploy, no push.
 
 ## Verified
 - Baseline (pre-change) -> typecheck/lint/test all pass on 3ea91a0
