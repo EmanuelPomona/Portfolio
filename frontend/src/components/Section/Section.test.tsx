@@ -31,7 +31,7 @@ describe('Section', () => {
     expect(screen.queryByRole('heading')).toBeNull();
   });
 
-  it('lets the backdrop lag the scroll by translate (--depth), clipped to its own section', () => {
+  it('lets the backdrop lag the scroll downward only (--depth), clipped to its own section', () => {
     const frames = installFrames();
     try {
       const { container } = render(
@@ -42,7 +42,9 @@ describe('Section', () => {
       frames.flush();
       const backdrop = container.querySelector('img')!.closest('[aria-hidden="true"]') as HTMLElement;
       expect(backdrop.style.getPropertyValue('--depth')).toMatch(/^-?[\d.]+px$/);
-      expect(css).toMatch(/\.backdrop\s*\{[^}]*translate:\s*0 var\(--depth/);
+      // Down only: --depth runs -80..80px, the backdrop 0..80px. Moving up would lift its
+      // half-faded top above the section's clip and cut it (a luminance step at the boundary).
+      expect(css).toMatch(/\.backdrop\s*\{[^}]*translate:\s*0 calc\(\(var\(--depth, 0px\) \+ 80px\) \/ 2\)/);
       // Offsets and arrivals never spill into the next section or widen the page.
       expect(css).toMatch(/\.section\s*\{[^}]*overflow:\s*clip/);
     } finally {

@@ -54,16 +54,19 @@ export function Hero({ site, onHeroDecode, ready = true }: HeroProps) {
   const [section, setSection] = useState<HTMLElement | null>(null);
   const playing = useDriftPlaying(section);
   // The photograph lags the scroll a little (TASK-108): the valley reads as farther than the name.
-  const [photoLayer, setPhotoLayer] = useState<HTMLDivElement | null>(null);
-  useScrollDepth(photoLayer, DEPTH.hero);
+  // Only the inner layer moves; the frame and its dissolve mask stay with the hero.
+  const [depthLayer, setDepthLayer] = useState<HTMLDivElement | null>(null);
+  useScrollDepth(depthLayer, DEPTH.hero);
   const photo = getMedia(site.heroImage);
 
   return (
     <section id="home" ref={setSection} className={styles.hero}>
-      <div ref={setPhotoLayer} className={styles.photo} aria-hidden="true">
-        <Picture media={photo} alt="" sizes={HERO_PHOTO_SIZES} priority className={styles.image} onDecode={onHeroDecode} />
-        <div className={styles.drift} data-drift={playing ? 'running' : 'paused'}>
-          <Picture media={photo} alt="" sizes={HERO_PHOTO_SIZES} className={styles.image} />
+      <div className={styles.photo} aria-hidden="true">
+        <div ref={setDepthLayer} className={styles.depth}>
+          <Picture media={photo} alt="" sizes={HERO_PHOTO_SIZES} priority className={styles.image} onDecode={onHeroDecode} />
+          <div className={styles.drift} data-drift={playing ? 'running' : 'paused'}>
+            <Picture media={photo} alt="" sizes={HERO_PHOTO_SIZES} className={styles.image} />
+          </div>
         </div>
       </div>
 

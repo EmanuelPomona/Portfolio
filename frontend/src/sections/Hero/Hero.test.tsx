@@ -94,17 +94,27 @@ describe('Hero', () => {
     expect(hero.querySelector('[data-drift]')).toHaveAttribute('data-drift', 'paused');
   });
 
-  it('lets the photograph lag the scroll (--depth) with room above, so its top edge never shows', () => {
+  it('lets the photograph lag the scroll (--depth) inside a still frame, so no edge ever shows', () => {
     const frames = installFrames();
     try {
       const { container } = render(<Hero site={site} onHeroDecode={() => {}} />);
       frames.flush();
-      const photo = container.querySelector('#home img')!.closest('[aria-hidden="true"]') as HTMLElement;
-      expect(photo.style.getPropertyValue('--depth')).toMatch(/^-?[\d.]+px$/);
+      const img = container.querySelector('#home img')!;
+      const frame = img.closest('[aria-hidden="true"]') as HTMLElement;
+      // The layer that moves sits inside the frame; the frame itself (and its dissolve mask) stays.
+      const layer = img.parentElement!.closest('div') as HTMLElement;
+      expect(layer).not.toBe(frame);
+      expect(frame.contains(layer)).toBe(true);
+      expect(layer.style.getPropertyValue('--depth')).toMatch(/^-?[\d.]+px$/);
+      expect(frame.style.getPropertyValue('--depth')).toBe('');
+      // Regression: with the mask on the moving element, its fade slid below the hero and the
+      // hero's clip cut the photo while still opaque (a 0.26 luminance step at the boundary).
       const css = readFileSync(join(__dirname, 'Hero.module.css'), 'utf8');
-      const rule = css.match(/\.photo\s*\{([^}]*)\}/)![1]!;
-      expect(rule).toMatch(/translate:\s*0 var\(--depth/);
-      expect(rule).toMatch(/inset:\s*-\d+px 0 0/);
+      const photo = css.match(/\.photo\s*\{([^}]*)\}/)![1]!;
+      expect(photo).toMatch(/mask-image/);
+      expect(photo).not.toMatch(/translate/);
+      expect(photo).toMatch(/inset:\s*-\d+px 0 0/);
+      expect(css).toMatch(/\.depth\s*\{[^}]*translate:\s*0 var\(--depth/);
     } finally {
       frames.restore();
     }

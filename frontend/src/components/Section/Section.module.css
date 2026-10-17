@@ -44,8 +44,10 @@
   max-height: 100%;
   overflow: hidden;
   pointer-events: none;
-  /* Scroll depth (TASK-108): the forest lags the content, so it reads as far away. */
-  translate: 0 var(--depth, 0px);
+  /* Scroll depth (TASK-108): the forest lags the content, so it reads as far away. Down only:
+     --depth runs -80..80px and this maps it to 0..80px, because moving up would lift the half-faded
+     top of the photo above the section's clip and cut it into a visible edge. */
+  translate: 0 calc((var(--depth, 0px) + 80px) / 2);
   /* A section can mirror its photograph (-1) so the dense pines fall behind something opaque
      rather than behind its text. The mask mirrors with it, so the inner edge still dissolves. */
   transform: scaleX(var(--backdrop-flip, 1));

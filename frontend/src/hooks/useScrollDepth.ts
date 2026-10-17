@@ -1,7 +1,7 @@
 // Owner: agent/frontend. Scroll depth (TASK-108, M-03): backgrounds and clouds travel slower than
 // the content. One shared passive scroll listener for the whole page; the work happens in
 // requestAnimationFrame; layouts are read on mount and resize only, never per frame.
-import { useEffect } from 'react';
+import { useLayoutEffect } from 'react';
 import { depthOffset } from '../lib/depth';
 import { usePrefersReducedMotion } from './usePrefersReducedMotion';
 
@@ -94,7 +94,9 @@ function unregister(el: HTMLElement) {
  */
 export function useScrollDepth(target: HTMLElement | null, factor = 0.1): void {
   const reduced = usePrefersReducedMotion();
-  useEffect(() => {
+  // A layout effect, so the frame it schedules runs before the first paint: a layer is never
+  // painted once at its resting place and then jumps.
+  useLayoutEffect(() => {
     if (!target || reduced) return;
     register(target, factor);
     return () => unregister(target);

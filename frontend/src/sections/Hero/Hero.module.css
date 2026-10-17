@@ -17,9 +17,19 @@
      px at the very top on phones (svh hero, taller viewport once the URL bar hides), and the band
      over the hero is clear, so its edge must never show. */
   inset: -12px 0 0;
-  translate: 0 var(--depth, 0px);
   z-index: -1;
   mask-image: linear-gradient(to bottom, #000 0, #000 70%, transparent 100%);
+}
+
+/*
+ * Scroll depth (TASK-108): the photograph slides inside the frame while the frame's mask stays
+ * put, so the dissolve always ends exactly at the hero's bottom edge. (With the mask on the moving
+ * layer, the fade slid below the hero and its clip cut the photo while still opaque.)
+ */
+.depth {
+  position: absolute;
+  inset: 0;
+  translate: 0 var(--depth, 0px);
 }
 
 .image {
@@ -75,7 +85,7 @@
     animation: none;
   }
 
-  .photo {
+  .depth {
     translate: none;
   }
 }
