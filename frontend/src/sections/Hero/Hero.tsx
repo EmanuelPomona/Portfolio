@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { preload } from 'react-dom';
 import { getMedia, type Link, type Site } from '../../content';
 import { Picture } from '../../components/Picture/Picture';
+import { HERO_PHOTO_SIZES } from '../../components/Picture/sizes';
 import { useDriftPlaying } from '../../hooks/useDriftPlaying';
 import styles from './Hero.module.css';
 
@@ -27,7 +28,7 @@ export function preloadHeroImage(site: Site) {
   preload(media.fallback.src, {
     as: 'image',
     fetchPriority: 'high',
-    imageSizes: '100vw',
+    imageSizes: HERO_PHOTO_SIZES,
     imageSrcSet: best ? best.srcset : media.fallback.srcset,
     ...(best ? { type: best.type } : {}),
   });
@@ -55,9 +56,9 @@ export function Hero({ site, onHeroDecode, ready = true }: HeroProps) {
   return (
     <section id="home" ref={setSection} className={styles.hero}>
       <div className={styles.photo} aria-hidden="true">
-        <Picture media={photo} alt="" sizes="100vw" priority className={styles.image} onDecode={onHeroDecode} />
+        <Picture media={photo} alt="" sizes={HERO_PHOTO_SIZES} priority className={styles.image} onDecode={onHeroDecode} />
         <div className={styles.drift} data-drift={playing ? 'running' : 'paused'}>
-          <Picture media={photo} alt="" sizes="100vw" className={styles.image} />
+          <Picture media={photo} alt="" sizes={HERO_PHOTO_SIZES} className={styles.image} />
         </div>
       </div>
 

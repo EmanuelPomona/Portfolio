@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { getMedia, site, type SectionId } from '../../content';
 import { useFogReveal } from '../../hooks/useFogReveal';
 import { Picture } from '../Picture/Picture';
+import { SECTION_BACKDROP_SIZES } from '../Picture/sizes';
 import styles from './Section.module.css';
 
 interface SectionProps {
@@ -19,7 +20,7 @@ interface SectionProps {
 function EvergreenBackdrop() {
   return (
     <div className={styles.backdrop} aria-hidden="true">
-      <Picture media={getMedia(site.sectionsImage)} alt="" sizes="(min-width: 72rem) 72rem, 100vw" />
+      <Picture media={getMedia(site.sectionsImage)} alt="" sizes={SECTION_BACKDROP_SIZES} />
     </div>
   );
 }
