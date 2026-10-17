@@ -5,9 +5,17 @@ import { useEffect, useRef } from 'react';
 /** HTMLMediaElement.HAVE_METADATA: duration and dimensions are known, so a seek can land. */
 const HAVE_METADATA = 1;
 
-/** Moves the playhead: a deliberate side effect on the media element, like play() and pause(). */
+/**
+ * Moves the playhead: a deliberate side effect on the media element, like play() and pause(). An
+ * engine that refuses the seek (older WebKit threw InvalidStateError before metadata) just plays
+ * from where it is; a throw here would escape the effect and unmount the page.
+ */
 function seek(video: HTMLMediaElement, seconds: number): void {
-  video.currentTime = seconds;
+  try {
+    video.currentTime = seconds;
+  } catch {
+    // Refused: the recording starts from its current position instead.
+  }
 }
 
 /**
