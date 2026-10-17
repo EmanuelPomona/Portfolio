@@ -10,6 +10,7 @@ import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
 import sharp from 'sharp';
 import { afterEach, describe, expect, it } from 'vitest';
+import { mp4Info } from './mp4-boxes.mjs';
 
 const SCRIPT = fileURLToPath(new URL('./video.swift', import.meta.url));
 const RECORDING = fileURLToPath(new URL('../media-src/video/snake-ai.mov', import.meta.url));
@@ -79,31 +80,6 @@ function look({ data, info }, y = 0, x0 = 300, x1 = 1100) {
     if (r > 180 && g < 80 && b < 80) red++;
   }
   return { rowMax, green, red };
-}
-
-/** Codec, handler types, and track size of an MP4, from its boxes (ISO BMFF). */
-function mp4Info(buf) {
-  const info = { handlers: [], formats: [], sizes: [] };
-  const CONTAINERS = new Set(['moov', 'trak', 'mdia', 'minf', 'stbl']);
-  const walk = (start, end) => {
-    for (let at = start; at + 8 <= end; ) {
-      let size = buf.readUInt32BE(at);
-      const type = buf.toString('latin1', at + 4, at + 8);
-      if (size === 1) size = Number(buf.readBigUInt64BE(at + 8));
-      if (size === 0) size = end - at;
-      if (size < 8) break;
-      if (CONTAINERS.has(type)) walk(at + 8, at + size);
-      if (type === 'hdlr') info.handlers.push(buf.toString('latin1', at + 16, at + 20));
-      if (type === 'stsd') info.formats.push(buf.toString('latin1', at + 20, at + 24));
-      if (type === 'tkhd') {
-        const tail = at + size; // width and height are the last two 16.16 fixed-point fields
-        info.sizes.push([buf.readUInt32BE(tail - 8) / 65536, buf.readUInt32BE(tail - 4) / 65536]);
-      }
-      at += size;
-    }
-  };
-  walk(0, buf.length);
-  return info;
 }
 
 describe.skipIf(process.platform !== 'darwin')('npm run video (macOS AVFoundation)', { timeout: 300_000 }, () => {

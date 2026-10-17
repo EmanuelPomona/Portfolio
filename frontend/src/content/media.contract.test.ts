@@ -1,12 +1,13 @@
 // @vitest-environment node
 // Owner: agent/backend. C-21 (docs/DATABASE.md): the media manifest is current with media-src/ and
 // public/media/. Part of `npm run test:contract`. Every failure here is fixed by running `npm run media`.
-import { existsSync, readdirSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
 import { describe, expect, it } from 'vitest';
 import { meanColor, prepareSource } from '../../scripts/media-lib.mjs';
+import { mp4Info } from '../../scripts/mp4-boxes.mjs';
 import { content } from './index';
 import { mediaManifest } from './media.generated';
 
@@ -96,5 +97,30 @@ describe('C-21 media manifest is current', () => {
     ];
     const dangling = images.filter(([, id]) => id !== null && !Object.hasOwn(mediaManifest, id));
     expect(dangling, `These images are not in the manifest. ${RUN_MEDIA}`).toEqual([]);
+  });
+});
+
+// Recordings (ADR-012). C-22 itself is checked by validateContent; these keep the files and the
+// content in step: no encoded recording ships unused, and the size a project declares (which sets the
+// layout before the video loads) is the file's real size.
+describe('recordings in public/media/video', () => {
+  const VIDEO_DIR = path.join(PUBLIC, 'media', 'video');
+  const used = content.projects.flatMap((p) => (p.screen.video ? [p.screen.video] : []));
+
+  it('every encoded recording is used by a project', () => {
+    const files = existsSync(VIDEO_DIR) ? readdirSync(VIDEO_DIR).filter((f) => !f.startsWith('.')) : [];
+    const unused = files.filter((f) => !used.some((v) => v.src === `/media/video/${f}`));
+    expect(unused, 'These recordings are not used by any project. Delete them, or set a project\'s screen.video.').toEqual([]);
+  });
+
+  it('every project recording is H.264 at the width and height the project declares', () => {
+    const wrong = used.flatMap((v) => {
+      const file = path.join(PUBLIC, v.src);
+      if (!existsSync(file)) return []; // C-22 reports a missing file
+      const info = mp4Info(readFileSync(file));
+      const ok = info.formats.join() === 'avc1' && info.sizes.length === 1 && info.sizes[0]![0] === v.width && info.sizes[0]![1] === v.height;
+      return ok ? [] : [`${v.src}: the file is ${info.formats.join() || 'no video'} ${info.sizes.map((s) => s.join('x')).join()}, the project says ${v.width}x${v.height}`];
+    });
+    expect(wrong, 'Copy the size npm run video printed into projects.ts.').toEqual([]);
   });
 });
