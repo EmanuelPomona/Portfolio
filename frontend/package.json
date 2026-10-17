@@ -11,7 +11,8 @@
     "test:contract": "tsc --noEmit -p tsconfig.json && vitest run contract",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "lint": "eslint .",
-    "media": "node scripts/media.mjs"
+    "media": "node scripts/media.mjs",
+    "video": "swift scripts/video.swift"
   },
   "dependencies": {
     "@fontsource-variable/manrope": "5.3.0",
