@@ -493,3 +493,126 @@ served bundle `index-CWbJ2tPp.js` is identical to the local build.
 
 `main` @ the commit adding this handoff, following `93b8874`. Merges: `0b52d92` (frontend) and
 `2122143` (stickman).
+
+## HANDOFF-4 — main — 2026-10-17
+
+### Summary
+
+Round 3 puts the owner's first real project media into the macOS windows, implemented by backend
+(TASK-305) and frontend (TASK-110) and integrated here. **StreetSafe: LA** shows the real screenshot.
+**Snake AI** plays the real recording while attended, starting seamlessly from its poster frame.
+SagePlan and Revelation Youth still read "screenshot soon". **Owner hold respected:** no deploy, no
+push.
+
+### Tasks Completed
+
+| Task | Owner | Criteria | Head |
+|---|---|---|---|
+| TASK-305 Project media, `npm run video`, C-22 | backend | B-06 (preview line deferred by the hold), B-01, B-02, C-21, C-22 | `4f3d0a7` |
+| TASK-110 Window recording | frontend | W-08, W-03, W-04, W-05, X-05 | `70b672a` |
+
+**Manager work this round**
+- `2ac1ada`: the contract (ADR-012). `ProjectVideo` and the optional `screen.video`, C-22, the API
+  rows, W-03 amended, W-08 and B-06 added, the root `video` script.
+- `b03068a`: the shipped-window tests made data-driven, so backend's content change kept `main`
+  green. Checked with a filled-window mutation.
+- `13d778b`: `posterTime`, after backend flagged a jump from the poster at 11.989s back to 0 on first
+  play.
+- Integration finding: the letterbox was `#161616` next to the recording's `#000`, against W-08's
+  "on black". Routed to frontend and fixed at `70b672a`.
+- TASK-306 (backlog): `posterTime` precision in `video.swift`, raised by frontend.
+
+### Files Changed
+
+- **Contracts:** `frontend/src/content/types.ts`, `docs/API.md`, `docs/DATABASE.md`,
+  `docs/ACCEPTANCE.md`, `docs/DESIGN_BRIEF.md`, `docs/DECISIONS.md` (ADR-012 and its amendment),
+  `package.json` (the `video` script).
+- **Tasks:** `TASK-305`, `TASK-110`, `TASK-306`, `INDEX.md`.
+- **Merged from backend:**
+  - `media-src/projects/{streetsafe-la,snake-ai}.png`, `media-src/video/snake-ai.{mov,json}`;
+  - `public/media/projects/*` and `public/media/video/snake-ai.mp4` (485,602 B);
+  - `scripts/video.swift` and its tests, `media.mjs` (skips `media-src/video`);
+  - `validate.ts` (C-22), `projects.ts`, the owner guide.
+- **Merged from frontend:** `BrowserWindow.{tsx,module.css,test.tsx}`, `poster.ts`, and the hooks
+  `useVideoPlayback` and `useNearViewport`.
+- **Manager test change:** `BrowserWindow.test.tsx` (`b03068a`).
+- **Evidence:** `docs/review/M3-*`.
+
+### Contracts
+
+- `ProjectScreen.video?: { src, width, height, posterTime? }`: additive and optional. A filled
+  window's name drops ", screenshot soon".
+- **C-22:** a video requires an image; a valid `src` whose file exists; at most 3 MB; positive
+  integer dimensions with `width` ≥ `height`; `posterTime` finite and ≥ 0.
+
+### Skills Used
+
+| Skill | Stage invoked | What it actually changed |
+|---|---|---|
+| superpowers:verification-before-completion | Immediately before this handoff | A fresh clean clone of `062aef9`, plus the owner-hold and merge-integrity checks below. No implementation after it. |
+
+(The contract and test work earlier in this round followed the TDD discipline already invoked this
+session: the RED filled-window mutation for `b03068a`. No other skill is claimed for round 3.)
+
+### Verification
+
+**Worker claims checked**
+
+| Branch | Checks |
+|---|---|
+| Backend | Skill audit 12/12. Scope: 41 files, no forbidden path. MP4 by `mdls`: H.264, video only, 1270×954, 33.7s, 485,602 B. Crops viewed. The follow-up's MP4 and poster blobs are byte-identical to the verified ones. |
+| Frontend | Skill audit corroborated. Scope limited to BrowserWindow, its hooks, its test helper, and its own evidence. |
+
+**Clean clone of `main` @ `062aef9`**
+
+| Check | Result |
+|---|---|
+| CI doc checks | ok; index current |
+| Secrets, `.env` | none; not committed |
+| `npm ci` | exit 0 |
+| `npm run typecheck` | exit 0 |
+| `npm run lint` | exit 0 |
+| `npm run build` | exit 0; JS **84.50 kB gzip**, CSS **6.54 kB gzip**; `dist/media/video/snake-ai.mp4` present; 0 em dashes |
+| `npm test` | **51 files, 629 passed** (twice on `main` after the TASK-110 merge) |
+| `scripts/contract-test.sh` | **5 files, 193 passed** |
+
+**Runtime** (production build, headless Chrome 155, CDP; `docs/review/M3-results.json`)
+
+| Check | Result |
+|---|---|
+| StreetSafe | `streetsafe-la-1024.avif`; `grayscale(1)` at rest, `none` on attention; no "screenshot soon" in the name |
+| Snake AI at rest | video paused; muted, loop, `playsinline`, `preload="none"`, `aria-hidden`; poster `snake-ai-1270.webp`; `contain` |
+| Lazy loading | **0 `.mp4` requests before attention**, 1 after |
+| Seamless first play | the first `playing` frame is at **11.99s** (`posterTime` 11.989) |
+| Leave | paused, with the frame held |
+| Reduced motion | attended but never plays; 0 `.mp4` requests |
+| Letterbox | `#000000` bars and field on attention; uniform `#131313` at rest |
+| axe 4.14 | 0 WCAG 2.2 AA violations at 1440 and 390; label-in-name passes 4/4 |
+| Console | 0 entries |
+
+**Owner hold**
+- `origin/*` refs are unchanged from the start of the round.
+- The newest Vercel deployment is the round 2 preview, from before the hold.
+
+### What Was NOT Verified
+
+- **The reviewer gate:** no reviewer session ran. All 20 v1 to round 3 tasks are `REVIEW`.
+- **Safari, Firefox, iOS:** autoplay and inline playback of the H.264 MP4 were not observed there.
+  Muted inline play is allowed by policy in each.
+- **The still fallback's black letterbox in a browser.** It is covered by a CSS-source test only, as
+  frontend states.
+- **The preview line of B-06**, `video/mp4` served by Vercel: deferred by the owner hold.
+- **Real phones:** the 390 center-band play was verified by frontend in emulation only.
+
+### Known Issues
+
+- **TASK-306 (backlog):** `posterTime` rounding in `video.swift`; no shipped asset is affected.
+- **Advisory, carried from HANDOFF-3:** the faint About → Contact cloud seam, and Vite's
+  native-config warning.
+- **Owner actions:** publishing stays on hold by the owner's choice. The SagePlan and Revelation
+  Youth media and the five About photos are still to come.
+
+### Commit
+
+`main` @ the commit adding this handoff. Merges: `0a84041` and `b778123` (backend), and `911fc1d`
+and `062aef9` (frontend).

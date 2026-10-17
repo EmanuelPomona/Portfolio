@@ -60,7 +60,7 @@ Mode A record archived to `docs/archive/status-main-mode-a.md`.
 ## Blocked on
 - nothing
 
-## Round 3 (owner media) — in progress
+## Round 3 (owner media) — complete, verified, handed to reviewer
 - Owner: "In the MacOS files, can you start replacing the empty stuff with corresponding stuff? ... Untitled 2.mov and the screenshot within inputs"; then "assign task corresponding to the respective agents and ensure that it gets implemented safely and with high quality".
 - Inputs: Screenshot 2026-10-14 (1920x958) = StreetSafe: LA; Untitled 2.mov (HEVC 1270x1006, 33.7s, own title bar) = Snake AI.
 - [x] Contract 2ac1ada: types.ts ProjectVideo + optional screen.video; DATABASE C-22; API §1 video row + §3 recordings; ACCEPTANCE W-03 amended, W-08, B-06; brief; ADR-012 (16:10 right-anchored crop for StreetSafe; H.264 via macOS AVFoundation; play only while attended); root `video` script
@@ -70,7 +70,11 @@ Mode A record archived to `docs/archive/status-main-mode-a.md`.
 - [x] TASK-305 REVIEW @ 8557ef0 checked: scope (41 files, no forbidden path), audit 12/12, MP4 by mdls (H.264, video only, 1270x954, 33.7s, 485,602 B), crops viewed (StreetSafe 1533x958 right-anchored; Snake poster no title bar)
 - [x] Merged backend by hand (integrate.sh would also take frontend's unfinished branch) -> 0a84041; gates: typecheck/lint/build 0, test 598/598, contract 185/185, index current
 - [x] 13d778b: ProjectVideo.posterTime (poster at 11.989s would jump to 0 on first play); synced: frontend -> 7131efe, others -> 13d778b
-- [ ] backend: posterTime value + C-22 clause (HANDOFF-3); frontend: posterTime seek + real-content evidence (HANDOFF-4); then integrate and verify
+- [x] backend posterTime follow-up @ 4f3d0a7 checked (MP4/poster blobs byte-identical, scope clean) -> merged b778123 (606 tests, 193 contract); synced to frontend
+- [x] frontend TASK-110 @ 911fc1d checked (scope, audit) -> integrate.sh 911fc1d (629 x2, 193); my runtime check found the letterbox #161616 vs field #000 (W-08 "on black") -> routed to frontend -> fixed @ 70b672a -> merged 062aef9
+- [x] Runtime (mine, headless Chrome 155): StreetSafe real screenshot grayscale(1) -> none; Snake video paused/muted/loop/playsinline/preload none/aria-hidden/contain; 0 .mp4 before attention; first playing frame 11.99s; held frame on leave; reduced motion never plays; letterbox #000 on attention, #131313 at rest; axe 0 violations at 1440 and 390; console 0 -> docs/review/M3-*
+- [x] TASK-306 (backlog, backend): posterTime precision in video.swift (frontend's Known Issue 1)
+- [x] superpowers:verification-before-completion @ round 3 -> clean clone 062aef9: CI doc checks ok, npm ci 0, typecheck/lint/build 0, test 51/629, contract 5/193; owner hold intact (origin refs unchanged; newest Vercel deployment is the pre-hold round 2 preview)
 
 ## Owner actions (not blockers)
 - 2026-10-16, owner: "dont actually connect the website for now, I will upload images for you to just put into the thingys" -> no deploy, promote, or push until the owner says so; next work = owner's images into the project windows and About photo slots.
