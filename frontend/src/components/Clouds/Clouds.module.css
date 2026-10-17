@@ -73,11 +73,7 @@
   opacity: 0.42;
 }
 
-/* Contact is short: one band of valley fog only. */
-[data-clouds='contact'] .forest {
-  display: none;
-}
-
+/* Contact is short: one band of valley fog only (Clouds.tsx renders just the valley there). */
 [data-clouds='contact'] .valley {
   top: -30%;
 }

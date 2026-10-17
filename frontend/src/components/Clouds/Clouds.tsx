@@ -25,6 +25,11 @@ const LAYERS = [
   { name: 'forest', photo: site.sectionsImage, sizes: SECTION_BACKDROP_SIZES, depth: DEPTH.forestCloud },
 ] as const;
 
+/** Contact is short: one band of valley fog. Chosen here, so a hidden layer is never mounted. */
+const LAYERS_FOR: Partial<Record<SectionId, readonly (typeof LAYERS)[number][]>> = {
+  contact: [LAYERS[0]],
+};
+
 type Drift = 'running' | 'paused' | 'off';
 
 function CloudLayer({ layer, drift }: { readonly layer: (typeof LAYERS)[number]; readonly drift: Drift }) {
@@ -45,7 +50,7 @@ export function Clouds({ section }: { readonly section: SectionId }) {
 
   return (
     <div ref={setRoot} className={styles.clouds} aria-hidden="true" data-clouds={section}>
-      {LAYERS.map((layer) => (
+      {(LAYERS_FOR[section] ?? LAYERS).map((layer) => (
         <CloudLayer key={layer.name} layer={layer} drift={drift} />
       ))}
     </div>

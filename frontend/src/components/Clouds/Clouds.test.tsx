@@ -129,6 +129,14 @@ describe('Clouds', () => {
     }
   });
 
+  it('renders only the layers a section shows, so no hidden layer is measured or moved', () => {
+    const contact = render(<Clouds section="contact" />);
+    const layers = contact.container.querySelectorAll('[data-drift]');
+    expect(layers).toHaveLength(1);
+    expect(layers[0]!.querySelector('img')).toHaveAttribute('src', getMedia(site.heroImage).fallback.src);
+    expect(css).not.toMatch(/display:\s*none/);
+  });
+
   it('animates transform only, on a cycle of at least 60s', () => {
     const keyframes = [...css.matchAll(/@keyframes[^{]+\{((?:[^{}]*\{[^}]*\})*)\s*\}/g)].map((m) => m[1]!);
     expect(keyframes.length).toBeGreaterThan(0);
