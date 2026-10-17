@@ -1,10 +1,10 @@
 // Owner: agent/frontend. The hero (TASK-102, wireframe 1): the alpine photograph, the name as a
 // book's title page, and the owner's "moving thingy", a slow drift of fog across the valley.
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { preload } from 'react-dom';
 import { getMedia, type Link, type Site } from '../../content';
 import { Picture } from '../../components/Picture/Picture';
-import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
+import { useDriftPlaying } from '../../hooks/useDriftPlaying';
 import styles from './Hero.module.css';
 
 interface HeroProps {
@@ -31,31 +31,6 @@ export function preloadHeroImage(site: Site) {
     imageSrcSet: best ? best.srcset : media.fallback.srcset,
     ...(best ? { type: best.type } : {}),
   });
-}
-
-/** True while the hero is on screen, the tab is visible, and motion is allowed. */
-function useDriftPlaying(target: HTMLElement | null): boolean {
-  const reduced = usePrefersReducedMotion();
-  const [inView, setInView] = useState(false);
-  const [visible, setVisible] = useState(() => typeof document === 'undefined' || !document.hidden);
-
-  useEffect(() => {
-    if (!target || typeof IntersectionObserver === 'undefined') return;
-    const observer = new IntersectionObserver((entries) => {
-      const entry = entries[entries.length - 1];
-      if (entry) setInView(entry.isIntersecting);
-    });
-    observer.observe(target);
-    return () => observer.disconnect();
-  }, [target]);
-
-  useEffect(() => {
-    const onChange = () => setVisible(!document.hidden);
-    document.addEventListener('visibilitychange', onChange);
-    return () => document.removeEventListener('visibilitychange', onChange);
-  }, []);
-
-  return inView && visible && !reduced;
 }
 
 function HeroLink({ link }: { readonly link: Link }) {
