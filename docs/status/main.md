@@ -83,6 +83,7 @@ Mode A record archived to `docs/archive/status-main-mode-a.md`.
 - [ ] TASK-307 -> portfolio-backend-c1; then merge, verify all four windows in the browser, axe, hand off
 
 ## Owner actions (not blockers)
+- 2026-10-19, owner: "can you push whatever is in main to my github repo" -> main pushed to origin (fast-forward, full history, no force). Publishing hold still stands: the Vercel project has no Git connection, so a push does not deploy.
 - 2026-10-16, owner: "dont actually connect the website for now, I will upload images for you to just put into the thingys" -> no deploy, promote, or push until the owner says so; next work = owner's images into the project windows and About photo slots.
 - Production https://emanuel-ling.vercel.app still serves the walking skeleton (backend's first deploy). Promote or take down: owner's call.
 - Turn off the Vercel Toolbar for previews (its injected script is blocked by the CSP).
