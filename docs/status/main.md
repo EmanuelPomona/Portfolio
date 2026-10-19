@@ -76,6 +76,12 @@ Mode A record archived to `docs/archive/status-main-mode-a.md`.
 - [x] TASK-306 (backlog, backend): posterTime precision in video.swift (frontend's Known Issue 1)
 - [x] superpowers:verification-before-completion @ round 3 -> clean clone 062aef9: CI doc checks ok, npm ci 0, typecheck/lint/build 0, test 51/629, contract 5/193; owner hold intact (origin refs unchanged; newest Vercel deployment is the pre-hold round 2 preview)
 
+## Round 4 (last two screenshots) — in progress
+- Owner (2026-10-19): "go ahead and update the screens for the other 2 projects as I have uploaded the screenshots for them".
+- Inputs: Screenshot 2026-10-18 11.58.42 PM = SagePlan; 11.59.00 PM = Revelation Youth (both 1920x937; top edge rows and scrollbar measured).
+- Calls: SagePlan crop left 210 top 8 1486x929; Revelation Youth crop left 206 top 2 1496x935 (16:10, centred on content). Backend-only task (renderer already handles screenshots).
+- [ ] TASK-307 -> portfolio-backend-c1; then merge, verify all four windows in the browser, axe, hand off
+
 ## Owner actions (not blockers)
 - 2026-10-16, owner: "dont actually connect the website for now, I will upload images for you to just put into the thingys" -> no deploy, promote, or push until the owner says so; next work = owner's images into the project windows and About photo slots.
 - Production https://emanuel-ling.vercel.app still serves the walking skeleton (backend's first deploy). Promote or take down: owner's call.

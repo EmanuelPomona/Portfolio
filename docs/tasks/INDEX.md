@@ -25,7 +25,8 @@ Do not edit by hand — edit the task files and regenerate.
 | TASK-303 | REVIEW | backend | 0 | Head metadata plugin, favicon, Open Graph image, robots, sitemap |
 | TASK-304 | REVIEW | backend | 0 | Vercel config, security headers, and the preview deployment |
 | TASK-305 | REVIEW | backend | 0 | StreetSafe screenshot, Snake AI recording, npm run video, and C-22 |
+| TASK-307 | READY | backend | 0 | SagePlan and Revelation Youth screenshots in their windows |
 | TASK-205 | BACKLOG | stickman | 0 | Safe-area viewport and real-phone check before the touch flag flips |
 | TASK-306 | BACKLOG | backend | 0 | posterTime lands on the poster's exact MP4 frame |
 
-**Counts:** BACKLOG 2, REVIEW 20
+**Counts:** BACKLOG 2, READY 1, REVIEW 20
