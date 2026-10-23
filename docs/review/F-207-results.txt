@@ -1,0 +1,120 @@
+TASK-207 results: the stickman sits 2s after the pointer stops (was 5s after he stopped)
+agent/stickman, 2026-10-19, headless system Chrome, dev server http://localhost:3009 (FRONTEND_PORT)
+Raw files: F-207-parity.txt, F-207-sit-timing.txt, F-207-*.png.
+Tools: F-tools/run-parity.sh, F-tools/sit-timing.mjs (both re-runnable from the repo).
+
+History. The first version changed only the threshold (5 -> 2s) and kept the 4/s ease and the
+speed-based idle clock "as before". Measured from the pointer, sitting then started 2.80-2.92s and he
+was seated at 3.52-3.63s, so S-04 could not be met; the task was BLOCKED on that. The manager ruled
+A + B (dce75d6):
+  A  SIT_EASE 4 -> 6/s.
+  B  the idle clock is the pointer's stillness, not his own.
+This file reports the ruled behavior.
+
+1. Tests (TDD: each new or changed expectation was RED on the code before it)
+   engine/gestures.test.ts
+     sit approaches 1 after 2s idle and returns to 0 when moving
+     does not sit before 2s idle
+     seated within 0.5s of starting to sit (6/s ease)   RED on 4/s: 0.874 where >= 0.95 is expected
+     starts sitting strictly after 2s idle              0.6 at 6/s (RED: 0.4)
+     eases sit at rate 6/s                              0.6 (RED: 0.4)
+   engine/figure.test.ts
+     the idle clock starts when the pointer stops, not when he arrives
+       Sitting starts on frame 122 after the move (121 counted frames = 2.017s), not 2s after he
+       arrives. RED on the speed-based clock: idle stayed 0 while he walked. A 1px move, horizontal
+       or vertical, restarts the clock.
+     a walk longer than 2s ends seated, with no sit shown mid-walk
+       At full stride his pose equals the pose with sit 0. Sit was 0.95+ underneath, unseen; once
+       he stops he is seated. RED on the speed-based clock: sit stayed 0.
+     a press resets idle before the step, so a seated figure starts to stand   0.7 at 6/s (RED: 0.8)
+   engine/motion.test.ts
+     idle is a plain clock: it counts on while he walks (the figure step resets it)
+   layer/controller.test.ts
+     he starts to sit 2s after the pointer stops, not before, is seated by 2.5s, and a move stands
+     him up (S-04)
+       Through the real frame loop: sit 0 at 1.967s, > 0 by 2.033s, >= 0.95 at 2.5s, < 0.05 after
+       a move.
+   Mutations (literal replacement, file restored byte-identical each time), all KILLED:
+     B off; previous target never updated; only x movement counts (KILLED after a vertical
+     assertion was added); his own speed resets idle again; the move frame counts its dt again;
+     SIT_EASE 5 and 7; SIT_AFTER_S 5, 1.9 and 2.1.
+
+2. Prototype parity (F-201 harness; docs/reference is never edited)
+   run-parity.sh applies the owner's TASK-207 changes to a temporary copy of the reference. Each
+   change is asserted to match exactly once:
+     - the sit line: threshold 5 -> SIT_AFTER_S and ease 4 -> SIT_EASE, read from gestures.ts;
+     - idle is not reset by his own speed;
+     - a pointermove that changes the target zeroes idle on the next frame.
+     default        19 identical, 0 different, exit 0
+     PARITY_PURE=1  16 identical, 3 different, exit 1:
+       idle 5s+ / idle 6s+   he is seated; the prototype is not yet
+       cheer +1f             most likely the residual of 2 frames of sit at 2.0s after the 800px
+                             jump, ~1e-7 by the click, shifting antialiasing on one stroke
+                             (arithmetic in F-207-parity.txt, not separately measured)
+   The default run matches on all 19 checkpoints: on these, the port is the prototype plus these
+   changes. The checkpoints cannot see the move-frame refinement (3551528): the default run's cheer
+   +1f hash is the same before and after it, and the sit checkpoints are at 5s+ and 6s+, where sit is
+   about 1 either way. The engine and controller tests pin the refinement.
+   Lab console in these runs: favicon.ico 404 (pre-existing: neither stickman-lab.html nor
+   index.html links a favicon) and the getImageData warning caused by the harness's own pixel digest.
+
+3. Browser timing on the real page, 1440x900 @1x, after the loader handed him over
+   Method: sit is read exactly from the drawn pose. With the figure still, the torso starts at hip
+   y = -16 + 8·sit rig units. The first sitting frame reads 0.1002 against 6/60 = 0.1000. The
+   pointer glides 240ms to the target, then stays still. Final run, F-207-sit-timing.txt:
+
+                                                   link (LinkedIn, 89,375)   fog (1180,720)
+   last move -> his feet stop                          667.4 ms                566.5 ms
+   last move -> sitting starts                        2016.6 ms               2000.0 ms
+   last move -> seated (sit >= 0.95)                  2484.0 ms               2466.7 ms
+   event timestamp (e.timeStamp) -> sitting starts    2031.9 ms               2015.3 ms
+   engine clock (rAF begin times) -> sitting frame    2016.6 ms               2000.0 ms
+   sitting starts -> seated (6/s: 467 ms)              467.4 ms                466.7 ms
+   sit 2.5s after the last move                        0.953                   0.962
+   sit before sitting starts (max)                     0.0000                  0.0000
+   Two earlier runs of the same script (not committed) gave sitting starts 1999.9-2016.5 ms,
+   seated 2467.3-2483.1 ms, event timestamp -> sitting 2015.6-2033.3 ms, and engine clock
+   2000.0-2016.7 ms.
+
+   Which "2.0s":
+   - The engine dates the move to the rAF begin time of the frame that dispatches it, and counts
+     stillness from there. In that clock, sitting starts 2000.0-2016.7 ms later. At exactly 2.000s
+     the strict "idle > 2.0" is decided by float rounding.
+   - The event's own timestamp is about 15 ms before that frame began (Chrome's frame-aligned
+     input; a browser property, not an engine one). Measured from it, sitting starts 2015-2033 ms
+     later. This is the closest measure of when the hand stopped.
+   - The "last move" rows use the sitting frame's draw-time performance.now() minus the pointermove
+     handler's performance.now(). They differ from the engine clock by sub-ms offsets in where the
+     handler and the draw run inside their frames. In uncommitted runs they read as low as
+     1999.8 ms; this is a measurement offset, not an early sit.
+   - Before 3551528 the frame that saw the move counted its whole dt, so the sit could start up to a
+     frame early by the engine's own clock. Handler-time readings were then 1999.0-1999.7 ms
+     (uncommitted runs). Fixed, and pinned by the engine test.
+
+   Standing back up (link, seated, a 50px nudge):
+     first frame he moves 11.9 ms; drawn hip at standing height 61.1 ms (the pose draws
+     sit × (1 − walk), so walking hides the sit at once); he stops at 427.9 ms; the sit easing
+     back at 6/s then shows as at most 0.004 (0.02 px); below 0.01 by 444.9 ms.
+   Main-page console: no errors or warnings.
+
+4. S-04 (as amended in dce75d6) and the owner's words
+   PASS  "2s after the pointer stops he starts to sit (not before)". Sitting starts 2015-2033 ms
+         after the event timestamp, and 2000-2017 ms in the engine clock. Unit, figure and
+         controller tests pin it.
+   PASS  "seated (sit >= 0.95) by about 2.5s". 2.47-2.48 s after the last move, on a link and on
+         the fog; sit is 0.953-0.962 at 2.5s.
+   PASS  "any movement stands him back up". Drawn hip at standing height in 61 ms. Any pointer move
+         now restarts the clock, including one too small for him to walk (<= 1.2px), which did not
+         stand him up before.
+   PASS  "if he is still walking at 2s he sits as he arrives". Engine test 'a walk longer than 2s
+         ends seated, with no sit shown mid-walk'. Not shown in the browser: at the approved
+         'hurry' pace no walk on a 1440 screen takes 2s (an 800px run settles in about 1.1s).
+   Owner's words, "leaves the thingy in the position for 2 seconds": sitting now starts 2.0s after
+   the pointer stops.
+
+5. Stills (240x130 crops around his feet, ms after the last move)
+   F-207-link-1500ms-standing.png, F-207-link-4000ms-seated.png
+   F-207-fog-1500ms-standing.png,  F-207-fog-4000ms-seated.png
+   F-207-nav-top-edge-1500ms-DEFECT.png. Pre-existing, not caused by this task: on the top nav (link
+     centre y = 28) his head is above the viewport while he stands. Seated he fits:
+     F-207-nav-top-edge-4000ms-seated.png.

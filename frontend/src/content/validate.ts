@@ -28,6 +28,7 @@ const MAILTO = /^mailto:[^\s@]+@[^\s@]+$/;
 const REQUIRED_CONTACT_KINDS: readonly LinkKind[] = ['linkedin', 'email', 'github'];
 const GENERIC_ALT = /^(?:image|photo|screenshot)[.!]?$/i;
 const PHOTO_ID = /^photo-\d+$/;
+const MAX_PHOTOS = 12;
 const NAV_ORDER: readonly SectionId[] = ['home', 'projects', 'about', 'contact'];
 const VIDEO_SRC = /^\/media\/video\/[a-z0-9-]+\.mp4$/;
 const MAX_VIDEO_BYTES = 3 * 1024 * 1024;
@@ -239,9 +240,9 @@ export function validateContent(
     }
   }
 
-  // C-17: 0 to 8 photos, with unique ids shaped like photo-N.
-  if (c.about.photos.length > 8) {
-    add('C-17', 'about.photos', `There are ${c.about.photos.length} photos; the collage holds at most 8.`);
+  // C-17: 0 to 12 photos (the photo wall's limit, A-05 / ADR-013), with unique ids shaped like photo-N.
+  if (c.about.photos.length > MAX_PHOTOS) {
+    add('C-17', 'about.photos', `There are ${c.about.photos.length} photos; the photo wall holds at most ${MAX_PHOTOS}.`);
   }
   const photoIds = new Set<string>();
   c.about.photos.forEach((ph, i) => {

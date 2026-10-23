@@ -88,7 +88,8 @@ export type PhotoAspect = '4:3' | '3:2' | '2:3' | '9:16' | '16:9' | '1:1';
 
 export interface LifePhoto {
   readonly id: string;
-  /** The slot renders at this ratio whether or not an image exists. */
+  /** The slot's ratio while it has no image; with an image, the image's own ratio shapes its
+   * tile on the photo wall (ADR-013). */
   readonly aspect: PhotoAspect;
   readonly image: MediaId | null;
   /** Non-empty when image is non-null; null when image is null. */

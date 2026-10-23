@@ -72,6 +72,7 @@ export function createTouchWalker(canvas: HTMLCanvasElement, opts: { size?: numb
 
   let fig: Figure = {
     motion: { pos: { x: 24, y: 0 }, speed: 0, facing: 1, phase: 0, idle: 0 },
+    target: { x: 24, y: 0 },
     gestures: { cheer: 0, point: 0, sit: 0 },
   };
   let tapX: number | null = null;

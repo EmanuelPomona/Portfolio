@@ -1,0 +1,13 @@
+TASK-111 axe-core 4.14.0 on the production build (8c3c0ce) at http://localhost:3101/, after scrolling the page through.
+Tags: wcag2a, wcag2aa, wcag21a, wcag21aa, wcag22aa, best-practice. Script: scratchpad qa/t111-axe.mjs.
+incomplete color-contrast = text over the photographic backdrops that axe cannot resolve (X-02 measured separately in earlier rounds).
+
+1440px whole page: {"violations":[],"passes":34,"incomplete":["color-contrast:45"]}
+1440px #about: {"violations":[],"passes":13} wall: {"columns":"6","tiles":5,"figuresFocusable":[-1,-1,-1,-1,-1],"ariaHidden":["true","true","true","true","true"]}
+768px whole page: {"violations":[],"passes":33,"incomplete":["color-contrast:47"]}
+768px #about: {"violations":[],"passes":13} wall: {"columns":"4","tiles":5,"figuresFocusable":[-1,-1,-1,-1,-1],"ariaHidden":["true","true","true","true","true"]}
+390px whole page: {"violations":[],"passes":34,"incomplete":["color-contrast:45"]}
+390px #about: {"violations":[],"passes":13} wall: {"columns":"2","tiles":5,"figuresFocusable":[-1,-1,-1,-1,-1],"ariaHidden":["true","true","true","true","true"]}
+
+X-02, caption label (no caption is written yet, so measured from the live tokens; the label is a solid ground, nothing dims it):
+caption label (PhotoSlot .caption: --color-ink-2 at rest, --color-ink on attention, on solid --color-mist): {"ground":[227,232,229],"rest":[79,85,82],"attended":[36,36,36],"fontSize":"13px","restRatio":6.15,"attendedRatio":12.52}

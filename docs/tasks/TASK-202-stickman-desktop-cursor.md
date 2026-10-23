@@ -54,7 +54,7 @@ Replace the `StickmanLayer` stub with the real desktop cursor. The full behavior
 
 - [ ] **S-01:** the native cursor is hidden and the ring sits exactly at the pointer. A click
       2px inside a nav link's edge activates it.
-- [ ] **S-04:** point on rest, cheer on press (about 0.7s), sit after 5s.
+- [ ] **S-04:** point on rest, cheer on press (about 0.7s), sit after 5s. (2s from the pointer's stillness since TASK-207)
 - [ ] **S-05:** a keyboard Tab to a link walks him to it, just below-left, and he points.
 - [ ] **S-06:** visible on light fog and on a black window. Screenshots
       `docs/review/F-202-on-fog.png` and `F-202-on-window.png`.

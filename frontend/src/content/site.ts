@@ -9,7 +9,7 @@ export const site: Site = {
   title: 'Emanuel Ling · CS + Math @ Pomona College',
   description:
     'Emanuel Ling studies computer science and math at Pomona College and builds software for his classmates, Los Angeles pedestrians, and his church.',
-  updated: '2026-10-16',
+  updated: '2026-10-23',
   nav: [
     { id: 'home', label: 'Home' },
     { id: 'projects', label: 'Projects' },

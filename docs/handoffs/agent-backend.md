@@ -679,3 +679,330 @@ npm run media (x2)       "4 image(s), 36 renditions (0 written, 0 stale removed)
 ### Commit
 
 `agent/backend` at the commit that adds this handoff. Committed locally only; not pushed (owner hold).
+
+## HANDOFF-4 — agent/backend — 2026-10-19
+
+### Summary
+
+TASK-307 is implemented, but it is **`BLOCKED`** (`blocked_on: frontend-test`).
+- **Done:**
+  - Both screenshots are cropped exactly to the rects given in TASK-307. Both were viewed, and no
+    adjustment was needed.
+  - The renditions are generated, and B-02 holds.
+  - The content values are set, and `site.updated` is `2026-10-19`.
+  - Typecheck, lint, build, and the contract gate all exit 0.
+- **Blocked:** `npm test` exits 1. Three frontend tests that I am not allowed to edit use the *real*
+  SagePlan as their "empty window" fixture. TASK-307 gives SagePlan its screenshot, so those tests
+  break, while the component itself behaves correctly.
+
+Committed locally only; not pushed (owner hold).
+
+## BLOCKER — `BrowserWindow.test.tsx` uses the real SagePlan as its empty-window fixture
+
+- **File:** `frontend/src/components/BrowserWindow/BrowserWindow.test.tsx`. It is frontend-owned, and
+  TASK-307 says never to edit it.
+- **Cause:** line 16 is `const sageplan = projects[0]!`. Lines 43, 72, and 88 render it and expect the
+  empty state, "screenshot soon".
+- **Failing tests:**
+  - `is one link to primary.href in a new tab, named "<title>, <label>, <addressBar>, screenshot soon" while empty (W-05, ADR-010)`
+  - `separates the address and the placeholder with whitespace, so their words never fuse`
+  - `renders the empty state, and no image, when screen.image is null (W-03)`
+- **Proof that the content change alone causes it:** with SagePlan's screen temporarily set back to
+  `{ image: null, alt: null }`, the file passes 22 of 22. With the TASK-307 screenshot, 3 fail. The
+  content was restored afterwards.
+- **Proposed fix** (frontend or manager), so the test no longer depends on whether SagePlan has a
+  screenshot:
+
+  ```ts
+  const sageplan = projects[0]!;
+  /** An empty window whatever the real content holds (W-03 / W-05 / ADR-010 tests). */
+  const emptyWindow: Project = { ...sageplan, screen: { image: null, alt: null } };
+  // then render <BrowserWindow project={emptyWindow} .../> at lines 43, 72, and 88
+  ```
+
+  The expected strings stay the same, because the title, label, and address bar come from the same
+  project.
+
+### Tasks Completed
+
+TASK-307 is not complete: it is `BLOCKED` on the fix above. Against its acceptance criteria:
+- **C-09, C-11, C-21, C-22** pass, and `validateContent(content)` returns `[]`: the contract gate
+  passes, 193 of 193.
+- **B-02:** two runs of `npm run media` both printed "6 image(s), 54 renditions (0 written …),
+  manifest unchanged", and `git status` was clean.
+- **Gates:** typecheck, lint, build, and `scripts/contract-test.sh` exit 0. **`npm test` exits 1**: 3
+  failures, all in the blocker above, out of 629 tests in 51 files.
+- **Evidence:** `docs/review/B-307-media.txt` holds:
+  - both crop rects, with edge measurements;
+  - source dimensions (1920×937 each) and output dimensions (SagePlan 1486×929, Revelation Youth
+    1496×935);
+  - rendition widths (640 / 1024 / 1486, and 640 / 1024 / 1496);
+  - the largest AVIF per image (24,768 B, and 31,070 B);
+  - the command output.
+
+### Files Changed
+
+- **Screenshot sources:** `frontend/media-src/projects/sageplan.png` and `revelation-youth.png`
+  (new).
+- **Renditions:** `frontend/public/media/projects/{sageplan,revelation-youth}-{640,1024,<orig>}.{avif,webp,jpg}`,
+  18 new files.
+- **Generated manifest:** `frontend/src/content/media.generated.ts`.
+- **Content:** `frontend/src/content/projects.ts` (the two screens) and `frontend/src/content/site.ts`
+  (`updated`).
+- **Docs:**
+  - `docs/review/B-307-media.txt`;
+  - `docs/tasks/TASK-307-sageplan-revelation-screens.md` (status) and `docs/tasks/INDEX.md`;
+  - `docs/status/agent-backend.md`;
+  - this file.
+- **Untouched:** `types.ts`, `media.ts`, `index.html`, `vite.config.ts`, and every frontend
+  component or test. The diff over them since `51b0125` is empty.
+
+### Contracts
+
+None changed. All four project windows now have a screenshot, or a recording plus its poster.
+
+### Skills Used
+
+| Skill | Stage invoked | What it actually changed |
+|---|---|---|
+| superpowers:verification-before-completion | Before the claims in this handoff. The call returned "already loaded, instructions unchanged" | It produced the fresh gate run that exposed the `npm test` failure. Instead of being reported as done, the task was marked `BLOCKED`. |
+
+`superpowers:test-driven-development` was not needed: no code changed (TASK-307's Notes).
+
+### Verification
+
+Fresh on HEAD `e4185a7`:
+
+```
+npm test                 exit 1   Test Files 1 failed | 50 passed (51); Tests 3 failed | 626 passed (629)   <- BLOCKER above
+npm run typecheck        exit 0
+npm run lint             exit 0
+npm run build            exit 0   index-GJ6OD4zY.js 266.90 kB (84.81 kB gzip); index-CfsHdlaT.css 24.95 kB (6.54 kB gzip)
+scripts/contract-test.sh exit 0   5 files, 193 passed
+npm run media (x2)       "6 image(s), 54 renditions (0 written, 0 stale removed), manifest unchanged."; git status clean
+BrowserWindow.test.tsx with SagePlan's screen temporarily empty: 22 passed (22); content restored
+```
+
+### What Was NOT Verified
+
+- **`npm test` green with all four windows filled.** It is not green, because of the blocker.
+- **The four windows in a browser.** The manager checks them at integration, and I opened none. I did
+  view both cropped PNGs.
+- **The preview** (owner hold).
+
+### Known Issues
+
+- **The blocker above.**
+- **SagePlan's crop cuts a credits line at the bottom** ("32 course credits …"). That is the source
+  screenshot's own bottom edge: the page continues below what was captured. It is not listed as
+  something to keep.
+
+### Commit
+
+`agent/backend` at the commit that adds this handoff. Committed locally only; not pushed (owner hold).
+
+## HANDOFF-5 — agent/backend — 2026-10-19
+
+### Summary
+
+TASK-307 is unblocked and set to `REVIEW`, with `blocked_on` cleared.
+- **What fixed it:** frontend's `emptyWindow` fixture fix (`3d07856`) was merged to main (`d70ff91`)
+  and synced into `agent/backend` (`89804ad`).
+- **What I checked:** my TASK-307 content is intact. All four windows have an image, and
+  `site.updated` is `2026-10-19`. Every gate was re-run with that real content.
+- **What I changed:** nothing in code or media. This handoff only records the fresh results and the
+  status change.
+
+Committed locally only; not pushed (the owner hold continues, and the manager pushes `main`).
+
+### Tasks Completed
+
+TASK-307 now meets every acceptance criterion, with the evidence in `docs/review/B-307-media.txt`:
+- **C-09, C-11, C-21, C-22** pass, and `validateContent(content)` returns `[]` (contract gate).
+- **B-02:** two runs of `npm run media` wrote 0, and `git status` was clean.
+- **Every gate exits 0,** including `npm test` with all four windows filled.
+
+### Files Changed
+
+- `docs/tasks/TASK-307-sageplan-revelation-screens.md` (status only) and `docs/tasks/INDEX.md`
+- `docs/status/agent-backend.md`
+- this file
+
+### Contracts
+
+None.
+
+### Skills Used
+
+| Skill | Stage invoked | What it actually changed |
+|---|---|---|
+| superpowers:verification-before-completion | After the unblock, before setting `REVIEW`. The call returned "already loaded, instructions unchanged" | All gates were re-run fresh on `89804ad`, below, before the status change. |
+
+### Verification
+
+Fresh on HEAD `89804ad`, with the real content:
+
+```
+npm test                 exit 0   Test Files 51 passed (51), Tests 629 passed (629)
+npm run typecheck        exit 0
+npm run lint             exit 0
+npm run build            exit 0   index-GJ6OD4zY.js 266.90 kB (84.81 kB gzip); index-CfsHdlaT.css 24.95 kB (6.54 kB gzip)
+scripts/contract-test.sh exit 0   5 files, 193 passed
+npm run media (x2)       "6 image(s), 54 renditions (0 written, 0 stale removed), manifest unchanged."; git status clean
+```
+
+### What Was NOT Verified
+
+- **The four windows in a browser.** The manager checks them at integration.
+- **The preview** (owner hold).
+
+### Known Issues
+
+- None new. SagePlan's cut credits line at the bottom is the source screenshot's own edge
+  (HANDOFF-4).
+
+### Commit
+
+`agent/backend` at the commit that adds this handoff, on top of `89804ad`. Committed locally only;
+not pushed.
+
+## HANDOFF-6 — agent/backend — 2026-10-19
+
+### Summary
+
+TASK-309 is done and set to `REVIEW`: C-17 now allows up to 12 About photos instead of 8, matching
+DATABASE C-17 as amended in `77b8dd7` and the photo wall's 1 to 12 (A-05, ADR-013). Nothing else in
+C-17 changed. Committed locally only; not pushed (owner hold).
+
+### Tasks Completed
+
+TASK-309, against its acceptance criteria:
+- **Tests, one violation each, on both bases:** `13 photos violates C-17` (it replaces the old "more
+  than 8" test) and `12 photos is valid`.
+  - The new tests were committed failing (`12 photos is valid` failed on both bases) and pass after the
+    change.
+- **`validateContent(content)` returns `[]`,** and all gates exit 0 (below).
+
+### Files Changed
+
+- `frontend/src/content/validate.ts`: C-17 now uses `MAX_PHOTOS = 12`. The comment and the message
+  ("the photo wall holds at most 12") are updated.
+- `frontend/src/content/content.contract.test.ts`: the two C-17 count tests.
+- `frontend/src/content/README.md`: "The photo wall holds up to 12" in section 4, and the C-17 row says
+  "more than 12".
+- `docs/tasks/TASK-309-photo-cap-12.md` (status) and `docs/tasks/INDEX.md`; `docs/status/agent-backend.md`;
+  this file.
+
+### Contracts
+
+This implements the manager's amended DATABASE C-17. No other change.
+
+### Skills Used
+
+| Skill | Stage invoked | What it actually changed |
+|---|---|---|
+| superpowers:test-driven-development | Before the C-17 tests. The call returned "already loaded, instructions unchanged" | The tests went red on both bases first (commit `test: C-17 allows 12 photos and flags 13`), then the bound changed. |
+| superpowers:verification-before-completion | Before this handoff. The call returned "already loaded, instructions unchanged" | The gates below were re-run fresh on `9034393`. |
+
+### Verification
+
+Fresh on HEAD `9034393`:
+
+```
+npm test                 exit 0   Test Files 53 passed (53), Tests 654 passed (654)
+npm run typecheck        exit 0
+npm run lint             exit 0
+npm run build            exit 0
+scripts/contract-test.sh exit 0   5 files, 195 passed (includes validateContent(content) === [])
+npm run media            "6 image(s), 54 renditions (0 written, 0 stale removed), manifest unchanged."; git status clean
+```
+
+### What Was NOT Verified
+
+- **The photo wall with 9 to 12 real photos.** The real content has 5 photo slots, and the frontend's
+  A-05 tests cover the wall's own layout.
+
+### Known Issues
+
+None.
+
+### Commit
+
+`agent/backend` at the commit that adds this handoff. Committed locally only; not pushed.
+
+## HANDOFF-7 — agent/backend — 2026-10-23
+
+### Summary
+
+TASK-310 is done and set to `REVIEW`: the About photo wall now holds the owner's 10 photos.
+- **Order:** oldest first by capture date.
+- **Metadata:** none at all. GPS was present in 7 of the 10 sources and is gone.
+- **Captions:** empty, for the owner to add.
+
+It is one commit, per protocol §24 as revised and the owner's instructions. The gates ran once, plus
+once more after the manager's test fix. No review was dispatched. No push, no deploy.
+
+### Tasks Completed
+
+TASK-310, against its acceptance criteria. Evidence: `docs/review/B-310-media.txt`.
+- **C-09, C-11, C-17 (≤ 12), and C-21** pass, and `validateContent(content)` returns `[]`: the
+  contract gate passes 195 of 195.
+- **No GPS or other metadata** in any committed source:
+  - ImageIO finds 0 tags and no blocks;
+  - every file's raw JPEG segments are only `FFDB FFDB FFC2 FFC4 FFC4`, with no APPn segment.
+- **Gates:** `npm test` (657 of 657), typecheck, lint, build, and `scripts/contract-test.sh` all exit 0.
+- **`npm run media`** run twice: the second run wrote 0.
+- **Per photo**, in the evidence: source, capture date, upright size, aspect, and largest AVIF.
+
+### Files Changed
+
+- **The photos:** `frontend/media-src/life/photo-1.jpg` … `photo-10.jpg` (new).
+  - They are in the contract's folder: `DATABASE.md` LifePhoto says `media-src/life/<id>.jpg`, and the
+    manager confirmed it. TASK-310's text said `about/`.
+- **Renditions:** `frontend/public/media/life/*`, 114 files: 10 photos × 3 or 4 widths × 3 formats.
+- **Generated manifest:** `frontend/src/content/media.generated.ts`.
+- **Content:** `frontend/src/content/about.ts` (10 entries; the stale "five slots" comment replaced) and
+  `site.ts` (`updated` set to `2026-10-23`).
+- **Docs:** `docs/review/B-310-media.txt`; `docs/tasks/TASK-310-about-photos.md` (status) and
+  `docs/tasks/INDEX.md`; `docs/status/agent-backend.md`; this file.
+
+### Contracts
+
+None changed.
+
+### Skills Used
+
+| Skill | Stage invoked | What it actually changed |
+|---|---|---|
+| superpowers:verification-before-completion | Before the first gate run, and again after merging main `11f93a1`. Each call returned "already loaded, instructions unchanged" | The final gates were re-run on the merged state before this commit, and no work followed. On the first run it caught 2 failing About tests, so I held the commit instead of making it. |
+
+### Verification
+
+On `11f93a1` plus this task's changes:
+
+```
+npm test                 exit 0   Test Files 53 passed (53), Tests 657 passed (657)
+npm run typecheck        exit 0
+npm run lint             exit 0
+npm run build            exit 0   index-ClFoqMvm.js 280.74 kB (88.91 kB gzip); index-C1a5CYmY.css 23.89 kB (6.21 kB gzip)
+scripts/contract-test.sh exit 0   5 files, 195 passed
+npm run media (x2)       "16 image(s), 168 renditions (0 written, 0 stale removed), manifest unchanged."
+metadata                 10/10 outputs: 0 ImageIO tags, no APPn segments (see B-310)
+```
+
+### What Was NOT Verified
+
+- **The photo wall in a browser.** I did not open the wall with these ten photos, so I cannot say
+  whether any tile crops badly. The six 3:4 portraits sit in `2:3` tiles, which show 1600 of their 1800
+  pixels of width, trimming the sides. Their subjects are central, so I expect no problem.
+- **The alt texts** come from my own viewing. They name no people or places, and the owner may want to
+  personalize them.
+- **Photo 3 (the PNG)** has no camera metadata, so its date is the file's creation date (2026-03-14).
+
+### Known Issues
+
+None.
+
+### Commit
+
+The one TASK-310 commit, "Add the About photos", on `agent/backend` on top of `11f93a1`. Not pushed.

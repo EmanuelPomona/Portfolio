@@ -1,0 +1,41 @@
+TASK-207 sit timing, http://localhost:3009/, 1440x900 @1x, headless Chrome, 2026-10-19T08:09:03.820Z
+resting target, link                                             {"x":89,"y":375,"text":"LinkedIn (opens in a new tab)","href":"https://www.linkedin.com/in/emanuel-ling-915a73244"}
+top nav link (still only)                                        {"x":575,"y":28,"text":"Home","href":"#home"}
+resting target, fog (no link, button or tabindex under it)       {"x":1180,"y":720,"under":"_image_1k1zc_35"}
+html.stickman-cursor (the layer took over the cursor)            true
+
+link: frames analysed / dropped (hip.x != 0) / mean frame        254 / 0 / 16.67 ms
+link: last move -> his feet stop on the pointer                  667.4 ms
+link: last move -> sitting starts (S-04: not before 2.0s; engine 2.0s + up to 2 frames) 2016.6 ms
+link: last move -> seated (sit >= 0.95; S-04: by about 2.5s)     2484.0 ms
+link: event timestamp (e.timeStamp) -> sitting starts            2031.9 ms
+link: frame that saw the move -> sitting frame, in rAF begin times (engine clock; > 2000) 2016.6 ms
+link: the move's handler ran after that frame began by           0.4 ms
+link: feet stop -> sitting starts                                1349.2 ms
+link: feet stop -> seated (sit >= 0.95)                          1816.6 ms
+link: sitting starts -> seated (ease 6/s: 28 frame intervals = 467 ms) 467.4 ms
+link: sit 2.5s after the last move / 2.5s after the feet stop    0.953 / 0.999
+link: sit on the first sitting frame (6/60 = 0.1000) / highest sit before it 0.1002 / 0.0000
+link: sit on the last frame                                      1.0000
+link: seated, then a 50px nudge: first frame he moves, after the nudge starts 11.9 ms
+link: drawn hip back at standing height (< 0.05), after the nudge starts 61.1 ms
+link: after he stops from the nudge (feet stop)                  427.9 ms
+link: then the highest drawn sit / hip drop in px                0.004 / 0.02 px (k = 0.800 px per rig unit)
+link: drawn sit below 0.01 again, after the nudge starts         444.9 ms
+
+fog: frames analysed / dropped (hip.x != 0) / mean frame         254 / 0 / 16.66 ms
+fog: last move -> his feet stop on the pointer                   566.5 ms
+fog: last move -> sitting starts (S-04: not before 2.0s; engine 2.0s + up to 2 frames) 2000.0 ms
+fog: last move -> seated (sit >= 0.95; S-04: by about 2.5s)      2466.7 ms
+fog: event timestamp (e.timeStamp) -> sitting starts             2015.3 ms
+fog: frame that saw the move -> sitting frame, in rAF begin times (engine clock; > 2000) 2000.0 ms
+fog: the move's handler ran after that frame began by            1.1 ms
+fog: feet stop -> sitting starts                                 1433.5 ms
+fog: feet stop -> seated (sit >= 0.95)                           1900.2 ms
+fog: sitting starts -> seated (ease 6/s: 28 frame intervals = 467 ms) 466.7 ms
+fog: sit 2.5s after the last move / 2.5s after the feet stop     0.962 / 0.999
+fog: sit on the first sitting frame (6/60 = 0.1000) / highest sit before it 0.1002 / 0.0000
+fog: sit on the last frame                                       1.0000
+
+stills                                                           F-207-{link,fog}-1500ms-standing.png, F-207-{link,fog}-4000ms-seated.png, F-207-nav-top-edge-{1500ms-DEFECT,4000ms-seated}.png (ms after the last move)
+console errors/warnings                                          []

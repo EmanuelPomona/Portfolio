@@ -15,6 +15,10 @@ const css = readFileSync(join(__dirname, 'BrowserWindow.module.css'), 'utf8');
 
 const sageplan = projects[0]!;
 
+// TEST FIXTURE ONLY: an empty window, whatever the shipped content holds. Tests of the empty state
+// render this, never a real project, so a project gaining a screenshot cannot break them.
+const emptyWindow: Project = { ...sageplan, screen: { image: null, alt: null } };
+
 // TEST FIXTURE ONLY (W-04). A window only ever shows its own project's screenshot (W-03); the
 // evergreen photo stands in for one here. It is 1024x1536 (2:3), so it is also the non-16:10 case.
 const withScreenshot: Project = {
@@ -40,7 +44,7 @@ describe('BrowserWindow', () => {
   });
 
   it('is one link to primary.href in a new tab, named "<title>, <label>, <addressBar>, screenshot soon" while empty (W-05, ADR-010)', () => {
-    render(<BrowserWindow project={sageplan} sizes={SIZES} />);
+    render(<BrowserWindow project={emptyWindow} sizes={SIZES} />);
     const link = screen.getByRole('link', { name: 'SagePlan, Live site, sageplan.vercel.app, screenshot soon' });
     expect(link).toHaveAttribute('href', 'https://sageplan.vercel.app');
     expect(link).toHaveAttribute('target', '_blank');
@@ -69,7 +73,7 @@ describe('BrowserWindow', () => {
   it('separates the address and the placeholder with whitespace, so their words never fuse', () => {
     // Text-content readers (axe's label-in-name check among them) join adjacent elements' text with
     // nothing between them: without a separator they read "...vercel.appscreenshot soon".
-    render(<BrowserWindow project={sageplan} sizes={SIZES} />);
+    render(<BrowserWindow project={emptyWindow} sizes={SIZES} />);
     expect(screen.getByRole('link').textContent).toMatch(/sageplan\.vercel\.app\s+screenshot soon/);
   });
 
@@ -85,7 +89,7 @@ describe('BrowserWindow', () => {
   });
 
   it('renders the empty state, and no image, when screen.image is null (W-03)', () => {
-    const { container } = render(<BrowserWindow project={sageplan} sizes={SIZES} />);
+    const { container } = render(<BrowserWindow project={emptyWindow} sizes={SIZES} />);
     expect(screen.getByText('screenshot soon')).toBeInTheDocument();
     expect(container.querySelector('img')).toBeNull();
   });

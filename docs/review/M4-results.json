@@ -1,0 +1,60 @@
+{
+  "windows": [
+    {
+      "id": "project-sageplan",
+      "media": "img:sageplan-1024.avif",
+      "empty": false,
+      "label": "SagePlan, Live site, sageplan.vercel.app",
+      "restFilter": "grayscale(1)",
+      "mp4BeforeHover": [],
+      "attention": {
+        "state": "attention",
+        "filter": "none",
+        "playing": null
+      }
+    },
+    {
+      "id": "project-streetsafe-la",
+      "media": "img:streetsafe-la-1024.avif",
+      "empty": false,
+      "label": "StreetSafe: LA, Code, github.com/EmanuelPomona/Street-Safe-LA",
+      "restFilter": "grayscale(1)",
+      "mp4BeforeHover": [],
+      "attention": {
+        "state": "attention",
+        "filter": "none",
+        "playing": null
+      }
+    },
+    {
+      "id": "project-revelation-youth",
+      "media": "img:revelation-youth-1024.avif",
+      "empty": false,
+      "label": "Revelation Youth, Live site, revelation-youth.vercel.app",
+      "restFilter": "grayscale(1)",
+      "mp4BeforeHover": [],
+      "attention": {
+        "state": "attention",
+        "filter": "none",
+        "playing": null
+      }
+    },
+    {
+      "id": "project-snake-ai",
+      "media": "video:snake-ai-1270.webp",
+      "empty": false,
+      "label": "Snake AI, Code, github.com/EmanuelPomona/Snake-AI",
+      "restFilter": "grayscale(1)",
+      "mp4BeforeHover": [],
+      "attention": {
+        "state": "attention",
+        "filter": "none",
+        "playing": true
+      }
+    }
+  ],
+  "mp4Total": [
+    "snake-ai.mp4"
+  ],
+  "console": []
+}

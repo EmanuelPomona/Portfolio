@@ -1,7 +1,7 @@
 # STATUS: agent/stickman
-Task: TASK-206 -> REVIEW (HANDOFF-2); TASK-201..204 REVIEW (HANDOFF-1)
+Task: TASK-207 REVIEW (HANDOFF-3); TASK-206 REVIEW (HANDOFF-2); TASK-201..204 REVIEW (HANDOFF-1)
 Round: 0
-Last updated: 2026-10-16T15:45:00Z
+Last updated: 2026-10-19T08:00:00Z
 
 ## Skills invoked so far
 - superpowers:test-driven-development @ TASK-201 step 1, before motion.ts -> RED/GREEN per module: motion.test.ts failed on missing module, then 17 pass; same for gestures (8) and pose (21); expectations hand-derived (scratchpad sim of the spike: 800px settles 1.083s, 50px peaks 198 px/s)
@@ -31,6 +31,14 @@ Last updated: 2026-10-16T15:45:00Z
 - superpowers:test-driven-development @ TASK-206, before the change -> named tests RED on 1200 (6 failing), GREEN with MIN_MS=2200 (0323cec); scribble bound checks made cheap (4561e1b)
 - superpowers:verification-before-completion @ TASK-206, immediately before HANDOFF-2 -> test 530/530, stickman 232/232, contract 162/162, typecheck 0, lint 0, build ok (JS 82.40 KB gz); manager files unchanged vs 90f4ffb
 
+- superpowers:test-driven-development @ TASK-207, before the change -> sit tests renamed to 2s and a seated-by test added; RED on SIT_AFTER_S=5 (3 failing: sit 0 where >0.99 / >0.95 / 0.4 expected; 'does not sit before 2s idle' passes on both, as a lower bound must); GREEN with 2 (engine 73/73, stickman 234/234)
+- superpowers:requesting-code-review @ TASK-207, after the evidence (1737532), before HANDOFF-3 -> reviewer on 6b82377..1737532: "With fixes", 0 critical, 2 important (options for the 2.5s criterion misstated, the owner's 2s measured from the pointer is ~2.9s; parity gate permanently red and run 2 not reproducible), 4 minor (stills at 3.1s not seated; 72ms measures the walk blend; idle-start estimate one frame late; labels)
+- superpowers:receiving-code-review @ after the TASK-207 review -> each item re-derived before acting; all 6 accepted. Fixes: 0557213 (>= assertion), d20c74b (lab reads SIT_AFTER_S), d11ff5a (controller-level sit test; mutants 5/1.9/2.1 KILLED; its first version had a test bug: speed was 0 before the first frame, found by logging per-frame speed/sit), f8e36b4 (run-parity.sh owner-change mode: default 19/19 exit 0, PARITY_PURE=1 17/2 exit 1), 25c602b (stills at 4s, idle anchor, nudge dip 0.28px), e78b296 (corrected options table: A alone 3.27-3.38s from the pointer, B ~2.72s, A+B ~2.47s). Task -> BLOCKED on the manager's ruling (DoD 1 not met)
+- superpowers:test-driven-development @ TASK-207 ruled change (A + B), NOT re-invoked: I followed the cycle under the load from TASK-207 start (honest record). 8 tests RED for the intended reasons (4/s values; idle 0 while walking), GREEN in 9a13b36 (A) and 82b18f8 (B); the move-frame refinement RED (idle dt where 0 was expected), GREEN in 3551528. Mutations KILLED: B off, target never updated, x-only (after adding a vertical assertion), speed reset back, move frame counts dt, SIT_EASE 5/7
+- superpowers:requesting-code-review @ TASK-207 ruled change, after the evidence (baafd58), before HANDOFF-3 -> second reviewer on 18aa646..baafd58: "Yes", 0 critical, 0 important, 6 minor (parity claim overstated, cheer +1f caveat, dispatch-gap wording, stale 4/s comments, figure.ts doc precision, 1px stand-up as a product question)
+- receiving the second review (receiving-code-review guidance, loaded earlier this task; not re-invoked) -> verified each item; 1-5 fixed in edbeba5 (comments) and 3f750b8 (results wording); 6 goes to the manager in HANDOFF-3 (a dead-zone would need a ruling: the named test pins the 1px reset); the optional focus+scroll controller test was not added (listed in HANDOFF-3)
+- superpowers:verification-before-completion @ TASK-207, immediately before HANDOFF-3 (d4c256e) -> npm test 633/633, stickman 237/237, contract 193/193, typecheck 0, lint 0, build ok (JS 84.83 KB gz); 27 branch commits touch no protected file or docs/reference; no secrets; all 5 named tests present. No implementation after it.
+
 ## Done
 - [x] Read protocol, routing, tasks 201-204, PRODUCT, DESIGN_BRIEF, DESIGN_CONSTRAINTS, API, ACCEPTANCE, ARCHITECTURE, reference spike, wireframe 1
 - [x] Brief check: concrete (refs, type pairing + reason, semantic palette, signature, anti-character) -> not blocked
@@ -49,6 +57,12 @@ Last updated: 2026-10-16T15:45:00Z
 - [x] TASK-202 step 5 browser verification + evidence 2a1f6de
 
 ## In progress
+- [x] TASK-207 step 1: sit tests 2s RED on 5, SIT_AFTER_S=2 GREEN; lab note 'Leave him alone for 2s'
+- [x] TASK-207 step 2: parity 0dc7468 (17 same / 2 diff = the idle checkpoints; spike with only line 155 at 2: 19/19); reference untouched
+- [x] TASK-207 step 3: sit timing on the real page 698566a (F-tools/sit-timing.mjs), results 1737532 (F-207-results.txt)
+- [x] TASK-207 step 4: review acted on (see skills); task -> BLOCKED (spec ruling)
+- [x] TASK-207 ruling A + B (dce75d6): frontmatter fixed 1398663; A 9a13b36; B 82b18f8; move frame 3551528; parity c51067f + 819556e (default 19/19, pure 16/3); re-timed 63dc699 (sitting 2000-2017 ms engine clock, seated 2467-2484 ms after the last move); results e769a6c, baafd58
+- [x] TASK-207 step 6: second review handled (edbeba5, 3f750b8); task -> REVIEW (d4c256e); verification-before-completion fresh at d4c256e (633/633, contract 193/193, typecheck 0, lint 0, build ok, scope + secrets clean); HANDOFF-3 written; local commit only (OWNER HOLD: not pushed)
 - [x] TASK-202 review fixes 4016cea, e037194 (verification-before-completion + handoff still to do, together with 203/204 at the end)
 - [x] TASK-203 progress.ts ed02df6, scribble.ts 4d55458, follow.ts 0015de2, artist.ts b80ef99, Loader.tsx + loader.css c491861 (13 Loader tests GREEN, contract 9/9 vs real Loader), tip-on-line fix 291f1a7
 - [x] TASK-203 done: fade 250ms b56c41b; circling-loop scribble 9e731d3 (wireframe ball verified visually); nav-relative cap ccd4710 (mutation-checked); lab replay control 4f1b072; evidence bb4904a
@@ -56,6 +70,10 @@ Last updated: 2026-10-16T15:45:00Z
 - [x] Final review handled; verification-before-completion run; HANDOFF-1 written; TASK-201..204 status REVIEW. Done:, act on findings, verification-before-completion, HANDOFF-1 in docs/handoffs/agent-stickman.md (201-204), task statuses -> REVIEW, final commit
 
 ## Verified
+- TASK-207 (ruled A + B) sitting starts 2s after the pointer stops -> engine/figure/controller tests; browser: 2000.0-2016.7 ms in the engine clock, 2015-2033 ms from e.timeStamp (F-207-sit-timing.txt, F-207-results.txt section 3)
+- TASK-207 seated >= 0.95 by about 2.5s -> 2466.7-2484.0 ms after the last move, link and fog; sit 0.953-0.962 at 2.5s
+- TASK-207 movement stands him up -> drawn hip at standing height 61 ms after a 50px nudge; leftover dip 0.004 (0.02 px)
+- TASK-207 parity -> run-parity.sh default 19/19 exit 0; PARITY_PURE=1 16/3 exit 1 (F-207-parity.txt)
 - TASK-203 final runtime (bb4904a, docs/review/F-203-results.txt): L-01 first paint ivory (100ms frame mean RGB 247.9,248.9,246.9); L-02 hero HANGS -> exit 4502ms after navigation start, gone 4957, page usable; hero BLOCKED (decode rejects = ready) -> exit at the 1.2s minimum; L-03 click -> exit 14ms, gone 467ms; L-04 reload -> no loader; L-05 fade 253ms, no canvas; L-06 progressbar + live valuenow, main inert, Tab reaches no link; L-07 1210ms; page scrolls after finish; F-203-loader-2500ms/4300ms show the dense ball
 - TASK-203 runtime (headless, before the density/fade tweaks): L-07 visible 1214ms; exit 455ms; L-03 skip -> exit 15ms, gone 472ms after click; L-04 reload shows no loader (skip); L-06 progressbar Loading/0/100 + live valuenow, main inert + aria-busy, Tab reaches no page link; page released (wheel scroll 392px after loader, was 0 before the fix); L-05 fade mode no canvas/meter, fade measured 305ms (to fix)
 - S-01 native cursor hidden, ring centred exactly at pointer (300.5,300.5 -> 300.5,300.5), click 2px inside "Projects" edge -> #projects -> docs/review/F-202-results.txt
@@ -80,7 +98,7 @@ Last updated: 2026-10-16T15:45:00Z
 - Contract test needs onDone <= 5s at the cap, so the exit is 450ms (task says <= 600).
 
 ## Blocked on
-- nothing
+- nothing (the TASK-207 spec ruling arrived: A + B, dce75d6)
 
 ## Tooling notes
 - chrome-devtools MCP profile is locked by another instance (another agent?); not killed. claude-in-chrome window is occluded (document.hidden, 0 raf/s), so live motion there is not observable.

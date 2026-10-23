@@ -1,0 +1,97 @@
+TASK-111 wall QA, production build (vite build @ 8c3c0ce) served by vite preview at http://localhost:3101/
+Script: scratchpad qa/t111.mjs (CDP, headless Chrome 155). Viewports 1440x900, 768x1024, 390x844 (mobile + touch).
+Per width: cols/rows, wall size, overlaps between tiles, sizeErr = max |tile - grid span| px, figErr = max |figure - tile| px,
+square1x2 = (2*row + gap) - column px, maxRight/maxBottom = tile extent - wall px, inSection, overflowX px,
+before = first tile translate/opacity before the wall is revealed (settle: 16px above), after = every tile after reveal,
+focus = order of the figures in the DOM, console = errors/warnings/exceptions captured on the page.
+HANDOFF-8 (two-row minimum, 8c3c0ce): 768 and 390 re-planned (no tile under 2 rows); 1440 tiles identical to HANDOFF-7, so F-111-wall-1440.png is kept as committed.
+
+{
+ "390": {
+  "cols": 2,
+  "rows": 11,
+  "wall": "352.0x982.0",
+  "colW": 352,
+  "gap": 8,
+  "overlaps": 0,
+  "fillShare": 0.9695,
+  "gapsCheck": "see fillShare (<1 by the gutters only)",
+  "sizeErr": 0,
+  "figErr": 0,
+  "square1x2": 0,
+  "maxRight": 0,
+  "maxBottom": 0,
+  "inSection": true,
+  "overflowX": 0,
+  "before": {
+   "translate": "0px -16px",
+   "opacity": "0",
+   "revealed": null
+  },
+  "after": [
+   "none|1"
+  ],
+  "tiles": "photo-1:landscape:2x3@1,1 photo-3:landscape:2x3@1,4 photo-4:portrait:1x5@1,7 photo-2:portrait:1x3@2,7 photo-5:landscape:1x2@2,10",
+  "focus": "photo-1,photo-3,photo-4,photo-2,photo-5",
+  "console": [],
+  "shot": "F-111-wall-390.png"
+ },
+ "768": {
+  "cols": 4,
+  "rows": 6,
+  "wall": "685.9x512.4",
+  "colW": 685.875,
+  "gap": 8,
+  "overlaps": 0,
+  "fillShare": 0.9652,
+  "gapsCheck": "see fillShare (<1 by the gutters only)",
+  "sizeErr": 0,
+  "figErr": 0,
+  "square1x2": 0,
+  "maxRight": 0,
+  "maxBottom": 0,
+  "inSection": true,
+  "overflowX": 0,
+  "before": {
+   "translate": "0px -16px",
+   "opacity": "0",
+   "revealed": null
+  },
+  "after": [
+   "none|1"
+  ],
+  "tiles": "photo-1:landscape:2x3@1,1 photo-2:portrait:1x4@3,1 photo-4:portrait:1x4@4,1 photo-3:landscape:2x3@1,4 photo-5:landscape:2x2@3,5",
+  "focus": "photo-1,photo-2,photo-4,photo-3,photo-5",
+  "console": [],
+  "shot": "F-111-wall-768.png"
+ },
+ "1440": {
+  "cols": 6,
+  "rows": 7,
+  "wall": "1306.1x758.5",
+  "colW": 1306.125,
+  "gap": 8,
+  "overlaps": 0,
+  "fillShare": 0.9808,
+  "gapsCheck": "see fillShare (<1 by the gutters only)",
+  "sizeErr": 0.01,
+  "figErr": 0,
+  "square1x2": -0.02,
+  "maxRight": -0.02,
+  "maxBottom": 0,
+  "inSection": true,
+  "overflowX": 0,
+  "before": {
+   "translate": "0px -16px",
+   "opacity": "0",
+   "revealed": null
+  },
+  "after": [
+   "none|1"
+  ],
+  "tiles": "photo-4:portrait:2x7@1,1 photo-5:landscape:3x4@3,1 photo-2:portrait:1x4@6,1 photo-1:landscape:2x3@3,5 photo-3:landscape:2x3@5,5",
+  "focus": "photo-4,photo-5,photo-2,photo-1,photo-3",
+  "console": [],
+  "shot": "F-111-wall-1440.png"
+ }
+}

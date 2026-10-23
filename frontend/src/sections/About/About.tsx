@@ -1,10 +1,9 @@
-// Owner: agent/frontend. About (TASK-105, wireframe 3): the brief description, this semester's
-// classes, and a loose, overlapping scatter of life photos. Not a grid.
-import type { CSSProperties } from 'react';
-import type { About as AboutContent, LifePhoto } from '../../content';
-import { PhotoSlot } from '../../components/PhotoSlot/PhotoSlot';
+// Owner: agent/frontend. About (TASK-105, TASK-111): the brief description, this semester's
+// classes, and the photo wall: one solid, asymmetric rectangle of life photos (ADR-013).
+import type { About as AboutContent } from '../../content';
 import { Section } from '../../components/Section/Section';
 import { useFogReveal } from '../../hooks/useFogReveal';
+import { PhotoWall } from './PhotoWall';
 import styles from './About.module.css';
 
 interface AboutProps {
@@ -12,61 +11,8 @@ interface AboutProps {
   readonly heading: string;
 }
 
-/** Five positions, in reading order (wireframe 3); photos beyond five start a new spread. */
-const PER_SPREAD = 5;
-
-/**
- * Slot widths per position as a share of the collage (phone, tablet, desktop), matching the
- * recipes in About.module.css, so each image is fetched at about the size it is drawn.
- */
-const WIDTHS: readonly (readonly [number, number, number])[] = [
-  [78, 52, 40],
-  [48, 34, 24],
-  [46, 36, 28],
-  [42, 26, 18],
-  [54, 40, 33],
-];
-
-function sizesFor(pos: number): string {
-  const [phone, tablet, desktop] = WIDTHS[pos]!;
-  const desktopPx = Math.round((desktop / 100) * 1296); // the collage is at most 1296px wide
-  return `(min-width: 90rem) ${desktopPx}px, (min-width: 64rem) ${Math.round(desktop * 0.92)}vw, (min-width: 48rem) ${Math.round(tablet * 0.9)}vw, ${Math.round(phone * 0.92)}vw`;
-}
-
-function ratio(aspect: LifePhoto['aspect']): number {
-  const [w, h] = aspect.split(':').map(Number);
-  return w! / h!;
-}
-
-function Spread({ photos }: { readonly photos: readonly LifePhoto[] }) {
-  const { ref } = useFogReveal<HTMLDivElement>();
-  // Each present slot's width-to-height ratio, so the spread's CSS can size itself to the
-  // lowest photo whatever aspects the owner chooses.
-  const vars = Object.fromEntries(photos.map((p, i) => [`--r${i}`, ratio(p.aspect).toFixed(4)])) as CSSProperties;
-  return (
-    <div
-      ref={ref}
-      className={styles.spread}
-      style={vars}
-      data-spread=""
-      data-fill={photos.length}
-      data-captioned={photos.some((p) => p.caption !== null) ? 'true' : undefined}
-      data-fog="stagger"
-      data-arrive="settle"
-    >
-      {photos.map((photo, i) => (
-        <div key={photo.id} className={`${styles.place} ${styles[`p${i}`]}`} data-pos={i}>
-          <PhotoSlot photo={photo} sizes={sizesFor(i)} />
-        </div>
-      ))}
-    </div>
-  );
-}
-
 export function About({ about, heading }: AboutProps) {
   const { ref } = useFogReveal<HTMLDivElement>();
-  const spreads: (readonly LifePhoto[])[] = [];
-  for (let i = 0; i < about.photos.length; i += PER_SPREAD) spreads.push(about.photos.slice(i, i + PER_SPREAD));
 
   return (
     <Section id="about" heading={heading} backdrop="evergreen" clouds className={styles.section}>
@@ -81,11 +27,9 @@ export function About({ about, heading }: AboutProps) {
           </ul>
         </div>
       </div>
-      {spreads.length > 0 ? (
+      {about.photos.length > 0 ? (
         <div className={styles.collage}>
-          {spreads.map((photos) => (
-            <Spread key={photos[0]!.id} photos={photos} />
-          ))}
+          <PhotoWall photos={about.photos} />
         </div>
       ) : null}
     </Section>

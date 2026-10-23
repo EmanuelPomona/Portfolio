@@ -1,0 +1,22 @@
+/*
+ * The photo wall (TASK-111, ADR-013): one solid rectangle the width of the About column, placed
+ * by CSS Grid spans from the planner. --cols columns (6, 4, or 2) and --rows rows, a row half a
+ * column high, so a tile's spans give its shape; one thin gutter throughout. The wall sits in the
+ * collage's inline-size container, so 100cqw is its own width.
+ */
+.wall {
+  --wall-gap: var(--space-2);
+  /* Half a column, less half a gutter: a 1 x 2 tile is then exactly square, gutter included. */
+  --row-h: calc((100cqw - (var(--cols) - 1) * var(--wall-gap)) / var(--cols) / 2 - var(--wall-gap) / 2);
+  display: grid;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  grid-template-rows: repeat(var(--rows), var(--row-h));
+  gap: var(--wall-gap);
+}
+
+.tile {
+  min-width: 0;
+  min-height: 0;
+  /* Each print settles into place (TASK-108), on the reveal's own stagger. */
+  --arrive-distance: var(--arrive-near);
+}

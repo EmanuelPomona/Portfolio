@@ -1,0 +1,10 @@
+TASK-111 F-03 (CLS over a full scroll-through, layout-shift observer from navigation) and X-05 (reduced motion) on the production build (8c3c0ce), http://localhost:3101/.
+Script: scratchpad qa/t111-motion.mjs. wall states = distinct tile 'translate|opacity|transition-duration' after scrolling the wall into view
+(reduced motion sampled 60ms after, no-preference after 2s). The only shifts come from the About class list (_list_) at font load, not the wall.
+
+1440px no-preference: CLS 0.0001 (2 shifts: 0.0000@46ms _list_1xwlc_34; 0.0001@2691ms _list_1xwlc_34) wall {"tiles":5,"states":["none|1|0s"]}
+1440px reduce: CLS 0.0000 (1 shifts: 0.0000@58ms _list_1xwlc_34) wall {"tiles":5,"states":["none|1|1e-05s"]}
+768px no-preference: CLS 0.0003 (2 shifts: 0.0001@55ms _list_1xwlc_34; 0.0002@2698ms _list_1xwlc_34) wall {"tiles":5,"states":["none|1|0s"]}
+768px reduce: CLS 0.0001 (1 shifts: 0.0001@61ms _list_1xwlc_34) wall {"tiles":5,"states":["none|1|1e-05s"]}
+390px no-preference: CLS 0.0000 (0 shifts) wall {"tiles":5,"states":["none|1|0s"]}
+390px reduce: CLS 0.0000 (0 shifts) wall {"tiles":5,"states":["none|1|1e-05s"]}

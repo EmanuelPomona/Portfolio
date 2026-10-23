@@ -64,7 +64,7 @@ visible `label`, and an `href`.
 | Field | Meaning |
 |---|---|
 | `id` | `photo-N`, also the filename `media-src/life/<id>.jpg`. |
-| `aspect` | The slot's ratio. The empty slot keeps it, so adding a photo later does not shift layout. |
+| `aspect` | The slot's ratio while it is empty. Once `image` exists, the image's own ratio (media manifest) decides its tile, and the wall recomposes (ADR-013). |
 | `image`, `alt` | Both `null` until supplied. |
 | `caption` | `null` until the owner writes it. |
 
@@ -130,7 +130,7 @@ Content
 | C-14 | `site.updated` is a real calendar date, `YYYY-MM-DD`, not in the future. |
 | C-15 | `site.origin` is `''` or an `https://` origin with no path and no trailing slash. |
 | C-16 | `about.description` is 1 or 2 sentences and at most 320 characters. |
-| C-17 | `about.photos` has 0 to 8 entries, with unique ids matching `^photo-\d+$`. |
+| C-17 | `about.photos` has 0 to 12 entries (was 8; raised for the photo wall, A-05, ADR-013), with unique ids matching `^photo-\d+$`. |
 | C-18 | `contact.links` kinds are unique and include `linkedin`, `email`, and `github`. |
 | C-19 | Every `site.heroLinks` href also appears in `contact.links`. |
 | C-20 | No content string contains placeholder words (case-insensitive): `lorem`, `ipsum`, `todo`, `tbd`, `placeholder`, `coming soon`. |

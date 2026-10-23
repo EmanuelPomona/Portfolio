@@ -17,6 +17,7 @@ Superseded decisions stay here and link their replacement.
 | ADR-010 | A project window is named by what it shows, and is black until attended | accepted | 2026-10-16 |
 | ADR-011 | Round 2 motion: clouds through the page, scroll depth, a 2.2s loader minimum | accepted | 2026-10-16 |
 | ADR-012 | Project windows may hold a short recording, played only while attended | accepted | 2026-10-16 |
+| ADR-013 | The About photos are a data-driven asymmetrical bento wall | accepted | 2026-10-19 |
 
 ---
 
@@ -494,3 +495,45 @@ keeps dependencies minimal.
 - **Amended at round 3 integration:** `video.posterTime` (optional, seconds). The poster is a
   mid-recording frame chosen to show the game, so the first play starts there instead of jumping
   back to 0.
+
+## ADR-013: The About photos are a data-driven asymmetrical bento wall
+
+**Date:** 2026-10-19. **Status:** accepted. **Deciders:** the owner (the direction and references),
+manager (the calls marked below). Supersedes the brief's "loose, overlapping scatter, not a grid"
+for About (wireframe-3).
+
+### Context
+
+The owner asked to redesign the About photo collage as a "Dynamic Asymmetrical Bento Grid", with
+detailed requirements (CSS Grid spans, curated patterns for small counts, packing beyond, data-driven
+from a simple array, deterministic, orientation-aware, minimal cropping, no overlap, no masonry, no
+uniform grid, no absolute positioning, simplified mobile, the section's look preserved), and two
+references: an editorial bento of portraits and a sheet of tiled collage frames. Both are fully
+tiled rectangles with one thin gutter and staggered breaks. The owner approved the playback.
+
+### Decision
+
+- One solid rectangle the width of the About text column; tiles placed with `grid-column` and
+  `grid-row` spans; one gutter; corners only slightly rounded.
+- 6 columns on desktop, 4 on tablet, 2 on phones, with fine row units *(manager's call)*.
+- Each photo's real ratio (media manifest; `aspect` while empty) picks its tile: portrait tall,
+  landscape wide, square near-square.
+- Up to 6 photos: curated patterns in the references' spirit (a feature tile, staggered columns),
+  the best orientation fit winning; 7 or more: deterministic packing into a gap-free rectangle.
+- `cover` cropping, portraits positioned slightly high for faces *(manager's call)*; captions on a
+  small solid label at a tile's bottom edge, only when written *(manager's call)*.
+- Rest/attention color, empty mist panels, and the settle-in arrival are kept.
+
+### Alternatives considered
+
+- **Keep the scatter.** The owner asked to replace it.
+- **CSS masonry or columns.** Ragged column bottoms and no width variation; explicitly rejected by
+  the owner.
+- **A layout library.** ADR-002 keeps the stack dependency-light; a small pure planner, fully
+  tested, is enough for 1 to 12 photos.
+
+### Consequences
+
+- **Positive:** the wall reads as art-directed and stays solid as photos are added.
+- **Negative:** tiles crop photos slightly to fill the rectangle; the planner is new logic to test.
+- **Risk:** a photo far from any tile shape crops more. The planner scores ratio fit to keep that rare.

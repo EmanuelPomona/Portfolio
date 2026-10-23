@@ -12,7 +12,10 @@ export const projects: readonly Project[] = [
     primary: { kind: 'live', label: 'Live site', href: 'https://sageplan.vercel.app' },
     secondary: [{ kind: 'code', label: 'Code', href: 'https://github.com/EmanuelPomona/SagePlan' }],
     addressBar: 'sageplan.vercel.app',
-    screen: { image: null, alt: null },
+    screen: {
+      image: 'projects/sageplan',
+      alt: 'SagePlan planner page with a pasted course history and the Breadth, Overlays, and Foundations requirement circles',
+    },
   },
   {
     id: 'streetsafe-la',
@@ -37,7 +40,10 @@ export const projects: readonly Project[] = [
     primary: { kind: 'live', label: 'Live site', href: 'https://revelation-youth.vercel.app' },
     secondary: [{ kind: 'code', label: 'Code', href: 'https://github.com/EmanuelPomona/Revelation-Youth' }],
     addressBar: 'revelation-youth.vercel.app',
-    screen: { image: null, alt: null },
+    screen: {
+      image: 'projects/revelation-youth',
+      alt: 'Revelation Youth home page: the name in large serif over a blurred green background, with the tagline Just a Moment With God',
+    },
   },
   {
     id: 'snake-ai',

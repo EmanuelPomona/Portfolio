@@ -1,7 +1,7 @@
 # STATUS: agent/backend
-Task: TASK-305 (REVIEW). Earlier: 301-303 REVIEW, 304 BLOCKED (contract)
+Task: TASK-310 (REVIEW). Earlier: 307 merged (865dc0e), 305 merged. Earlier: 305 done (merged), 301-303 REVIEW, 304 BLOCKED (contract)
 Round: 0
-Last updated: 2026-10-16T23:45:00Z
+Last updated: 2026-10-23T20:20:00Z
 
 ## Skills invoked so far
 - ecc:contract-first @ TASK-301 start, before validator -> shapes imported from types.ts (no redeclared copies); DATABASE.md is the invariant source; provider check = validate the real exported `content`; fixtures JSON-cloned because heroLinks/contact.links share refs (structuredClone would double-count)
@@ -24,6 +24,11 @@ Last updated: 2026-10-16T23:45:00Z
 - superpowers:verification-before-completion @ immediately before HANDOFF-2 (re-invoked; harness: already loaded) -> every TASK-305 claim re-run fresh on 5c82dc8; no implementation after it
 - superpowers:test-driven-development @ posterTime follow-up (already loaded) -> red-first for C-22 posterTime (6 fails) and the printed paste line
 - superpowers:verification-before-completion @ immediately before HANDOFF-3 (already loaded) -> fresh gates on 45ccb94; no implementation after
+- superpowers:verification-before-completion @ TASK-307 before handoff (already loaded) -> fresh gates exposed npm test exit 1 (frontend fixture coupled to content) -> BLOCKED instead of claiming done
+- superpowers:verification-before-completion @ TASK-307 after unblock (already loaded) -> all gates re-run fresh on 89804ad before setting REVIEW
+- superpowers:test-driven-development @ TASK-309 (already loaded) -> 12-valid test red on both bases before raising the bound
+- superpowers:verification-before-completion @ TASK-309 before HANDOFF-6 (already loaded) -> fresh gates on 9034393
+- superpowers:verification-before-completion @ TASK-310 (already loaded; invoked before the first gate run and again after merging main 11f93a1) -> final gates on 11f93a1+work, no implementation after
 - (probe, scratchpad only) all 3 formats byte-stable across 3 processes on this mac; hero 1600w AVIF q50=53.6KB, q60=73.9KB -> chose AVIF q60/effort 4, WebP q80/effort 4, JPEG q80 mozjpeg
 
 ## Done
@@ -103,8 +108,42 @@ OWNER HOLD: no vercel calls of any kind, no git push. Local commits only.
 
 - [x] Replied to portfolio-38 (head 4f3d0a7, items 1-3, gates)
 
+## TASK-307 (assigned by manager portfolio-38 on 51b0125)
+OWNER HOLD continues: no vercel calls, no push. Local commits only. No code change planned (TDD only if code changes).
+- [x] Read status + TASK-307; synced to 51b0125; inputs in MAIN checkout docs/inputs (U+202F before PM)
+
+- [x] Crops exactly as given (0db9cd9): sageplan 1486x929, revelation-youth 1496x935; viewed: all listed items kept, no adjustment; edges measured
+- [x] npm run media: 6 images / 54 renditions; 2nd run 0 written (1ae0272)
+- [x] Content: two screens + site.updated 2026-10-19 (e4185a7); content tests 175/175
+- [x] Fresh gates on e4185a7: typecheck/lint/build/contract (193) exit 0; npm test EXIT 1: 3 frontend BrowserWindow.test.tsx tests use the REAL SagePlan (projects[0]) as the empty fixture; with SagePlan empty they pass 22/22 (proof), restored
+- [x] TASK-307 -> BLOCKED (blocked_on: frontend-test); evidence B-307-media.txt; HANDOFF-4 with proposed fix (emptyWindow fixture)
+
+- [x] Reported the blocker to portfolio-38 (head c23a6b4, gates, dims, proposed fixture fix)
+
+- [x] Unblocked: frontend emptyWindow fixture (3d07856) merged to main d70ff91, synced as 89804ad; content intact
+- [x] Fresh on 89804ad (verification-before-completion): npm test 629/629 (51 files) exit 0; typecheck 0; lint 0; build 0; contract 193/193; media x2 0 written, clean
+- [x] TASK-307 -> REVIEW (blocked_on ""); HANDOFF-5
+
+- [x] Replied to portfolio-38 (head b8aa02c, gates, dims)
+
+## TASK-309 (C-17 cap 8 -> 12; manager portfolio-38, main 77b8dd7 synced)
+OWNER HOLD: no deploy, no push. Local commits only.
+
+- [x] TASK-309: tests red ('12 photos is valid' on both bases) -> MAX_PHOTOS 12 (8140237); guide (9034393); fresh gates on 9034393: npm test 654/654, typecheck/lint/build 0, contract 195/195, media clean; HANDOFF-6; REVIEW
+
+- [x] Replied to portfolio-38 (head d39a3db, gates)
+
+## TASK-310 (About photos; manager portfolio-38, main d2ff432). Owner: gates once, ONE commit, strip metadata, no push/deploy.
+- [x] 10 sources -> media-src/life/photo-1..10.jpg (contract folder; task said about/, DATABASE says life/), sips HEIC -> PNG intermediate -> sharp autoOrient/sRGB/<=2400/q85, no metadata (ImageIO: 0 tags; bytes: no APPn)
+- [x] about.ts 10 entries oldest-first (EXIF DateTimeOriginal; PNG by file date), alts from viewing, captions null; site.updated 2026-10-23
+- [x] media x2 (2nd 0 written); gates once: typecheck/lint/build/contract(195) 0; npm test EXIT 1: About.test.tsx 2 tests use REAL about (expects all tiles empty; "six" = real+1). Proof: old about.ts -> 7/7.
+- [x] Evidence docs/review/B-310-media.txt written. NOTHING COMMITTED: §24 says every commit must pass tests; I may not edit frontend tests.
+
+- [x] Unblocked: manager fixed About.test.tsx on main (11f93a1); fast-forwarded (no overlap); gates once on 11f93a1+work: npm test 657/657, typecheck/lint/build 0, contract 195/195, media x2 0 written
+- [x] TASK-310 -> REVIEW; HANDOFF-7; ONE commit "Add the About photos" (status/handoff folded in, §24)
+
 ## In progress
-- [ ] nothing; TASK-305 in REVIEW. Owner hold: no deploy, no push.
+- [ ] nothing; TASK-310 in REVIEW. Owner hold: no deploy, no push.
 
 ## Verified
 - Baseline (pre-change) -> typecheck/lint/test all pass on 3ea91a0
@@ -117,4 +156,6 @@ OWNER HOLD: no vercel calls of any kind, no git push. Local commits only.
 - GitHub CI `ci` on pushed HEAD 2c08ebb -> success (run 38946354450)
 
 ## Blocked on
+- (resolved) TASK-310 About.test.tsx coupling: fixed on main 11f93a1
+- (resolved) TASK-307 frontend fixture coupling: fixed by frontend 3d07856, synced 89804ad
 - TASK-304 zero-CSP-violation criterion: CCR-1 (manager: vite.config.ts assetsInlineLimit for fonts, or alternative). Toolbar violation on previews needs an OWNER setting (Vercel Toolbar off for previews).

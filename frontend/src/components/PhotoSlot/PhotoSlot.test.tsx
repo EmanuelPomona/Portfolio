@@ -29,12 +29,15 @@ describe('PhotoSlot', () => {
     media.restore();
   });
 
-  it('renders a figure whose ratio comes from aspect ("4:3" becomes 4 / 3)', () => {
+  it('fills its tile: the tile sets the shape, portraits crop slightly high (TASK-111)', () => {
     const { container } = render(<PhotoSlot photo={empty} sizes="40vw" />);
     const figure = container.querySelector('figure')!;
-    expect(figure.style.getPropertyValue('--ratio')).toBe('4 / 3');
-    expect(figure).toHaveAttribute('data-aspect', '4:3');
-    expect(css).toMatch(/\.frame\s*\{[^}]*aspect-ratio:\s*var\(--ratio\)/);
+    expect(figure).toHaveAttribute('data-orientation', 'landscape');
+    expect(figure.style.getPropertyValue('--ratio')).toBe('');
+    expect(css).not.toMatch(/aspect-ratio/);
+    expect(css).toMatch(/\.slot\s*\{[^}]*height:\s*100%/);
+    expect(css).toMatch(/\.image\s*\{[^}]*object-fit:\s*cover/);
+    expect(css).toMatch(/\.slot\[data-orientation='portrait'\] \.image\s*\{[^}]*object-position:\s*50% 35%/);
   });
 
   it('renders an empty slot as a bare panel: no image, no words, hidden from assistive tech (A-02)', () => {

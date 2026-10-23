@@ -2,6 +2,7 @@
 // page so the port can be compared with docs/reference/stickman-cursor-spike.html side by side.
 // The figure is the production cursor controller; the lab only adds tuning controls.
 import { useEffect, useRef, useState, type MouseEvent } from 'react';
+import { SIT_AFTER_S } from '../engine/gestures';
 import { PACES, type PaceName } from '../engine/motion';
 import { createCursorController, type CursorController } from '../layer/controller';
 import { registerCursorHandoff } from '../layer/cursorChannel';
@@ -152,7 +153,7 @@ export function Lab() {
         docs/reference/stickman-cursor-spike.html at 32px, Hurries when far, Ring.
         <br />
         Move the mouse and he walks to the ring. Rest on a link and he points. Click one and he cheers.
-        Leave him alone for 5s and he sits. Tab through the links and he follows the focus.
+        Leave him alone for {SIT_AFTER_S}s and he sits. Tab through the links and he follows the focus.
       </aside>
 
       <div

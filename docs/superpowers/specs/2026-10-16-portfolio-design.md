@@ -108,7 +108,7 @@ at `docs/reference/stickman-cursor-spike.html` and is **the reference for feel**
   - After arriving on an interactive element, he points at it.
   - On press of an interactive element, he hops and cheers, arms up with a small
     wave, for about 0.7s.
-  - After 5s idle, he sits down.
+  - After 5s idle, he sits down. (2s from the pointer's stillness since TASK-207)
 - **Contrast:** he is drawn so that he stays visible over both light fog and the
   dark frames. The prototype uses `mix-blend-mode: difference`.
 - **One character:** the loader's scribbler and the cursor are the same stickman.

@@ -90,6 +90,7 @@ export function createCursorController(
   let target = anchor();
   let fig: Figure = {
     motion: { pos: { ...target }, speed: 0, facing: 1, phase: 0, idle: 0 },
+    target: { ...target },
     gestures: { cheer: 0, point: 0, sit: 0 },
   };
 

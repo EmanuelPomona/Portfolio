@@ -10,13 +10,13 @@ export interface MotionState {
   facing: 1 | -1;
   /** Stride phase in radians; advances with distance walked relative to size. */
   phase: number;
-  /** Seconds since he last moved. */
+  /** Seconds since the pointer (his target) last moved or a press; stepFigure resets it. */
   idle: number;
 }
 
 /** Within this distance (px) he wants no speed at all: he has arrived. */
 export const ARRIVE_PX = 1.2;
-/** Above this speed (px/s) he counts as moving: idle resets, he cannot point. */
+/** Above this speed (px/s) he counts as moving: he cannot point. */
 export const MOVING_SPEED = 8;
 /** The frame loop clamps dt to this (s), so a stalled tab does not teleport him. */
 export const MAX_DT = 0.05;
@@ -67,13 +67,13 @@ export function stepMotion(
 
   const facing: 1 | -1 =
     Math.abs(dx) > FACE_DEADZONE_PX && speed > FACE_MIN_SPEED ? (dx > 0 ? 1 : -1) : s.facing;
-  const moving = speed > MOVING_SPEED;
-
   return {
     pos,
     speed,
     facing,
     phase: s.phase + (speed * dt) / (size * 0.5),
-    idle: moving ? 0 : s.idle + dt,
+    // TASK-207 (owner): the sit clock is the pointer's stillness, not his own, so walking does not
+    // reset it here (the prototype did); stepFigure resets it when the target moves or on a press.
+    idle: s.idle + dt,
   };
 }

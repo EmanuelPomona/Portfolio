@@ -616,3 +616,85 @@ session: the RED filled-window mutation for `b03068a`. No other skill is claimed
 
 `main` @ the commit adding this handoff. Merges: `0a84041` and `b778123` (backend), and `911fc1d`
 and `062aef9` (frontend).
+
+## HANDOFF-5 — main — 2026-10-19
+
+### Summary
+
+Round 4 fills the last two empty windows with the owner's screenshots (TASK-307, backend). All four
+project windows now show real media. On the owner's explicit request, `main` was pushed to GitHub
+(`628db58`, fast-forward, 361 commits of history), and CI passed there. The publishing hold stands:
+the Vercel project has no Git connection, and nothing was deployed.
+
+### Tasks Completed
+
+- **TASK-307** (backend, `60180aa`):
+  - SagePlan cropped to 1486×929, Revelation Youth cropped to 1496×935 (16:10; browser edge and
+    scrollbar removed; the rects were measured by the manager);
+  - renditions at 640 and 1024 plus the source width;
+  - alt texts; `site.updated` set to 2026-10-19.
+- **Blocker:** three frontend tests rendered the real SagePlan as the empty window, a coupling from
+  the manager's `b03068a`. Frontend fixed them with an `emptyWindow` fixture (`3d07856`, shown red
+  then green with SagePlan filled). Backend never touched the frontend test.
+
+### Files Changed
+
+- **From backend:** `media-src/projects/{sageplan,revelation-youth}.png`, 18 renditions,
+  `media.generated.ts`, `projects.ts`, `site.ts`, B-307 evidence.
+- **From frontend:** `BrowserWindow.test.tsx` (the fixture only).
+- **Manager:** `TASK-307`, status, this handoff, `docs/review/M4-*`.
+
+### Contracts
+
+None changed.
+
+### Skills Used
+
+| Skill | Stage invoked | What it actually changed |
+|---|---|---|
+| superpowers:verification-before-completion | Immediately before this handoff | Fresh gates on `60180aa`, merge integrity, and the publishing hold, below. No implementation after it. |
+
+### Verification
+
+**On `main` @ `60180aa`**
+
+| Check | Result |
+|---|---|
+| `npm run typecheck`, `lint`, `build` | exit 0 |
+| `npm test` | 629/629 |
+| `scripts/contract-test.sh` | 193/193 |
+| `npm run media` | 0 written; tree clean |
+| Index | current |
+
+**Runtime** (headless Chrome 155; `docs/review/M4-results.json`)
+
+| Window | Media | At rest → on attention |
+|---|---|---|
+| SagePlan | `sageplan-1024.avif` | `grayscale(1)` → `none` |
+| StreetSafe: LA | `streetsafe-la-1024.avif` | `grayscale(1)` → `none` |
+| Revelation Youth | `revelation-youth-1024.avif` | `grayscale(1)` → `none` |
+| Snake AI | video with `snake-ai-1270.webp` poster | `grayscale(1)` → `none`, playing |
+
+- No window shows "screenshot soon"; names are "<title>, <label>, <address>".
+- 0 `.mp4` requests before hovering the Snake AI window.
+- Console: 0 entries.
+- axe 4.14: 0 WCAG 2.2 AA violations at 1440 and 390; label-in-name passes 4/4.
+
+**GitHub:** CI run 39213865348 on the pushed `main`: success (I-03).
+
+### What Was NOT Verified
+
+- Safari, Firefox, and real phones.
+- The reviewer gate (no reviewer session ran).
+- Commits after `628db58`, this round's included, are **not on GitHub** yet. Pushing them waits for
+  the owner.
+
+### Known Issues
+
+- TASK-306 (backlog).
+- The advisory cloud seam.
+- The five About photos have not been supplied yet.
+
+### Commit
+
+`main` @ the commit adding this handoff, following `60180aa`.

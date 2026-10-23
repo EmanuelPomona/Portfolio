@@ -56,7 +56,8 @@ Otherwise use `npm run dev` after `scripts/bootstrap.sh`. Force the loader with
 - [ ] **S-03** On an 800px pointer jump he runs, with a visible lean, and arrives
       in about 1.2s or less. On a 50px move he walks.
 - [ ] **S-04** Resting on a link, he points at it. Pressing a link makes him hop
-      and cheer for about 0.7s. After 5s with no movement he sits.
+      and cheer for about 0.7s. 2s after the pointer stops he starts to sit (not before), and he is
+      seated (sit ≥ 0.95) by about 2.5s.
 - [ ] **S-05** Tabbing to a link with the keyboard makes him walk to it and point.
 - [ ] **S-06** He is clearly visible both over light fog and over a dark project
       window. Provide a screenshot of each.
@@ -146,12 +147,31 @@ Otherwise use `npm run dev` after `scripts/bootstrap.sh`. Force the loader with
 - [ ] **A-01** About shows:
       - the description;
       - "This semester" with Linear Algebra and Data Structures and Algorithms;
-      - five photo slots at 4:3, 2:3, 4:3, 9:16, and 4:3, in a loose, overlapping
-        scatter that echoes wireframe-3. **Not a grid.**
+      - the photo wall: every entry of `about.photos`, as an asymmetrical bento grid
+        (ADR-013; A-04 to A-06). It replaced wireframe-3's overlapping scatter at the
+        owner's request.
 - [ ] **A-02** Empty slots are mist-tone panels. No placeholder words appear, and
       no caption text appears when the caption is `null`.
 - [ ] **A-03** A component test with a fixture image shows grayscale and low
       contrast at rest, and full color on attention.
+- [ ] **A-04** The wall is one solid rectangle (ADR-013):
+      - tiles never overlap and leave no empty grid cell inside the rectangle;
+      - one consistent gutter between all tiles; corners sharp or only slightly rounded;
+      - placement is CSS Grid `grid-column` / `grid-row` with spans, never absolute
+        positioning, never a masonry of ragged columns, never a uniform grid;
+      - with 3 or more photos, tiles differ in both column span and row span, and with
+        4 or more on desktop and tablet no horizontal gutter runs the wall's full width.
+- [ ] **A-05** The wall is data-driven and deterministic:
+      - each tile's shape follows its photo's real ratio (from the media manifest; the
+        slot's `aspect` while empty): portrait tall, landscape wide, square near-square;
+      - adding or removing an entry in `about.photos` recomposes the wall with no other
+        change; the same photos always give the same layout;
+      - any count from 1 to 12 produces a valid wall (A-04): curated patterns up to 6,
+        a packing layout beyond.
+- [ ] **A-06** Responsive: 6 columns on desktop, 4 on tablet, 2 on phones, each still a
+      solid, varied rectangle; no horizontal overflow; cropping is `cover` with portraits
+      positioned slightly high; a caption, when written, sits on a small solid label at its
+      tile's bottom edge and passes X-02.
 
 ## Connect (frontend)
 

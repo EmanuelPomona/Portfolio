@@ -1,24 +1,33 @@
 /*
- * A print on the fog. At rest it is grayscale, low contrast, and sunk into the matte; on
- * attention (hover, keyboard focus, or the touch center band) it comes to full color and full
- * contrast. The caption is always readable and darkens on attention; nothing exists only on hover.
- * An empty slot (every slot in v1) is a flat fog-tone panel at the slot's ratio, with no words.
+ * A print on the fog, filling its tile on the photo wall (TASK-111, ADR-013). At rest it is
+ * grayscale, low contrast, and sunk into the matte; on attention (hover, keyboard focus, or the
+ * touch center band) it comes to full color and full contrast. An empty slot is a flat fog-tone
+ * panel, with no words. The tile, not the slot, sets the shape: the photo is cropped with `cover`,
+ * portraits kept slightly high for faces.
+ *
+ * The figure is a one-cell grid: the frame and the caption share the cell, the caption on a small
+ * solid label at the tile's bottom edge. No absolute positioning; nothing spills past the tile.
  */
 .slot {
+  display: grid;
+  grid-template: minmax(0, 1fr) / minmax(0, 1fr);
+  height: 100%;
   margin: 0;
+  overflow: hidden;
   border-radius: var(--radius-print); /* the focus ring follows the print's corner */
 }
 
 .frame {
-  aspect-ratio: var(--ratio);
+  grid-area: 1 / 1;
+  min-height: 0;
   overflow: hidden;
   border-radius: var(--radius-print);
   background: var(--color-fog-panel);
   transition: background-color var(--dur-release) var(--ease-out);
 }
 
-/* Empty prints are one flat tone, so overlapping ones would merge into a single shape: a hairline
-   keeps each print its own (the brief's hairline, ink at reduced alpha). Photos carry their own edge. */
+/* Empty prints are one flat tone: a hairline keeps each its own shape beside its neighbours (the
+   brief's hairline, ink at reduced alpha). Photos carry their own edge. */
 .slot[data-empty='true'] .frame {
   border: 1px solid var(--color-hairline);
 }
@@ -28,6 +37,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: 50% 50%;
   /* A light photograph's edge would otherwise dissolve into the Mist around it. Neutral, untinted. */
   outline: 1px solid rgb(0 0 0 / 0.1);
   outline-offset: -1px;
@@ -38,12 +48,24 @@
     opacity var(--dur-release) var(--ease-out);
 }
 
+/* Portraits: faces sit high in a frame, so the crop keeps the upper part. */
+.slot[data-orientation='portrait'] .image {
+  object-position: 50% 35%;
+}
+
 .caption {
-  margin-block-start: var(--space-2);
-  max-width: 36ch;
+  grid-area: 1 / 1;
+  align-self: safe end; /* a label taller than its tile shows its start, never loses its first lines */
+  justify-self: start;
+  /* A 4px inset: a 120-character caption then fits even the narrowest 1x2 tile (147px at 1024). */
+  max-width: calc(100% - 2 * var(--space-1));
+  margin: var(--space-1);
+  padding: 0.3em 0.6em;
+  border-radius: var(--radius-print);
+  background: var(--color-mist); /* solid: the text never sits on the photograph (X-02) */
   font-size: var(--step--1);
   font-weight: 500;
-  line-height: 1.5;
+  line-height: 1.4;
   color: var(--color-ink-2);
   overflow-wrap: anywhere;
   text-wrap: pretty;

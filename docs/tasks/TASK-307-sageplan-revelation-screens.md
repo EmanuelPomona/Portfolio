@@ -1,7 +1,7 @@
 ---
 id: TASK-307
 title: SagePlan and Revelation Youth screenshots in their windows
-status: READY
+status: REVIEW
 owner: backend
 branch: agent/backend
 priority: HIGH

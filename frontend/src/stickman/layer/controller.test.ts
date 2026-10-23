@@ -2,6 +2,7 @@
 // elementFromPoint (jsdom has none), observed through inspect() and a recording 2D context.
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { recordingContext } from '../testing/recordingContext';
+import { MOVING_SPEED } from '../engine/motion';
 import { createCursorController, type CursorController } from './controller';
 
 const html = document.documentElement;
@@ -221,6 +222,24 @@ describe('createCursorController: pointer', () => {
     expect(snap.hover).toBe($('link'));
     expect(Math.hypot(snap.pos.x - 440, snap.pos.y - 40)).toBeLessThan(1.5);
     expect(snap.gestures.point).toBeGreaterThan(0.9);
+  });
+
+  it('he starts to sit 2s after the pointer stops, not before, is seated by 2.5s, and a move stands him up (S-04)', () => {
+    const { c, $, frames } = harness();
+    c.start();
+    pointer('pointermove', $('link'), 440, 40);
+    // the clock is the pointer's stillness: it starts now, while he still walks the ~820px
+    frames(118); // 1.967s
+    expect(c.inspect().speed).toBeLessThanOrEqual(MOVING_SPEED); // he arrived well before 2s
+    expect(c.inspect().gestures.sit).toBe(0);
+    frames(4); // 2.033s
+    expect(c.inspect().gestures.sit).toBeGreaterThan(0);
+    frames(28); // 2.5s: eased at 6/s for at least 28 frames: 1 − 0.9^28 = 0.948, plus the start
+    expect(c.inspect().gestures.sit).toBeGreaterThanOrEqual(0.95);
+
+    pointer('pointermove', $('other'), 650, 320);
+    frames(60); // the pointer move resets idle and sit eases back at 6/s: 0.9^60 = 0.002
+    expect(c.inspect().gestures.sit).toBeLessThan(0.05);
   });
 
   it('a press on a target cheers, and the layer never cancels or stops the event', () => {

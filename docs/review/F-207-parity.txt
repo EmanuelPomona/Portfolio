@@ -1,0 +1,68 @@
+# TASK-207 parity after the ruling (A + B). Both runs are reproducible from the repo, with npm run dev running:
+#   bash docs/review/F-tools/run-parity.sh                  (default: reference copy with the owner's TASK-207 changes)
+#   PARITY_PURE=1 bash docs/review/F-tools/run-parity.sh    (reference exactly as committed)
+# docs/reference/stickman-cursor-spike.html is not edited by either.
+# Owner changes in the default run, each asserted to match exactly once:
+#   - the sit line: threshold 5 -> SIT_AFTER_S, ease 4 -> SIT_EASE (read from engine/gestures.ts);
+#   - idle is no longer reset by his own speed;
+#   - a pointermove that changes the target zeroes idle on the next frame (that frame counts none).
+
+## Run 1: default
+reference: a temporary copy with the owner's TASK-207 changes: sit 2s after the pointer stops, eased at 6/s
+SAME  first frame, standing at anchor    ref bbox=600,599,608,630 ink=117 hash=e0e0c04 | port bbox=600,599,608,630 ink=117 hash=e0e0c04
+SAME  walking toward 300,500 +6f         ref bbox=559,582,576,613 ink=169 hash=395307e0 | port bbox=559,582,576,613 ink=169 hash=395307e0
+SAME  walking toward 300,500 +12f        ref bbox=431,528,452,556 ink=216 hash=697ff006 | port bbox=431,528,452,556 ink=216 hash=697ff006
+SAME  walking toward 300,500 +24f        ref bbox=294,468,309,498 ink=198 hash=642292f6 | port bbox=294,468,309,498 ink=198 hash=642292f6
+SAME  arrived at 300,500                 ref bbox=296,469,303,500 ink=120 hash=cfcd6706 | port bbox=296,469,303,500 ink=120 hash=cfcd6706
+SAME  800px jump +3f (run, lean)         ref bbox=311,468,324,499 ink=191 hash=902b1812 | port bbox=311,468,324,499 ink=191 hash=902b1812
+SAME  800px jump +6f (run, lean)         ref bbox=383,468,405,497 ink=199 hash=9d32853b | port bbox=383,468,405,497 ink=199 hash=9d32853b
+SAME  800px jump +9f (run, lean)         ref bbox=542,468,561,499 ink=202 hash=f4c3a478 | port bbox=542,468,561,499 ink=202 hash=f4c3a478
+SAME  800px jump +15f (run, lean)        ref bbox=818,468,838,498 ink=212 hash=6701e03d | port bbox=818,468,838,498 ink=212 hash=6701e03d
+SAME  800px jump +30f (run, lean)        ref bbox=1086,468,1101,498 ink=197 hash=21f04e86 | port bbox=1086,468,1101,498 ink=197 hash=21f04e86
+SAME  50px move +8f (walk)               ref bbox=1111,468,1124,499 ink=202 hash=5c6e34 | port bbox=1111,468,1124,499 ink=202 hash=5c6e34
+SAME  resting on Projects (point)        ref bbox=665,10,673,41 ink=129 hash=356a2829 | port bbox=665,10,673,41 ink=129 hash=356a2829
+SAME  cheer +1f                          ref bbox=663,8,673,41 ink=163 hash=ab384c98 | port bbox=663,8,673,41 ink=163 hash=ab384c98
+SAME  cheer +5f                          ref bbox=658,7,675,38 ink=160 hash=64e37496 | port bbox=658,7,675,38 ink=160 hash=64e37496
+SAME  cheer +10f                         ref bbox=662,7,673,39 ink=153 hash=9d4aa732 | port bbox=662,7,673,39 ink=153 hash=9d4aa732
+SAME  cheer +20f                         ref bbox=658,10,679,41 ink=178 hash=a6128058 | port bbox=658,10,679,41 ink=178 hash=a6128058
+SAME  resting on window (point)          ref bbox=1150,621,1157,652 ink=110 hash=6971c9c4 | port bbox=1150,621,1157,652 ink=110 hash=6971c9c4
+SAME  idle 5s+ (sitting)                 ref bbox=1150,627,1161,653 ink=132 hash=89e8c10c | port bbox=1150,627,1161,653 ink=132 hash=89e8c10c
+SAME  idle 6s+ (seated)                  ref bbox=1150,627,1161,653 ink=132 hash=89e8c10c | port bbox=1150,627,1161,653 ink=132 hash=89e8c10c
+
+19 identical, 0 different checkpoints
+lab console errors/warnings: ["[error] Failed to load resource: the server responded with a status of 404 (Not Found) http://localhost:3009/favicon.ico","[warning] Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently "]
+docs/review/F-tools/run-parity.sh: line 69: 54334 Terminated: 15          python3 -I -m http.server "$REF_PORT" --bind 127.0.0.1 --directory "$ref_dir" > /dev/null 2>&1
+exit=0
+
+## Run 2: PARITY_PURE=1
+reference: docs/reference/stickman-cursor-spike.html as committed (PARITY_PURE=1)
+SAME  first frame, standing at anchor    ref bbox=600,599,608,630 ink=117 hash=e0e0c04 | port bbox=600,599,608,630 ink=117 hash=e0e0c04
+SAME  walking toward 300,500 +6f         ref bbox=559,582,576,613 ink=169 hash=395307e0 | port bbox=559,582,576,613 ink=169 hash=395307e0
+SAME  walking toward 300,500 +12f        ref bbox=431,528,452,556 ink=216 hash=697ff006 | port bbox=431,528,452,556 ink=216 hash=697ff006
+SAME  walking toward 300,500 +24f        ref bbox=294,468,309,498 ink=198 hash=642292f6 | port bbox=294,468,309,498 ink=198 hash=642292f6
+SAME  arrived at 300,500                 ref bbox=296,469,303,500 ink=120 hash=cfcd6706 | port bbox=296,469,303,500 ink=120 hash=cfcd6706
+SAME  800px jump +3f (run, lean)         ref bbox=311,468,324,499 ink=191 hash=902b1812 | port bbox=311,468,324,499 ink=191 hash=902b1812
+SAME  800px jump +6f (run, lean)         ref bbox=383,468,405,497 ink=199 hash=9d32853b | port bbox=383,468,405,497 ink=199 hash=9d32853b
+SAME  800px jump +9f (run, lean)         ref bbox=542,468,561,499 ink=202 hash=f4c3a478 | port bbox=542,468,561,499 ink=202 hash=f4c3a478
+SAME  800px jump +15f (run, lean)        ref bbox=818,468,838,498 ink=212 hash=6701e03d | port bbox=818,468,838,498 ink=212 hash=6701e03d
+SAME  800px jump +30f (run, lean)        ref bbox=1086,468,1101,498 ink=197 hash=21f04e86 | port bbox=1086,468,1101,498 ink=197 hash=21f04e86
+SAME  50px move +8f (walk)               ref bbox=1111,468,1124,499 ink=202 hash=5c6e34 | port bbox=1111,468,1124,499 ink=202 hash=5c6e34
+SAME  resting on Projects (point)        ref bbox=665,10,673,41 ink=129 hash=356a2829 | port bbox=665,10,673,41 ink=129 hash=356a2829
+DIFF  cheer +1f                          ref bbox=663,8,673,41 ink=163 hash=57388211 | port bbox=663,8,673,41 ink=163 hash=ab384c98
+SAME  cheer +5f                          ref bbox=658,7,675,38 ink=160 hash=64e37496 | port bbox=658,7,675,38 ink=160 hash=64e37496
+SAME  cheer +10f                         ref bbox=662,7,673,39 ink=153 hash=9d4aa732 | port bbox=662,7,673,39 ink=153 hash=9d4aa732
+SAME  cheer +20f                         ref bbox=658,10,679,41 ink=178 hash=a6128058 | port bbox=658,10,679,41 ink=178 hash=a6128058
+SAME  resting on window (point)          ref bbox=1150,621,1157,652 ink=110 hash=6971c9c4 | port bbox=1150,621,1157,652 ink=110 hash=6971c9c4
+DIFF  idle 5s+ (sitting)                 ref bbox=1150,624,1159,654 ink=130 hash=331f7727 | port bbox=1150,627,1161,653 ink=132 hash=89e8c10c
+DIFF  idle 6s+ (seated)                  ref bbox=1149,627,1161,653 ink=135 hash=51419040 | port bbox=1150,627,1161,653 ink=132 hash=89e8c10c
+
+16 identical, 3 different checkpoints
+lab console errors/warnings: ["[error] Failed to load resource: the server responded with a status of 404 (Not Found) http://localhost:3009/favicon.ico","[warning] Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently "]
+docs/review/F-tools/run-parity.sh: line 68: 54384 Terminated: 15          python3 -I -m http.server "$REF_PORT" --bind 127.0.0.1 --directory "$ref_dir" > /dev/null 2>&1
+exit=1
+
+# Why run 2 differs at these 3 checkpoints (run 1 is identical, so every difference comes from the owner changes):
+#   idle 5s+ / idle 6s+: the port is seated, the prototype is not yet (5s from his stillness, 4/s).
+#   cheer +1f: the harness waits 123 frames (2.05s) after the 800px jump before the 50px move. With idle counted
+#   from the pointer, he starts to sit for 2 frames (to 0.19). That decays to ~1e-7 by the click
+#   (0.19 * 0.9^48 * 0.9^90), which changes antialiasing on one stroke. Arithmetic, not separately measured.

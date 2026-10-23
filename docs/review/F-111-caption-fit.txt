@@ -1,0 +1,9 @@
+TASK-111 caption fit (review finding 3), production build (75b05b3): a 120-character caption on the real .caption CSS,
+attached in the live page (temporary DOM only, nothing committed) to a tile resized to 1x2, the smallest tile a captioned photo can get (CAPTION_MIN_ROWS = 2).
+tile/label = [width, height] px; topInside = space between the tile top and the label (negative = cut off). Script: scratchpad qa/t111-label120b.mjs.
+
+360 {"chars":120,"captionClass":"._caption_pnu7q_56","tile":[158.1,158.1],"label":[150.1,116.9],"topInside":37.2,"bottomInside":4}
+390 {"chars":120,"captionClass":"._caption_pnu7q_56","tile":[172,172],"label":[164,116.9],"topInside":51.1,"bottomInside":4}
+768 {"chars":120,"captionClass":"._caption_pnu7q_56","tile":[165.5,165.5],"label":[157.5,116.9],"topInside":44.6,"bottomInside":4}
+1024 {"chars":120,"captionClass":"._caption_pnu7q_56","tile":[147,147],"label":[139,135.1],"topInside":7.9,"bottomInside":4}
+1440 {"chars":120,"captionClass":"._caption_pnu7q_56","tile":[211,211],"label":[203,80.5],"topInside":126.5,"bottomInside":4}

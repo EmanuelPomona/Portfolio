@@ -49,8 +49,8 @@ docs/inputs/                 (every file — the human's source material)
 Invoke each skill with the Skill tool at the stage named. Record each invocation
 in `docs/status/main.md` at the moment you invoke it.
 
-Commit after every step below that writes a file, so planning lands on `main` as
-a series of commits rather than one (`docs/AGENT_PROTOCOL.md` section 24).
+Commit planning as a few meaningful commits, not one per document
+(`docs/AGENT_PROTOCOL.md` section 24).
 
 0. Inventory `docs/inputs/`. Read every file, and record each filename with a
    one-line takeaway in `docs/status/main.md`. Brainstorming starts from this

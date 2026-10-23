@@ -41,7 +41,7 @@ docs/ACCEPTANCE.md.
   - ring 11px with a 1.2px stroke;
   - `desired = d > 1.2 ? min(min(1150, 150 + 2.4·d), 7·d) : 0`, with speed easing at rate 10/s;
   - runs above about 220px/s;
-  - cheer about 0.7s; sit after 5s idle.
+  - cheer about 0.7s; sit after 5s idle. (2s from the pointer's stillness since TASK-207)
 - **Loader:** progress reaches 90% by 1.2s; minimum 1.2s; cap 4.5s; skip on pointerdown or
   keydown; exit ≤ 600ms; fade mode 300ms; storage key `el:loader-seen`; `?loader=1` forces it.
 - **Reduced motion:** no loader animation, no stickman, no fog drift, no reveal motion. All

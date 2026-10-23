@@ -15,6 +15,9 @@ const slot = (id: string, aspect: LifePhoto['aspect'], caption: string | null = 
   caption,
 });
 
+// Five empty slots, independent of whatever photos the real content holds.
+const emptyAbout: AboutContent = { ...about, photos: [1, 2, 3, 4, 5].map((n) => slot(`photo-${n}`, '4:3')) };
+
 describe('About', () => {
   let io: ReturnType<typeof installIntersectionObserver>;
   let media: ReturnType<typeof installMatchMedia>;
@@ -43,34 +46,29 @@ describe('About', () => {
     }
   });
 
-  it('renders slots with aspect ratios 4/3, 2/3, 4/3, 9/16, 4/3 in order', () => {
-    const { container } = render(<About about={about} heading="About" />);
-    const ratios = [...container.querySelectorAll('figure')].map((f) => (f as HTMLElement).style.getPropertyValue('--ratio'));
-    expect(ratios).toEqual(['4 / 3', '2 / 3', '4 / 3', '9 / 16', '4 / 3']);
+  it('renders every slot as a tile of the photo wall, empty ones as mist panels (A-01, A-02)', () => {
+    const { container } = render(<About about={emptyAbout} heading="About" />);
+    const wall = container.querySelectorAll('[data-wall]');
+    expect(wall).toHaveLength(1);
+    const tiles = [...container.querySelectorAll('[data-tile]')];
+    expect(tiles.map((t) => t.getAttribute('data-tile')).sort()).toEqual(emptyAbout.photos.map((p) => p.id).sort());
+    for (const t of tiles) expect(t.querySelector('figure')).toHaveAttribute('data-empty', 'true');
+    // The scatter is gone: no spreads, no positioned places.
+    expect(container.querySelector('[data-spread], [data-pos]')).toBeNull();
   });
 
-  it('places the slots by index with the scatter recipe, in one spread for five', () => {
-    const { container } = render(<About about={about} heading="About" />);
-    const spreads = container.querySelectorAll('[data-spread]');
-    expect(spreads).toHaveLength(1);
-    expect(spreads[0]).toHaveAttribute('data-fill', '5');
-    expect([...container.querySelectorAll('figure')].map((f) => f.closest('[data-pos]')!.getAttribute('data-pos'))).toEqual(['0', '1', '2', '3', '4']);
-  });
-
-  it('six photos render six slots, cycling positions after five', () => {
-    const six: AboutContent = { ...about, photos: [...about.photos, slot('photo-6', '3:2')] };
+  it('six photos recompose the wall with six tiles', () => {
+    const six: AboutContent = { ...emptyAbout, photos: [...emptyAbout.photos, slot('photo-6', '3:2')] };
     const { container } = render(<About about={six} heading="About" />);
-    const figures = [...container.querySelectorAll('figure')];
-    expect(figures).toHaveLength(6);
-    expect(figures.map((f) => f.closest('[data-pos]')!.getAttribute('data-pos'))).toEqual(['0', '1', '2', '3', '4', '0']);
-    expect([...container.querySelectorAll('[data-spread]')].map((s) => s.getAttribute('data-fill'))).toEqual(['5', '1']);
+    expect(container.querySelectorAll('[data-wall]')).toHaveLength(1);
+    expect(container.querySelectorAll('[data-tile]')).toHaveLength(6);
   });
 
-  it('renders no collage when there are no photos', () => {
+  it('renders no wall when there are no photos', () => {
     const none: AboutContent = { ...about, photos: [] };
     const { container } = render(<About about={none} heading="About" />);
     expect(container.querySelector('figure')).toBeNull();
-    expect(container.querySelector('[data-spread]')).toBeNull();
+    expect(container.querySelector('[data-wall]')).toBeNull();
   });
 
   it('a 120-character caption renders fully', () => {
@@ -81,39 +79,24 @@ describe('About', () => {
     expect(screen.getByText(caption).textContent).toBe(caption);
   });
 
-  it('loosens a captioned spread into a flow so no print covers a caption', () => {
-    // Regression: in the overlapping scatter, later prints covered up to 100% of an earlier
-    // print's caption (measured in the browser at 1440, 1024, 768, and 390 with 120-char captions).
-    const css = readFileSync(join(__dirname, 'About.module.css'), 'utf8');
-    const spread = css.match(/\.spread\[data-captioned='true'\]\s*\{([^}]*)\}/)?.[1] ?? '';
-    const place = css.match(/\.spread\[data-captioned='true'\] \.place\s*\{([^}]*)\}/)?.[1] ?? '';
-    expect(spread).toMatch(/display:\s*flex/);
-    expect(spread).toMatch(/flex-wrap:\s*wrap/);
-    expect(spread).toMatch(/height:\s*auto/);
-    expect(place).toMatch(/position:\s*relative/);
-
-    const captioned: AboutContent = { ...about, photos: about.photos.map((p, i) => (i === 1 ? { ...p, caption: 'A caption' } : p)) };
-    const { container } = render(<About about={captioned} heading="About" />);
-    expect(container.querySelector('[data-spread]')).toHaveAttribute('data-captioned', 'true');
-  });
-
   it('About prints settle with a stagger of at most 0.08s per print', () => {
     const { container } = render(<About about={about} heading="About" />);
-    const spread = container.querySelector('[data-spread]')!;
-    expect(spread).toHaveAttribute('data-arrive', 'settle');
-    expect(spread).toHaveAttribute('data-fog', 'stagger');
-    const aboutCss = readFileSync(join(__dirname, 'About.module.css'), 'utf8');
-    const delay = resolveNumber(partDeclaration(aboutCss, 'place', '--arrive-delay') ?? '0s');
-    const starts = [...spread.children].map((_, i) => fogDelay(i + 1) + delay);
+    const wall = container.querySelector('[data-wall]')!;
+    expect(wall).toHaveAttribute('data-arrive', 'settle');
+    expect(wall).toHaveAttribute('data-fog', 'stagger');
+    const wallCss = readFileSync(join(__dirname, 'PhotoWall.module.css'), 'utf8');
+    const delay = resolveNumber(partDeclaration(wallCss, 'tile', '--arrive-delay') ?? '0s');
+    const starts = [...wall.children].map((_, i) => fogDelay(i + 1) + delay);
     expect(starts.length).toBeGreaterThan(1);
     for (let i = 1; i < starts.length; i++) {
       const step = starts[i]! - starts[i - 1]!;
-      // A stagger, never all at once, and never slower than 0.08s per print.
-      expect(step).toBeGreaterThan(0);
+      // A stagger, never all at once, and never slower than 0.08s per print. Past the fifth the
+      // prints share the last delay (global.css caps the stagger), so a step may also be 0 there.
+      if (i < 5) expect(step).toBeGreaterThan(0);
       expect(step).toBeLessThanOrEqual(0.08 + 1e-9);
     }
     // Each print settles about 16px down into place.
-    expect(resolveNumber(partDeclaration(aboutCss, 'place', '--arrive-distance') ?? '0px')).toBe(16);
+    expect(resolveNumber(partDeclaration(wallCss, 'tile', '--arrive-distance') ?? '0px')).toBe(16);
     expect(globalCss).toMatch(/\[data-arrive='settle'\]\s*\{[^}]*--arrive-dir-y:\s*-1/);
   });
 

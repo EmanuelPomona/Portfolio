@@ -396,9 +396,14 @@ describe.each([
       expect(found(base, { mediaIds: [] })).toEqual(imagePaths(base).map((path) => ({ rule: 'C-11', path })));
     });
 
-    it('C-17 flags more than 8 photos', () => {
-      const c = variant((c) => ensurePhotos(c, 9));
+    it('13 photos violates C-17', () => {
+      const c = variant((c) => ensurePhotos(c, 13));
       expect(found(c)).toEqual(one('C-17', 'about.photos'));
+    });
+
+    it('12 photos is valid', () => {
+      const c = variant((c) => ensurePhotos(c, 12));
+      expect(found(c)).toEqual([]);
     });
 
     it('C-17 accepts no photos at all', () => {

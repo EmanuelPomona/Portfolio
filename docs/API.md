@@ -54,7 +54,8 @@ in `docs/DATABASE.md`.
 | `project.screen.image === null` | The window's **empty state**: near-black at rest with the words "screenshot soon"; on attention the screen lifts to a flat fog-tone panel (ADR-010). Never substitute any other image. |
 | `about.description` | Rendered as is. `descriptionIsDraft` is **never** rendered; it exists for the owner's tooling. |
 | `about.classes` | `label` as a small heading, `items` as a list. |
-| `about.photos[i].image === null` | A mist-tone panel at `aspect`. |
+| `about.photos` | The photo wall (ADR-013): an asymmetrical bento grid filling one rectangle, recomposed automatically from the array (A-04 to A-06). Each tile's shape follows the photo's real ratio from `getMedia(image)` (`width`/`height`), or `aspect` while the slot is empty. |
+| `about.photos[i].image === null` | A mist-tone panel in its tile, no words. |
 | `about.photos[i].caption === null` | No caption text. The frontend may reserve the caption line, but must never print placeholder words. |
 | `contact.links` | The Contact section, in order. A `mailto:` link opens in the same tab. |
 
@@ -141,7 +142,7 @@ On unmount or deactivation it **always** removes `html.stickman-cursor`.
 - **Point.** Once arrived (`d < 1.5 × size`) on a target, he points at its center.
 - **Cheer.** On `pointerdown` on a target: a hop plus arms up with a wave, about
   0.7s.
-- **Sit.** After 5s with no movement.
+- **Sit.** 2s after the pointer stops moving he starts to sit, seated by about 2.5s (owner, 2026-10-19; was 5s from his own stillness in the approved prototype). The clock is the pointer's stillness, not his feet's; if he is still walking at 2s, he sits as he arrives.
 - **Keyboard.** On keyboard focus of a target (`:focus-visible`), he walks to
   just below-left of the element and points at it.
 - **Pause.** When the tab is hidden, the rAF loop pauses.

@@ -1,5 +1,5 @@
 // Owner: agent/stickman. Point, cheer, and sit blends, ported from the owner-approved prototype.
-// Pure. The caller resets MotionState.idle on a press, as the prototype's pointerdown handler did.
+// Pure. stepFigure resets MotionState.idle on a press and whenever the pointer (his target) moves.
 import type { MotionState } from './motion';
 import { approach } from './vec';
 
@@ -23,8 +23,8 @@ export interface GestureInputs {
   pressed: boolean;
 }
 
-export const SIT_AFTER_S = 5;
-const SIT_EASE = 4;
+export const SIT_AFTER_S = 2;
+const SIT_EASE = 6; // owner, TASK-207: seated by about 2.5s (the prototype eased at 4/s)
 const CHEER_DECAY = 1.4;
 const POINT_EASE = 8;
 

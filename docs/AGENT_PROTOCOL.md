@@ -122,8 +122,8 @@ No agent may claim completion without verification.
 14. Documentation updated where behavior changed.
 15. `docs/status/<branch-slug>.md` reflects the finished state.
 16. `docs/handoffs/<branch-slug>.md` written for consumers.
-17. Changes committed in small steps as the work progressed (section 24), not
-    as one commit at the end.
+17. Changes committed as one meaningful commit per task, two or three at most
+    (section 24); never status- or handoff-only commits.
 
 Invoke `superpowers:verification-before-completion` immediately before declaring
 work finished — and do no further implementation work after it. If you keep
@@ -441,27 +441,24 @@ being finished?** If not, the slice boundary is wrong.
 
 ## 24. COMMIT CADENCE
 
-Commit in small, working steps as you go. Never save a task for one large commit
-at the end. The owner wants the history to show the work as it happened: a
-project lands with **at least 25 commits, and typically 40-100+**.
+The owner's GitHub activity is read by recruiters, so the history should look like a
+person's: **few, meaningful commits**, not a log of every step. (Revised 2026-10-23 at
+the owner's request; the earlier "40-100+ commits" rule produced 300+ and is withdrawn.)
 
-Commit each time one logical step is done and verified, for example:
-
-- a component, endpoint, migration, or test file is added and passes
-- one interface state (loading, empty, error) or one breakpoint is finished
-- a bug is fixed, together with its regression test
-- a planning document, contract, or config file is written or changed
-
-Rules:
-
-- One logical change per commit, and every commit leaves the branch building.
-- A task normally produces several commits; 3-10 is typical. A task that reaches
-  handoff with a single commit was batched. Split the next one finer.
-- Never pad the count: no empty commits, no whitespace-only commits, no splitting
-  one change into fragments. Every commit must be worth reading on its own.
-- Messages are `type: what changed` in the imperative (`feat:`, `fix:`,
-  `test:`, `docs:`, `refactor:`, `style:`, `chore:`), under about 72 characters.
-- Commit under the repository's configured git identity, and add no
-  `Co-Authored-By` or other attribution trailers. The work credits the owner.
-- Merge, never squash. `scripts/integrate.sh` merges worker branches with their
-  history intact; do not squash-merge or rewrite a worker branch's commits.
+- **One commit per task** when the task is one coherent change; at most **2-3** when it
+  has genuinely separate parts (for example: the feature, then a follow-up fix after
+  review). Commit when the task's change is done and verified, not after each step.
+- **Never commit status, handoff, or task-status edits on their own.** Fold them into the
+  task's commit. Your status file still updates as you work (§20); it just isn't
+  committed separately.
+- The manager does the same: one commit per round of planning or integration notes, not
+  one per document.
+- Every commit leaves the branch building and its tests passing.
+- Messages read like a person wrote them: a short imperative summary under about 72
+  characters ("Add the About photo wall", "Fix the window letterbox"), no `type:` prefix
+  required. Add a body only when the why isn't obvious.
+- Commit under the repository's configured git identity, with no `Co-Authored-By` or other
+  attribution trailers. The work credits the owner.
+- Integration still merges worker branches (`scripts/integrate.sh`). What reaches GitHub is
+  the owner's call: when the owner asks to publish, the manager pushes `main` as a small
+  number of squashed commits, never hundreds.

@@ -60,7 +60,7 @@ These values come from the prototype and are fixed:
 - moving means `speed > 8`
 - `phase += speed·dt / (size·0.5)`
 - `idle` resets while moving
-- sit target is `idle > 5 ? 1 : 0`, eased at rate 4/s
+- sit target is `idle > 5 ? 1 : 0`, eased at rate 4/s (since TASK-207: idle from the pointer's stillness, `> 2`, eased at 6/s)
 - cheer decays at 1.4/s
 - point eases at rate 8/s, and only when `!moving && cheer === 0 && arrived && onTarget`, where
   `arrived` means `d < 1.5·size`
@@ -92,7 +92,7 @@ These values come from the prototype and are fixed:
   - `stepMotion never overshoots the target`
   - `facing does not flip on |dx| ≤ 1.5`
   - `idle accumulates only when speed ≤ 8`
-  - `sit approaches 1 after 5s idle and returns to 0 when moving`
+  - `sit approaches 1 after 5s idle and returns to 0 when moving` (2s from the pointer's stillness since TASK-207)
   - `cheer decays from 1 to 0 in ~0.71s`
   - `point only rises when arrived on a target and not cheering`
 - [ ] `npm run test:contract` still passes (the stubs are untouched by this task).

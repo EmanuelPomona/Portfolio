@@ -1,0 +1,52 @@
+B-307 project screenshots evidence (TASK-307), agent/backend, 2026-10-19 (PDT)
+Re-run fresh on HEAD e4185a7, after superpowers:verification-before-completion.
+Owner hold respected: no vercel calls, no git push.
+
+== Crops (both through the pipeline's prepareSource: EXIF auto-orient, alpha flattened onto Ivory) ==
+SagePlan
+  source  docs/inputs/Screenshot 2026-10-18 at 11.58.42<U+202F>PM.png  1920x937 RGBA, no EXIF orientation
+  rect    left 210, top 8, width 1486, height 929   (as given in TASK-307; not adjusted)
+  output  frontend/media-src/projects/sageplan.png  1486x929, 3 channels, 101,220 bytes, ratio 1.5996
+  edges   median luminance over x 210..1695: row 0 = 60 (browser edge), rows 6/7 = 233/235 (shadow tail),
+          row 8 = 237, row 9 = 238 (page background) -> the crop starts on background.
+          Scrollbar: column 1904 = 238 (background), 1910 = 250 (scrollbar); the crop ends at x 1695.
+  kept    SagePlan title and the System/Light/Dark toggle, "Your record" with the pasted course history,
+          and the Breadth, Overlays, and Foundations requirement circles (viewed).
+Revelation Youth
+  source  docs/inputs/Screenshot 2026-10-18 at 11.59.00<U+202F>PM.png  1920x937 RGBA, no EXIF orientation
+  rect    left 206, top 2, width 1496, height 935   (as given in TASK-307; not adjusted)
+  output  frontend/media-src/projects/revelation-youth.png  1496x935, 3 channels, 1,619,226 bytes, ratio 1.6000
+  edges   median luminance over x 206..1701: row 0 = 92, row 1 = 70 (browser edge), row 2 = 28, row 3 = 30
+          (page) -> the crop starts on the page. The crop ends at x 1701, before the scrollbar (x ~1904).
+  kept    small title, nav (Home, Music, Merch, Events, Devotions, Community), theme toggle, the large
+          serif "Revelation Youth", the tagline "Just a Moment With God", and both info lines
+          (GATHERING Sundays 2:30 PM - 3:30 PM; WHERE 3000 S 55th St, Kansas City, KS 66106) (viewed).
+
+== Renditions (npm run media) ==
+  projects/sageplan          widths 640, 1024, 1486   largest AVIF /media/projects/sageplan-1486.avif          24,768 bytes
+  projects/revelation-youth  widths 640, 1024, 1496   largest AVIF /media/projects/revelation-youth-1496.avif  31,070 bytes
+  npm run media: 6 image(s), 54 renditions (0 written, 0 stale removed), manifest unchanged.
+  npm run media: 6 image(s), 54 renditions (0 written, 0 stale removed), manifest unchanged.
+  git status: 0 changed paths
+
+== Content ==
+  sageplan.screen         { image: 'projects/sageplan', alt: 'SagePlan planner page with a pasted course history and the Breadth, Overlays, and Foundations requirement circles' }
+  revelation-youth.screen { image: 'projects/revelation-youth', alt: 'Revelation Youth home page: the name in large serif over a blurred green background, with the tagline Just a Moment With God' }
+  site.updated            '2026-10-19'
+
+== Gates ==
+  npm test                 exit 1   Test Files 1 failed | 50 passed (51); Tests 3 failed | 626 passed (629)
+                                    FAILING (frontend-owned, not edited): src/components/BrowserWindow/BrowserWindow.test.tsx
+                                      x is one link to primary.href in a new tab, named "<title>, <label>, <addressBar>, screenshot soon" while empty (W-05, ADR-010)
+                                      x separates the address and the placeholder with whitespace, so their words never fuse
+                                      x renders the empty state, and no image, when screen.image is null (W-03)
+                                    Cause: line 16 `const sageplan = projects[0]!` takes the REAL SagePlan as the
+                                    empty-window fixture (lines 43, 72, 88). Proof: with SagePlan's screen set back to
+                                    { image: null, alt: null }, the file passes 22/22; with the TASK-307 screenshot, 3 fail.
+  npm run typecheck        exit 0
+  npm run lint             exit 0
+  npm run build            exit 0   dist/assets/index-GJ6OD4zY.js 266.90 kB (84.81 kB gzip); index-CfsHdlaT.css 24.95 kB (6.54 kB gzip)
+  scripts/contract-test.sh exit 0   "no HTTP API declared ... running module contract tests"; 5 files, 193 passed
+                                    (includes C-09, C-11, C-21, C-22 and validateContent(content) === [] on the real content)
+  Never-edit files (types.ts, media.ts, index.html, vite.config.ts, components/sections/app/hooks/styles/stickman):
+  no diff in 51b0125..HEAD.

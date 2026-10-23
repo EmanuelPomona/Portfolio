@@ -147,8 +147,8 @@ poster comes out the same). That is normal: run it again only when the recording
    - `alt` describes the photo, at least 8 characters.
    - `caption` is the short line shown under it, at most 120 characters. Leave it `null` for no
      caption; never write a stand-in like "caption here".
-4. To add a sixth slot, copy a line and give it the next id (`photo-6`). The collage holds up to
-   8.
+4. To add a sixth slot, copy a line and give it the next id (`photo-6`). The photo wall holds up
+   to 12.
 5. Set `updated` in `site.ts` to today. Check (section 5) and commit (section 6).
 
 ## 5. Check your edit
@@ -200,7 +200,7 @@ What each rule means:
 | C-14 | `updated` is not a real date written `YYYY-MM-DD`, or it is later than today (in UTC). |
 | C-15 | `origin` is not empty or a plain `https://` address with no path and no trailing `/`. |
 | C-16 | The About description is more than two sentences, over 320 characters, or does not end with `.`, `!`, or `?`. |
-| C-17 | There are more than 8 photos, or a photo `id` is not `photo-` and a number, or two photos share an id. |
+| C-17 | There are more than 12 photos, or a photo `id` is not `photo-` and a number, or two photos share an id. |
 | C-18 | The contact links do not include exactly one each of LinkedIn, Email, and GitHub. |
 | C-19 | A link in the hero row is not also one of the contact links. |
 | C-20 | Some text contains an unfinished word: lorem, ipsum, todo, tbd, placeholder, or "coming soon" (any capitalization, plurals included). |

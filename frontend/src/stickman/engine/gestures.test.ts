@@ -24,8 +24,8 @@ function hold(g: GestureState, i: GestureInputs, seconds: number, idle0 = 0): Ge
 }
 
 describe('stepGestures: sit', () => {
-  it('sit approaches 1 after 5s idle and returns to 0 when moving', () => {
-    const seated = hold(REST, STILL, 2, 5); // idle 5 -> 7s, eased at rate 4/s
+  it('sit approaches 1 after 2s idle and returns to 0 when moving', () => {
+    const seated = hold(REST, STILL, 2, 2); // idle 2 -> 4s, eased at rate 6/s
     expect(seated.sit).toBeGreaterThan(0.99);
 
     let standing = seated;
@@ -35,18 +35,23 @@ describe('stepGestures: sit', () => {
     expect(standing.sit).toBeLessThan(0.01);
   });
 
-  it('does not sit before 5s idle', () => {
-    expect(hold(REST, STILL, 4.9).sit).toBe(0);
+  it('does not sit before 2s idle', () => {
+    expect(hold(REST, STILL, 1.98).sit).toBe(0);
   });
 
-  it('starts sitting strictly after 5s idle', () => {
-    expect(stepGestures(REST, motion(5), STILL, 0.1).sit).toBe(0);
-    expect(stepGestures(REST, motion(5.01), STILL, 0.1).sit).toBeCloseTo(0.4, 9);
+  it('seated within 0.5s of starting to sit (6/s ease)', () => {
+    // from idle 2s, 30 frames at rate 6/s: 1 − (1 − 6/60)^30 = 0.958 (at 4/s it would be 0.874)
+    expect(hold(REST, STILL, 0.5, 2).sit).toBeGreaterThanOrEqual(0.95);
   });
 
-  it('eases sit at rate 4/s', () => {
-    // 0 + (1 - 0) * min(1, 0.1 * 4) = 0.4
-    expect(stepGestures(REST, motion(6), STILL, 0.1).sit).toBeCloseTo(0.4, 9);
+  it('starts sitting strictly after 2s idle', () => {
+    expect(stepGestures(REST, motion(2), STILL, 0.1).sit).toBe(0);
+    expect(stepGestures(REST, motion(2.01), STILL, 0.1).sit).toBeCloseTo(0.6, 9);
+  });
+
+  it('eases sit at rate 6/s', () => {
+    // 0 + (1 - 0) * min(1, 0.1 * 6) = 0.6
+    expect(stepGestures(REST, motion(6), STILL, 0.1).sit).toBeCloseTo(0.6, 9);
   });
 });
 

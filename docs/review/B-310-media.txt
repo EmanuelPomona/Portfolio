@@ -1,0 +1,65 @@
+B-310 About photos evidence (TASK-310), agent/backend, 2026-10-23 (PDT)
+Owner hold respected: no deploy, no push.
+
+== The 10 photos, oldest first by capture date ==
+Capture date = EXIF DateTimeOriginal (local time), read with ImageIO. The PNG has no EXIF, so its date is
+the file's creation date (Spotlight kMDItemContentCreationDate 2026-03-15 05:12:11 UTC).
+Conversion: HEIC decoded with macOS sips to a lossless PNG intermediate (scratchpad only), then sharp:
+EXIF orientation applied (autoOrient), Display P3 -> sRGB, long edge capped at 2400, JPEG q85 mozjpeg,
+no metadata written. Files: frontend/media-src/life/photo-N.jpg (the contract's folder, DATABASE.md
+LifePhoto: media-src/life/<id>.jpg), image ids 'life/photo-N'.
+
+ id        source                                     captured             stored -> upright      output     aspect  largest AVIF
+ photo-1   IMG_2882.HEIC                              2025-11-17 20:21:35  4032x3024 o6 -> 3024x4032  1800x2400  2:3     photo-1-1800.avif   147,258 B
+ photo-2   IMG_3316.HEIC                              2026-02-11 16:32:42  4032x3024 o1 -> 4032x3024  2400x1800  4:3     photo-2-2400.avif   263,128 B
+ photo-3   38D04DF0-90B6-4BD3-BEBF-F2B830883773.PNG   2026-03-14 22:12:11* 1536x1024    -> 1536x1024  1536x1024  3:2     photo-3-1536.avif   135,404 B
+ photo-4   IMG_3826.HEIC                              2026-03-16 19:03:13  4032x3024 o1 -> 4032x3024  2400x1800  4:3     photo-4-2400.avif   245,160 B
+ photo-5   IMG_4379.HEIC                              2026-06-12 22:38:15  4032x3024 o6 -> 3024x4032  1800x2400  2:3     photo-5-1800.avif   463,447 B
+ photo-6   IMG_5111.HEIC                              2026-08-13 21:54:43  4032x3024 o6 -> 3024x4032  1800x2400  2:3     photo-6-1800.avif   166,631 B
+ photo-7   IMG_5445.HEIC                              2026-09-07 13:09:05  4032x3024 o1 -> 4032x3024  2400x1800  4:3     photo-7-2400.avif   313,552 B
+ photo-8   IMG_5642.HEIC                              2026-10-20 13:34:13  4032x3024 o6 -> 3024x4032  1800x2400  2:3     photo-8-1800.avif   412,020 B
+ photo-9   IMG_5644.HEIC                              2026-10-20 13:39:30  3088x2316 o5 -> 2316x3088  1800x2400  2:3     photo-9-1800.avif   395,608 B
+ photo-10  IMG_5675.jpg                               2026-10-23 12:24:40  1179x2091 o1 -> 1179x2091  1179x2091  9:16    photo-10-1179.avif  102,951 B
+ * file creation date (no EXIF in the PNG). o = EXIF orientation (6 = rotate 90 CW, 5 = transpose).
+ Aspect = nearest PhotoAspect: 3:4 portraits (0.75) -> 2:3; 4:3 exact; 1.5 -> 3:2; 0.5638 -> 9:16.
+
+== Metadata in the sources (before) ==
+ GPS present in 7 of 10 sources (IMG_2882, 3316, 3826, 5111, 5445, 5642, 5644). Blocks found, per ImageIO:
+   IMG_2882/3316/3826/5111/5445/5642: {Exif},{GPS},{MakerApple},{TIFF}; IMG_5644 adds {ExifAux};
+   IMG_4379: {Exif},{MakerApple},{TIFF}; IMG_5675.jpg: {Exif},{IPTC},{TIFF}; the PNG: none.
+
+== Metadata check on the committed sources (after) ==
+ ImageIO (CGImageSourceCopyPropertiesAtIndex + CGImageSourceCopyMetadataAtIndex):
+   photo-1.jpg  | stored 1800x2400 | orientation none | DateTimeOriginal none | blocks none | metadata tags 0
+   photo-2.jpg  | stored 2400x1800 | orientation none | DateTimeOriginal none | blocks none | metadata tags 0
+   photo-3.jpg  | stored 1536x1024 | orientation none | DateTimeOriginal none | blocks none | metadata tags 0
+   photo-4.jpg  | stored 2400x1800 | orientation none | DateTimeOriginal none | blocks none | metadata tags 0
+   photo-5.jpg  | stored 1800x2400 | orientation none | DateTimeOriginal none | blocks none | metadata tags 0
+   photo-6.jpg  | stored 1800x2400 | orientation none | DateTimeOriginal none | blocks none | metadata tags 0
+   photo-7.jpg  | stored 2400x1800 | orientation none | DateTimeOriginal none | blocks none | metadata tags 0
+   photo-8.jpg  | stored 1800x2400 | orientation none | DateTimeOriginal none | blocks none | metadata tags 0
+   photo-9.jpg  | stored 1800x2400 | orientation none | DateTimeOriginal none | blocks none | metadata tags 0
+   photo-10.jpg | stored 1179x2091 | orientation none | DateTimeOriginal none | blocks none | metadata tags 0
+ Raw JPEG segments before the image data, every file: FFDB FFDB FFC2 FFC4 FFC4 (quantization tables, frame,
+ Huffman tables only). No APPn segment at all: no APP1 "Exif\0\0", no XMP, no ICC_PROFILE, no "Photoshop 3.0" (IPTC).
+ Every rendition is written by sharp without metadata as well (pipeline default, unchanged).
+
+== npm run media ==
+ npm run media: 16 image(s), 168 renditions (114 written, 0 stale removed), manifest updated.
+ npm run media: 16 image(s), 168 renditions (0 written, 0 stale removed), manifest unchanged.
+ Widths: 1800x2400 photos 640/1024/1600/1800; 2400x1800 photos 640/1024/1600/2400; photo-3 640/1024/1536;
+ photo-10 640/1024/1179.
+
+== Gates ==
+ First run (2026-10-23, before main 11f93a1): npm test exit 1. Two frontend-owned tests in
+ src/sections/About/About.test.tsx used the REAL about content (all tiles expected empty; "six" = real + 1).
+ Proof: with about.ts back to five empty slots they passed 7/7. Fixed on main by the manager (11f93a1,
+ test-only emptyAbout fixture); fast-forwarded into agent/backend.
+
+ Final run, on 11f93a1 + this task's changes:
+ npm test                 exit 0   Test Files 53 passed (53), Tests 657 passed (657)
+ npm run typecheck        exit 0
+ npm run lint             exit 0
+ npm run build            exit 0   index-ClFoqMvm.js 280.74 kB (88.91 kB gzip); index-C1a5CYmY.css 23.89 kB (6.21 kB gzip)
+ scripts/contract-test.sh exit 0   5 files, 195 passed (C-09, C-11, C-17 <= 12, C-21 and validateContent(content) === [])
+ npm run media (x2)       "16 image(s), 168 renditions (0 written, 0 stale removed), manifest unchanged."

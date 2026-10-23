@@ -43,6 +43,246 @@ export const mediaManifest = {
       "srcset": "/media/backgrounds/evergreen-forest-640.jpg 640w, /media/backgrounds/evergreen-forest-1024.jpg 1024w"
     }
   },
+  "life/photo-1": {
+    "id": "life/photo-1",
+    "width": 1800,
+    "height": 2400,
+    "placeholder": "#2d2922",
+    "sources": [
+      {
+        "type": "image/avif",
+        "srcset": "/media/life/photo-1-640.avif 640w, /media/life/photo-1-1024.avif 1024w, /media/life/photo-1-1600.avif 1600w, /media/life/photo-1-1800.avif 1800w"
+      },
+      {
+        "type": "image/webp",
+        "srcset": "/media/life/photo-1-640.webp 640w, /media/life/photo-1-1024.webp 1024w, /media/life/photo-1-1600.webp 1600w, /media/life/photo-1-1800.webp 1800w"
+      }
+    ],
+    "fallback": {
+      "src": "/media/life/photo-1-1800.jpg",
+      "srcset": "/media/life/photo-1-640.jpg 640w, /media/life/photo-1-1024.jpg 1024w, /media/life/photo-1-1600.jpg 1600w, /media/life/photo-1-1800.jpg 1800w"
+    }
+  },
+  "life/photo-10": {
+    "id": "life/photo-10",
+    "width": 1179,
+    "height": 2091,
+    "placeholder": "#65554c",
+    "sources": [
+      {
+        "type": "image/avif",
+        "srcset": "/media/life/photo-10-640.avif 640w, /media/life/photo-10-1024.avif 1024w, /media/life/photo-10-1179.avif 1179w"
+      },
+      {
+        "type": "image/webp",
+        "srcset": "/media/life/photo-10-640.webp 640w, /media/life/photo-10-1024.webp 1024w, /media/life/photo-10-1179.webp 1179w"
+      }
+    ],
+    "fallback": {
+      "src": "/media/life/photo-10-1179.jpg",
+      "srcset": "/media/life/photo-10-640.jpg 640w, /media/life/photo-10-1024.jpg 1024w, /media/life/photo-10-1179.jpg 1179w"
+    }
+  },
+  "life/photo-2": {
+    "id": "life/photo-2",
+    "width": 2400,
+    "height": 1800,
+    "placeholder": "#657175",
+    "sources": [
+      {
+        "type": "image/avif",
+        "srcset": "/media/life/photo-2-640.avif 640w, /media/life/photo-2-1024.avif 1024w, /media/life/photo-2-1600.avif 1600w, /media/life/photo-2-2400.avif 2400w"
+      },
+      {
+        "type": "image/webp",
+        "srcset": "/media/life/photo-2-640.webp 640w, /media/life/photo-2-1024.webp 1024w, /media/life/photo-2-1600.webp 1600w, /media/life/photo-2-2400.webp 2400w"
+      }
+    ],
+    "fallback": {
+      "src": "/media/life/photo-2-2400.jpg",
+      "srcset": "/media/life/photo-2-640.jpg 640w, /media/life/photo-2-1024.jpg 1024w, /media/life/photo-2-1600.jpg 1600w, /media/life/photo-2-2400.jpg 2400w"
+    }
+  },
+  "life/photo-3": {
+    "id": "life/photo-3",
+    "width": 1536,
+    "height": 1024,
+    "placeholder": "#8e7f8a",
+    "sources": [
+      {
+        "type": "image/avif",
+        "srcset": "/media/life/photo-3-640.avif 640w, /media/life/photo-3-1024.avif 1024w, /media/life/photo-3-1536.avif 1536w"
+      },
+      {
+        "type": "image/webp",
+        "srcset": "/media/life/photo-3-640.webp 640w, /media/life/photo-3-1024.webp 1024w, /media/life/photo-3-1536.webp 1536w"
+      }
+    ],
+    "fallback": {
+      "src": "/media/life/photo-3-1536.jpg",
+      "srcset": "/media/life/photo-3-640.jpg 640w, /media/life/photo-3-1024.jpg 1024w, /media/life/photo-3-1536.jpg 1536w"
+    }
+  },
+  "life/photo-4": {
+    "id": "life/photo-4",
+    "width": 2400,
+    "height": 1800,
+    "placeholder": "#71797f",
+    "sources": [
+      {
+        "type": "image/avif",
+        "srcset": "/media/life/photo-4-640.avif 640w, /media/life/photo-4-1024.avif 1024w, /media/life/photo-4-1600.avif 1600w, /media/life/photo-4-2400.avif 2400w"
+      },
+      {
+        "type": "image/webp",
+        "srcset": "/media/life/photo-4-640.webp 640w, /media/life/photo-4-1024.webp 1024w, /media/life/photo-4-1600.webp 1600w, /media/life/photo-4-2400.webp 2400w"
+      }
+    ],
+    "fallback": {
+      "src": "/media/life/photo-4-2400.jpg",
+      "srcset": "/media/life/photo-4-640.jpg 640w, /media/life/photo-4-1024.jpg 1024w, /media/life/photo-4-1600.jpg 1600w, /media/life/photo-4-2400.jpg 2400w"
+    }
+  },
+  "life/photo-5": {
+    "id": "life/photo-5",
+    "width": 1800,
+    "height": 2400,
+    "placeholder": "#986f5c",
+    "sources": [
+      {
+        "type": "image/avif",
+        "srcset": "/media/life/photo-5-640.avif 640w, /media/life/photo-5-1024.avif 1024w, /media/life/photo-5-1600.avif 1600w, /media/life/photo-5-1800.avif 1800w"
+      },
+      {
+        "type": "image/webp",
+        "srcset": "/media/life/photo-5-640.webp 640w, /media/life/photo-5-1024.webp 1024w, /media/life/photo-5-1600.webp 1600w, /media/life/photo-5-1800.webp 1800w"
+      }
+    ],
+    "fallback": {
+      "src": "/media/life/photo-5-1800.jpg",
+      "srcset": "/media/life/photo-5-640.jpg 640w, /media/life/photo-5-1024.jpg 1024w, /media/life/photo-5-1600.jpg 1600w, /media/life/photo-5-1800.jpg 1800w"
+    }
+  },
+  "life/photo-6": {
+    "id": "life/photo-6",
+    "width": 1800,
+    "height": 2400,
+    "placeholder": "#181812",
+    "sources": [
+      {
+        "type": "image/avif",
+        "srcset": "/media/life/photo-6-640.avif 640w, /media/life/photo-6-1024.avif 1024w, /media/life/photo-6-1600.avif 1600w, /media/life/photo-6-1800.avif 1800w"
+      },
+      {
+        "type": "image/webp",
+        "srcset": "/media/life/photo-6-640.webp 640w, /media/life/photo-6-1024.webp 1024w, /media/life/photo-6-1600.webp 1600w, /media/life/photo-6-1800.webp 1800w"
+      }
+    ],
+    "fallback": {
+      "src": "/media/life/photo-6-1800.jpg",
+      "srcset": "/media/life/photo-6-640.jpg 640w, /media/life/photo-6-1024.jpg 1024w, /media/life/photo-6-1600.jpg 1600w, /media/life/photo-6-1800.jpg 1800w"
+    }
+  },
+  "life/photo-7": {
+    "id": "life/photo-7",
+    "width": 2400,
+    "height": 1800,
+    "placeholder": "#69706b",
+    "sources": [
+      {
+        "type": "image/avif",
+        "srcset": "/media/life/photo-7-640.avif 640w, /media/life/photo-7-1024.avif 1024w, /media/life/photo-7-1600.avif 1600w, /media/life/photo-7-2400.avif 2400w"
+      },
+      {
+        "type": "image/webp",
+        "srcset": "/media/life/photo-7-640.webp 640w, /media/life/photo-7-1024.webp 1024w, /media/life/photo-7-1600.webp 1600w, /media/life/photo-7-2400.webp 2400w"
+      }
+    ],
+    "fallback": {
+      "src": "/media/life/photo-7-2400.jpg",
+      "srcset": "/media/life/photo-7-640.jpg 640w, /media/life/photo-7-1024.jpg 1024w, /media/life/photo-7-1600.jpg 1600w, /media/life/photo-7-2400.jpg 2400w"
+    }
+  },
+  "life/photo-8": {
+    "id": "life/photo-8",
+    "width": 1800,
+    "height": 2400,
+    "placeholder": "#7a5d4a",
+    "sources": [
+      {
+        "type": "image/avif",
+        "srcset": "/media/life/photo-8-640.avif 640w, /media/life/photo-8-1024.avif 1024w, /media/life/photo-8-1600.avif 1600w, /media/life/photo-8-1800.avif 1800w"
+      },
+      {
+        "type": "image/webp",
+        "srcset": "/media/life/photo-8-640.webp 640w, /media/life/photo-8-1024.webp 1024w, /media/life/photo-8-1600.webp 1600w, /media/life/photo-8-1800.webp 1800w"
+      }
+    ],
+    "fallback": {
+      "src": "/media/life/photo-8-1800.jpg",
+      "srcset": "/media/life/photo-8-640.jpg 640w, /media/life/photo-8-1024.jpg 1024w, /media/life/photo-8-1600.jpg 1600w, /media/life/photo-8-1800.jpg 1800w"
+    }
+  },
+  "life/photo-9": {
+    "id": "life/photo-9",
+    "width": 1800,
+    "height": 2400,
+    "placeholder": "#8e6953",
+    "sources": [
+      {
+        "type": "image/avif",
+        "srcset": "/media/life/photo-9-640.avif 640w, /media/life/photo-9-1024.avif 1024w, /media/life/photo-9-1600.avif 1600w, /media/life/photo-9-1800.avif 1800w"
+      },
+      {
+        "type": "image/webp",
+        "srcset": "/media/life/photo-9-640.webp 640w, /media/life/photo-9-1024.webp 1024w, /media/life/photo-9-1600.webp 1600w, /media/life/photo-9-1800.webp 1800w"
+      }
+    ],
+    "fallback": {
+      "src": "/media/life/photo-9-1800.jpg",
+      "srcset": "/media/life/photo-9-640.jpg 640w, /media/life/photo-9-1024.jpg 1024w, /media/life/photo-9-1600.jpg 1600w, /media/life/photo-9-1800.jpg 1800w"
+    }
+  },
+  "projects/revelation-youth": {
+    "id": "projects/revelation-youth",
+    "width": 1496,
+    "height": 935,
+    "placeholder": "#323b2d",
+    "sources": [
+      {
+        "type": "image/avif",
+        "srcset": "/media/projects/revelation-youth-640.avif 640w, /media/projects/revelation-youth-1024.avif 1024w, /media/projects/revelation-youth-1496.avif 1496w"
+      },
+      {
+        "type": "image/webp",
+        "srcset": "/media/projects/revelation-youth-640.webp 640w, /media/projects/revelation-youth-1024.webp 1024w, /media/projects/revelation-youth-1496.webp 1496w"
+      }
+    ],
+    "fallback": {
+      "src": "/media/projects/revelation-youth-1496.jpg",
+      "srcset": "/media/projects/revelation-youth-640.jpg 640w, /media/projects/revelation-youth-1024.jpg 1024w, /media/projects/revelation-youth-1496.jpg 1496w"
+    }
+  },
+  "projects/sageplan": {
+    "id": "projects/sageplan",
+    "width": 1486,
+    "height": 929,
+    "placeholder": "#f3eee4",
+    "sources": [
+      {
+        "type": "image/avif",
+        "srcset": "/media/projects/sageplan-640.avif 640w, /media/projects/sageplan-1024.avif 1024w, /media/projects/sageplan-1486.avif 1486w"
+      },
+      {
+        "type": "image/webp",
+        "srcset": "/media/projects/sageplan-640.webp 640w, /media/projects/sageplan-1024.webp 1024w, /media/projects/sageplan-1486.webp 1486w"
+      }
+    ],
+    "fallback": {
+      "src": "/media/projects/sageplan-1486.jpg",
+      "srcset": "/media/projects/sageplan-640.jpg 640w, /media/projects/sageplan-1024.jpg 1024w, /media/projects/sageplan-1486.jpg 1486w"
+    }
+  },
   "projects/snake-ai": {
     "id": "projects/snake-ai",
     "width": 1270,

@@ -15,18 +15,25 @@ Do not edit by hand — edit the task files and regenerate.
 | TASK-108 | REVIEW | frontend | 0 | Scroll depth and arrivals (backgrounds slower, plates from their side, prints settle) |
 | TASK-109 | REVIEW | frontend | 0 | Contact as one sentence, "Contact: LinkedIn, Email, GitHub." |
 | TASK-110 | REVIEW | frontend | 0 | Project windows show screenshots and play recordings while attended |
+| TASK-111 | REVIEW | frontend | 0 | About photo wall as a data-driven asymmetrical bento grid |
 | TASK-201 | REVIEW | stickman | 0 | Stickman motion engine, canvas rig, and lab page |
 | TASK-202 | REVIEW | stickman | 0 | StickmanLayer desktop cursor (fine pointer) |
 | TASK-203 | REVIEW | stickman | 0 | Scribbling loader with progress, timing rules, and cursor handoff |
 | TASK-204 | REVIEW | stickman | 0 | Touch walker for coarse pointers (behind flag, off in production) |
 | TASK-206 | REVIEW | stickman | 0 | Loader minimum 2.2s, with the scribble and progress paced to match |
+| TASK-207 | REVIEW | stickman | 0 | The stickman sits after 2s without movement (was 5s) |
 | TASK-301 | REVIEW | backend | 0 | Content validator, invariant contract tests, and owner editing guide |
 | TASK-302 | REVIEW | backend | 0 | Deterministic media pipeline (npm run media) and manifest freshness test |
 | TASK-303 | REVIEW | backend | 0 | Head metadata plugin, favicon, Open Graph image, robots, sitemap |
 | TASK-304 | REVIEW | backend | 0 | Vercel config, security headers, and the preview deployment |
 | TASK-305 | REVIEW | backend | 0 | StreetSafe screenshot, Snake AI recording, npm run video, and C-22 |
-| TASK-307 | READY | backend | 0 | SagePlan and Revelation Youth screenshots in their windows |
+| TASK-307 | REVIEW | backend | 0 | SagePlan and Revelation Youth screenshots in their windows |
+| TASK-309 | REVIEW | backend | 0 | C-17 allows up to 12 About photos (was 8) |
+| TASK-310 | REVIEW | backend | 0 | Fill the About photo wall with the owner's 10 photos |
+| TASK-112 | BACKLOG | frontend | 0 | Photo wall stays a sensible height for one or two photos |
+| TASK-113 | BACKLOG | frontend | 0 | Photo wall edge cases: when a one-row tile may break the two-row rule |
 | TASK-205 | BACKLOG | stickman | 0 | Safe-area viewport and real-phone check before the touch flag flips |
+| TASK-208 | BACKLOG | stickman | 0 | Stickman polish: a jitter dead zone for sitting, and stale 1.2s wording |
 | TASK-306 | BACKLOG | backend | 0 | posterTime lands on the poster's exact MP4 frame |
 
-**Counts:** BACKLOG 2, READY 1, REVIEW 20
+**Counts:** BACKLOG 5, REVIEW 25

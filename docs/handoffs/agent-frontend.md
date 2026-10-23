@@ -677,3 +677,286 @@ None new.
 
 ### Commit
 `agent/frontend` at `d506406` (fix `d5684fa`, evidence `d506406`), followed by this handoff's docs commit. Local only, not pushed.
+
+## HANDOFF-6 — agent/frontend — 2026-10-19
+
+### Summary
+A test-only fix that unblocks backend's TASK-307. Three BrowserWindow tests rendered the **real** SagePlan (`projects[0]`) as the empty window, so giving SagePlan a screenshot broke them even though the component was correct. They now render a local `emptyWindow` fixture (`{ ...sageplan, screen: { image: null, alt: null } }`); the expected strings are unchanged. TASK-110 stays in `REVIEW`. **Committed locally only; not pushed or deployed (owner hold).**
+
+### Tasks Completed
+No new task. A test fix for TASK-110's suite, unblocking TASK-307 (backend). The three tests:
+- `is one link to primary.href in a new tab, named "<title>, <label>, <addressBar>, screenshot soon" while empty (W-05, ADR-010)`
+- `separates the address and the placeholder with whitespace, so their words never fuse`
+- `renders the empty state, and no image, when screen.image is null (W-03)`
+
+### Files Changed
+- `frontend/src/components/BrowserWindow/BrowserWindow.test.tsx` only: the `emptyWindow` fixture, and those three tests switched to it.
+
+**Checked:** no other test in the file depends on a shipped project being empty or filled.
+- The data-driven W-03 and W-05 tests branch on each project's real content.
+- The address-field test uses StreetSafe only for its `addressBar`.
+- Every other test uses a fixture that overrides `screen`.
+
+### Contracts
+None.
+
+### Skills Used
+| Skill | Stage invoked | What it actually changed |
+|---|---|---|
+| superpowers:verification-before-completion | Immediately before this handoff | The fresh results below. No implementation after it. |
+
+### Verification
+- **Reproduced first (RED):** with SagePlan's `screen` set temporarily to `{ image: 'projects/streetsafe-la', alt: … }` in `projects.ts`, the file failed exactly those three tests (22/25).
+- **Fixed with SagePlan still filled (GREEN):** the file passed 25/25.
+- **Restored:** `projects.ts` was restored with `git checkout`. It was never staged, and it is identical to `HEAD`.
+- **Fresh at `3d07856` with the real content:**
+  - the file: 25/25;
+  - `npx vitest run`: **51 files, 629 passed**;
+  - `npm run typecheck`: exit 0;
+  - `npm run lint`: exit 0;
+  - 0 attribution trailers.
+
+### What Was NOT Verified
+- The fix was not run against backend's actual TASK-307 content (not on this branch). It was run against a stand-in screenshot (`projects/streetsafe-la`) on SagePlan, which exercises the same "SagePlan is filled" condition.
+
+### Known Issues
+None.
+
+### Commit
+`3d07856` (test), followed by this handoff's docs commit. Local only, not pushed.
+
+## HANDOFF-7 — agent/frontend — 2026-10-19
+
+### Summary
+TASK-111: About's overlapping print scatter is replaced by a data-driven, asymmetrical bento photo wall (ADR-013). The wall is one solid rectangle placed with CSS Grid spans.
+
+- **The planner** (`frontend/src/lib/photoWall.ts`) is pure and deterministic.
+  - It composes `about.photos` at 6, 4 or 2 columns (desktop, tablet, phone).
+  - Each tile follows its photo's shape, within a factor of 2.
+  - Spans vary, and the gutters are staggered.
+  - Up to 6 photos are composed directly; 7 or more are packed.
+- **Today's five slots** compose the owner's reference at 1440: a two-column feature down the whole wall, the other columns broken at staggered heights. The wall is 1306×758px.
+- **The rest of About is unchanged:** colours, fog, type, rest/attention states, mist panels, the settle arrival.
+- **Fixture walls (3/6/9/12) were cancelled** by the owner via the manager ("Skip samples, finish").
+- **Committed locally only; not pushed or deployed (owner hold).**
+
+### Tasks Completed
+TASK-111 is now `REVIEW`. Criteria:
+- **A-01:** About shows the description, "This semester", and every `about.photos` entry as the wall.
+  - `About.test.tsx`: "renders every slot as a tile of the photo wall, empty ones as mist panels (A-01, A-02)".
+- **A-02:** empty slots are mist panels; no figcaption when the caption is null (PhotoSlot tests).
+- **A-03:** rest grayscale and attention color, kept unchanged (PhotoSlot tests).
+- **A-04:**
+  - exact cover, no overlap, one 8px gutter, grid spans only (planner and CSS-source tests);
+  - variety from 3 photos, and no full-width gutter from 4 photos on 4 and 6 columns (sweep over n 1..12 × 2/4/6 columns × 5 mixes).
+  - Exception: packed walls of 7 identical captioned 16:9 photos on 4 columns (Known Issues).
+- **A-05:** manifest ratio, with `aspect` while a slot is empty; recomposes from `about.photos`; deterministic; valid for 1..12 photos.
+  - Orientation is kept for every photo up to 6, apart from the squares exception below.
+  - At 7 to 8 photos, 97% of tiles are kept (Known Issues).
+- **A-06:**
+  - 6/4/2 columns, no horizontal overflow;
+  - `cover`, with portraits at `object-position: 50% 35%`;
+  - a caption sits on a solid label at the tile's bottom edge (4px inset), passing X-02 at 6.15:1 rest and 12.52:1 attention.
+- **X-02:** caption label contrast, measured from the live tokens.
+- **X-05:** under reduced motion all 5 tiles are present, static and opaque within 60ms.
+- **R-01:** screenshots at 1440/768/390; `overflowX` 0 at each.
+- **F-03:** CLS ≤ 0.0003 at every width.
+- **Named tests:** all 10 planner tests and 6 component tests from the task file, by name, plus 5 more:
+  - "composes today's five photos on 6 columns like the reference: a two-column feature, full height";
+  - "plans fast enough to run in render: under 200 ms for six photos of one camera shape";
+  - "sets two camera-shape photos side by side across the full height on 4 and 6 columns";
+  - "gives a captioned photo a tile at least two rows tall, so a 120-character label fits";
+  - "keeps nearly every photo's orientation in packed walls of 7 and 8 photos on 4 and 6 columns".
+
+### Files Changed
+- **Created:**
+  - `frontend/src/lib/photoWall.ts`, `frontend/src/lib/photoWall.test.ts`;
+  - `frontend/src/sections/About/PhotoWall.tsx`, `PhotoWall.module.css`, `PhotoWall.test.tsx`.
+- **Modified:**
+  - `frontend/src/sections/About/About.tsx`, `About.module.css`, `About.test.tsx`: the scatter is gone; `.collage` stays as the wall's inline-size container.
+  - `frontend/src/components/PhotoSlot/PhotoSlot.tsx`, `PhotoSlot.module.css`, `PhotoSlot.test.tsx`: the slot fills its tile, crops `cover`, and keeps its rest/attention rules.
+- **Docs:** `docs/review/F-111-*`, this handoff, `docs/status/agent-frontend.md`, and the TASK-111 status line.
+- **Not touched:** content, contract and other sections.
+
+### Contracts
+None changed. The frontend-internal interface from the task file, `planWall(items, columns)`, is implemented as specified, with two additions:
+- an optional `WallItem.captioned`;
+- an exported `CAPTION_MIN_ROWS = 2`.
+
+PhotoWall is the only consumer.
+
+### Skills Used
+| Skill | Stage invoked | What it actually changed |
+|---|---|---|
+| frontend-design:frontend-design | Before the UI | The art direction: a feature tile, staggered columns, one thin gutter, the slot's existing radius token, a 1×2 tile exactly square. |
+| superpowers:test-driven-development | Before the planner and component code | Every named test was written RED first. The "curated vs packed" test was mutation-checked. |
+| ecc:browser-qa | Browser QA on the production build | Found the 1440 defect: a 4×15 feature beside three equal cards, 1634px tall (`F-111-wall-1440-DEFECT.png`). |
+| superpowers:systematic-debugging | That defect, then the planning-time finding | Root causes: the height weight was too weak (fix f9d8a1b); the profiler located the planning time in the tiling search. Changes that didn't help were reverted. |
+| superpowers:requesting-code-review | Before the handoff | Reviewer verdict "With fixes": 4 Important, 7 Minor, 3 plan issues. Re-review of the fixes: "Ready to merge: yes". |
+| superpowers:receiving-code-review | On that review | Each Important finding was reproduced, then fixed test first. Pushed back on Minor #9, and the reviewer withdrew it. |
+| superpowers:verification-before-completion | Immediately before this handoff | The fresh results below. No implementation after it. |
+
+`animate` was not used, since motion is unchanged: the settle arrival is reused. `scripts/audit-skills.sh` exits 0, with all claims corroborated.
+
+### Verification
+- **Fresh at e041464 (code head 75b05b3):**
+  - `npx vitest run`: **53 files, 648 passed**;
+  - `npm run typecheck`: exit 0;
+  - `npm run lint`: exit 0;
+  - `npm run build`: exit 0.
+- **Production build in headless Chrome 155:**
+  - **Screenshots:** `docs/review/F-111-wall-{1440,768,390}.png`, with today's five empty slots.
+  - **Geometry** (`F-111-wall-qa.txt`):
+    - 0 overlaps and 0 gaps;
+    - tile = grid span ±0.01px, figure = tile;
+    - 1×2 tiles square within 0.02px;
+    - `overflowX` 0;
+    - settle from translate 0 −16px / opacity 0 to none / 1;
+    - figures in reading order.
+  - **Console:** `F-111-console.txt`, 0 at each width.
+  - **axe:** `F-111-axe.txt`, axe-core 4.14.0 with WCAG 2.2 AA and best-practice tags, 0 violations at 1440/768/390 (whole page and `#about`).
+  - **CLS and reduced motion:** `F-111-motion.txt`.
+  - **Caption fit:** `F-111-caption-fit.txt`, a 120-character caption on the real CSS in a 1×2 tile. It fits at 360, 390, 768, 1024 and 1440 (tightest: 135px in 147px at 1024).
+- **Planning time:**
+  - six photos of one camera shape: ≤ 70ms alone, against 1126ms before for six 9:16 on 6 columns;
+  - today's five photos: ~1ms;
+  - random camera mixes: ≤ 6ms.
+- **Scope, secrets, trailers:** every file is in TASK-111's scope; no credentials in the diff; 0 attribution trailers; 22 commits under the configured identity.
+
+### What Was NOT Verified
+- **No fixture walls with real images (3/6/9/12).** The owner cancelled them. No real photograph has been shown in the wall: all five slots are empty. The planner tests over 1..12 photos stand in.
+- **Images and captions in the wall:**
+  - rest/attention with an image rests on the PhotoSlot unit tests (A-03) and earlier rounds;
+  - caption rendering was measured only with a temporary DOM-injected label, since content has no captions;
+  - caption contrast was computed from the tokens.
+- **Packed walls (7 or more photos) were never rendered in a browser;** content has 5 photos.
+- **Browsers:** headless Chrome only. No Safari, Firefox or real device. `align-self: safe end` is untested on older iOS Safari.
+- **Keyboard:** empty slots are `aria-hidden` and not focusable, so the wall has no tab stops today. Reading-order focus with images is covered only by a unit test.
+- **Re-shot screenshots** were compared by geometry (identical tiles), not pixel by pixel.
+
+### Known Issues
+1. **N1 (review):** seven identical captioned 16:9 (or 2:1) photos on 4 columns become seven equal full-width tiles with full-width gutters, which breaks A-04 for that input.
+   - Cause: the two-row caption minimum removes the shapes the 2-column halves need, and past 6 photos the fallback goes straight to the stack.
+   - Relaxing variety in the halves was tried; it doesn't fix it.
+   - Eight such photos, 6 columns, and half-captioned or mixed sets are not affected.
+2. **Planning time on extreme or captioned uniform sets:**
+   - six 4:1 panoramas on 6 columns: ~0.5s (1.34s if all are captioned);
+   - six captioned 3:2 or 16:9 photos on 4 columns: ~0.3–0.4s.
+   - The timing test covers uncaptioned sets only, and it is wall-clock (200ms, best of 3). A step-count test would not depend on the machine.
+3. **Orientation past 6 photos (A-05):**
+   - 97% of tiles are kept across 68 sampled 7–8-photo walls; 9 walls still have 1–3 off-shape tiles.
+   - With captions it is worse: on 4 columns, 43 of 80 all-captioned 7–8-photo walls have a miss, and 1–2.5% of captioned walls of up to 6 photos.
+4. **The squares exception:** 4 or 5 square photos on 6 columns cannot all get strictly square tiles while spans vary and gutters stagger (proven by exhaustive search). There, one tile may be near-square (0.75–1.34), and the orientation test encodes this. Manager to rule.
+5. **Inherent to strict orientation:**
+   - for some non-today mixes the feature spans more than half the columns;
+   - some 4-column walls are taller than they are wide (three squares on 4 columns need 11–12 rows).
+6. **Pairs on 4 columns:** 6 of 81 camera-shape pairs still stack, because no side-by-side split keeps both shapes. Example: [3:4, 1:1] gives 19 rows, about 1640px at 768. Orientation was kept over the spread on purpose; manager to rule.
+7. **A 120-character caption at a 320px viewport** loses its last line: the 1×2 tile is 139.7px and the label 153.3px, so 17.6px is cut. It fits from 340px up.
+8. **Equal sizes on today's tablet and phone walls (advisory):** at 768, two equal 3×4 tiles stacked; at 390, two equal 2×3 tiles. The equal-size penalty (0.12) is mild.
+9. **The wall reveals at once past its fifth tile,** because the global stagger caps at `nth-child(n + 5)`. Before, each spread of five had its own reveal.
+10. **Minor code items:**
+    - a NaN or 0 ratio is not guarded (the manifest is generated, so the risk is low);
+    - the photo-ratio logic is duplicated in `PhotoWall.tsx` and `PhotoSlot.tsx`;
+    - on phones, `pack()` ignores `orientation`, so its retry repeats work.
+
+**Plan issues for the manager:**
+- C-17 caps `about.photos` at 8, while A-05 and TASK-111 ask for 1..12. The contracts disagree.
+- One photo is the whole wall at its own shape, so a single 2:3 portrait is 6×18 (about 1960px at 1440) and a 9:16 about 2290px. A narrower wall or a height cap may be wanted.
+- The squares exception (4) and the pairs trade-off (6).
+
+### Commit
+This round, 06a877f..HEAD, local only, not pushed:
+- **plan:** 06a877f;
+- **planner:** 3c6fc24, 8e2d350, ddbd3a9, 28ddc73, 17800f3, d07e107, 1b1970e;
+- **wall and About swap:** 85b33d1, 933c5bb;
+- **scale fix:** f9d8a1b;
+- **review fixes:** ebd97f9, 214ad9c, c4b89c8, 6fa94ab, 75b05b3;
+- **docs and evidence:** ea1e1ef, 32fce87, 6ee4c1b, ade47b0, 874813b, 1f47894, e041464;
+- this handoff's docs commit.
+
+214ad9c's full suite was red by timing until c4b89c8 fixed it. History was not rewritten.
+
+## HANDOFF-8 — agent/frontend — 2026-10-19
+
+### Summary
+The manager ruled that no tile may be shorter than two row units, one column width, at any column count. Today's fifth photo was a 1×1 sliver at 768 and at 390.
+- **The rule:** the planner now enforces it on every path, including the fallback stack. The test is named as requested, and it failed first: today's five got a 1×1 tile at 4 and at 2 columns.
+- **Today's five photos:**
+  - **1440:** unchanged.
+  - **768:** 2×3 and 2×3 stacked beside 1×4, 1×4 over a 2×2, 6 rows, breaks staggered at rows 3 and 4.
+  - **390:** 2×3, 2×3, then a 1×5 portrait beside a 1×3 over a 1×2.
+- **Review:** the reviewer checked the rule, then confirmed the shortcut's proof and the bit-exact `shapeKey` rewrite. It also found that the rule broke more walls than I had listed; two of those fixes are included below.
+- **TASK-111 stays in REVIEW.** Committed locally only; not pushed or deployed.
+
+### Tasks Completed
+TASK-111, follow-up to the manager's ruling. All earlier criteria still hold.
+- New test: `no tile is shorter than two row units, at any column count` (n = 1..12, columns 2/4/6, every test mix).
+- Also new:
+  - "packs 7 to 12 photos into a staggered wall, never a stack of full-width cards";
+  - "crops uniform panoramas up to 4:1 within a factor of 2, phones included".
+
+### Files Changed
+- `frontend/src/lib/photoWall.ts` and `frontend/src/lib/photoWall.test.ts` only.
+- Evidence: `docs/review/F-111-wall-{768,390}.png`, `F-111-wall-qa.txt`, `F-111-console.txt`, `F-111-axe.txt`, `F-111-motion.txt`.
+- `F-111-wall-1440.png` is kept as committed: its tiles are identical.
+
+### Contracts
+None. One new export: `MIN_TILE_ROWS = 2`. `CAPTION_MIN_ROWS` stays separate on purpose.
+
+### Skills Used
+| Skill | Stage invoked | What it actually changed |
+|---|---|---|
+| superpowers:test-driven-development | Before each change (process still governing) | Every new test was RED first: the two-row test, the stack test and the panorama test. |
+| superpowers:systematic-debugging | The slow searches and the regressions | Profiling found `shapeKey` (37%) and the strict search proving impossibility. Led to 7531e22 and the shortcut. Dense-row variants failed, were confined to scratch copies and reverted. |
+| superpowers:requesting-code-review | Before this handoff | Reviewer verdict "With fixes": I1 (7+ photo stacks) and I2 (phone crops past factor 2). I1 and I2's cheap part are fixed; M2 and M3 are taken. |
+| superpowers:verification-before-completion | Immediately before this handoff | The fresh results below. No implementation after it. |
+
+### Verification
+- **Fresh at 8a548df:**
+  - `npx vitest run`: **53 files, 657 passed**;
+  - `npm run typecheck`: exit 0;
+  - `npm run lint`: exit 0;
+  - `npm run build`: exit 0.
+- **The two-row rule:** reviewer probe, about 3,000 walls (n 1..12, all column counts, with and without captions): no tile under two rows. Before the rule, 446 of 900 random walls had a sliver.
+- **No unintended layout change:**
+  - 7531e22 (`shapeKey` without allocation): 0 of 1464 layouts change (mine), 0 of 3528 (reviewer).
+  - The shortcut: 0 of 1464 layouts change against the same code without it. Reviewer brute force: no strict layout exists for that class.
+- **Browser** (production build, headless Chrome 155):
+  - `F-111-wall-{768,390}.png` re-captured: 0 overlaps, 0 gaps, tile = span, `overflowX` 0, settle 0 −16px → none.
+  - On the final build at 8a548df, today's tiles are identical to that evidence at all three widths.
+  - axe-core 4.14: 0 violations at 1440, 768 and 390. Console 0.
+  - CLS at most 0.0003; under reduced motion every tile is present and static.
+- **Scope, secrets, trailers:** my commits touch only `photoWall.ts` and its test, my evidence and my status file. No secrets. 0 trailers. `audit-skills.sh`: all claims corroborated.
+
+### What Was NOT Verified
+- **f4a43ae, d42e8d4 and 8a548df were not re-reviewed.** They implement the reviewer's own prototypes (I1, I2) and notes (M2, M3), checked only by the full suite and my probes.
+- **Packed walls, panoramas and captioned walls were never rendered in a browser;** content has five photos and no captions.
+- **Browsers:** headless Chrome only; no Safari, Firefox or real device.
+
+### Known Issues
+1. **Four or more landscape-only photos on 4 columns cannot keep orientation.** The proof is in the test. They take near-square tiles (0.75–1.34), and the planner skips the search that would only confirm it. Some mostly-landscape sets are impossible too, e.g. [4:3, 3:2, 16:9, 2:3]: 4 of 150 random 4–6-photo walls on 4 columns now miss orientation, against 0 before.
+2. **Packed walls of 7–8 photos keep 90.2% of orientations, down from 97%;** the ratchet is now ≥ 0.90. Landscape-heavy 2- and 3-wide halves cannot vary their widths.
+3. **Seven uniform 16:9 or 2:1 photos on 4 columns** are now staggered, but every tile is 2 wide, which breaks span variety. Before d42e8d4 they were full-width stacks.
+4. **Four uniform 16:9 photos on 4 columns get a full-width gutter.** With orientation relaxed, a 3×6 tile beside three 1×2 tiles would be valid, but the sparse row candidates miss 6. Dense rows fix it but double planning time.
+5. **Uniform 4:1 panoramas:**
+   - 4 to 12 photos on 4 and 6 columns get full-width gutters;
+   - 7 or more on 2 and 4 columns still stack.
+6. **On phones, a panorama wider than 4:1 is cropped past factor 2.** The widest phone tile is now 2×2. Examples: today's five plus a 5:1 gives 2.5; a single 5:1 photo also gives 2.5. A single 3:1 or 4:1 on phones misses the one-photo "own shape" bound (1.5 and 2.0).
+7. **Two 4:1 panoramas on tablets** sit side by side at factor 2, where a stack would fit them exactly. The spread rule outranks fit.
+8. **Planning time:**
+   - six 4:1 on 6 columns: 0.84–0.91s (0.55s before);
+   - [4, 3, 3, 4, 4, 3] on 6 columns: 0.7s;
+   - landscape-only sets with panoramas on 4 columns: up to 0.43s;
+   - six 3:2 on 4 columns: about 0.12s, so the timing test now has about a 1.35× margin;
+   - realistic mixes: 47ms at most.
+9. **Visual (advisory):** the 768 wall has two equal pairs and a full-height gutter between columns 2 and 3.
+
+**Question for the manager:** where should the two-row rule give way, if anywhere? Options:
+- (a) before a full-width gutter (issue 4);
+- (b) before a single-width wall (issue 3);
+- (c) for panoramas wider than 4:1 on phones, before the crop limit (issue 6).
+
+Each option means allowing a one-row tile only when no two-row wall keeps A-04 or the factor-2 crop. Or the current behaviour stands.
+
+### Commit
+7531e22, 8c3c0ce, b99ec9f, 7513806, f4a43ae, d42e8d4 and 8a548df, plus this handoff's docs commit, on top of the manager's merge of main (2d63841). Local only, not pushed.

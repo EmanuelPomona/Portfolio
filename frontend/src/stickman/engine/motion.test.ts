@@ -101,20 +101,15 @@ describe('stepMotion', () => {
     expect(stepMotion(at(100, 100, { speed: 5.9 }), target, 0.01, SIZE).facing).toBe(-1);
   });
 
-  it('idle accumulates only when speed ≤ 8', () => {
+  it('idle is a plain clock: it counts on while he walks (the figure step resets it)', () => {
     let s = at(50, 50);
     for (let i = 0; i < 10; i++) s = stepMotion(s, { x: 50, y: 50 }, 0.1, SIZE);
     expect(s.idle).toBeCloseTo(1, 9);
 
-    // moving (speed well above 8) resets it
-    const moving = stepMotion(at(50, 50, { idle: 3, speed: 300 }), { x: 500, y: 50 }, FRAME, SIZE);
-    expect(moving.idle).toBe(0);
-
-    // at the boundary, on the eased speed (target = pos, desired 0, dt 0.01):
-    // 8.8 eases to 7.92 (≤ 8: idle 1 -> 1.01); 9 eases to 8.1 (> 8: idle resets)
-    const still = { x: 50, y: 50 };
-    expect(stepMotion(at(50, 50, { idle: 1, speed: 8.8 }), still, 0.01, SIZE).idle).toBeCloseTo(1.01, 9);
-    expect(stepMotion(at(50, 50, { idle: 1, speed: 9 }), still, 0.01, SIZE).idle).toBe(0);
+    // his own movement no longer resets it (TASK-207: the clock is the pointer's stillness)
+    const walking = stepMotion(at(50, 50, { idle: 3, speed: 300 }), { x: 500, y: 50 }, FRAME, SIZE);
+    expect(walking.speed).toBeGreaterThan(8);
+    expect(walking.idle).toBeCloseTo(3 + FRAME, 9);
   });
 
   it('advances the stride phase by speed·dt / (size·0.5)', () => {

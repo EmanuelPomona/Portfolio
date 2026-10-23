@@ -264,3 +264,154 @@ None new. HANDOFF-1's Known Issues still apply.
 
 ### Commit
 `agent/stickman` @ the commit that adds this section (pushed).
+
+## HANDOFF-3 — agent/stickman — 2026-10-19
+
+### Summary
+TASK-207. The owner's words: "If the user leaves the thingy in the position for 2 seconds, then make
+the stickman sit down." This follows the manager's ruling (A + B, dce75d6):
+- **Start:** he starts to sit **2s after the pointer stops**. The clock is the pointer's stillness,
+  not his own.
+- **Ease:** the sit eases in at **6/s**, so he is seated (sit ≥ 0.95) about 2.47s after the last
+  move.
+- **Long walks:** if he is still walking at 2s, the sit stays hidden while he walks and he sits as he
+  arrives.
+
+How it got here: the first version changed only the threshold (5s to 2s) and could not meet S-04.
+Sitting started 2.80-2.92s and he was seated 3.52-3.63s after the pointer stopped. I reported it
+BLOCKED with timed options, and the ruling followed.
+
+### Tasks Completed
+TASK-207 (now REVIEW):
+- **S-04 (as amended in dce75d6):** measured at 1440 on a link and on the fog. Sitting starts
+  2000.0-2016.7 ms after the last move in the engine's frame clock, which is 2015-2033 ms after the
+  event's own timestamp. He is seated (≥ 0.95) 2466.7-2484.0 ms after the last move. Any movement
+  stands him back up: his drawn hip is at standing height after 61 ms.
+- **Named tests:** all present:
+  - `sit approaches 1 after 2s idle and returns to 0 when moving` (gestures)
+  - `does not sit before 2s idle` (gestures)
+  - `the idle clock starts when the pointer stops, not when he arrives` (figure)
+  - `seated within 0.5s of starting to sit (6/s ease)` (gestures)
+  - `a walk longer than 2s ends seated, with no sit shown mid-walk` (figure)
+  - Also added: a controller-level S-04 test running through the real frame loop.
+- **Parity:** `run-parity.sh` applies the owner's TASK-207 changes to a temporary copy of the
+  reference, with each patch asserted to match once. Default mode: 19/19 identical.
+  `PARITY_PURE=1`: 16/3, all three explained in F-207-parity.txt. `docs/reference` is untouched.
+- **Evidence:** `docs/review/F-207-results.txt`.
+
+### Files Changed
+- `frontend/src/stickman/engine/gestures.ts`: `SIT_AFTER_S` = 2, `SIT_EASE` = 6.
+- `frontend/src/stickman/engine/motion.ts`: `idle` is now a plain clock; his own speed no longer
+  resets it.
+- `frontend/src/stickman/engine/figure.ts`:
+  - `Figure.target` holds the previous frame's target.
+  - A change of target zeroes `idle` after the step, so the frame that sees the move counts no
+    stillness.
+  - A press still resets it before the step, as the prototype does.
+- `frontend/src/stickman/layer/controller.ts` and `layer/touchWalker.ts`: they initialize
+  `Figure.target`.
+- `frontend/src/stickman/lab/Lab.tsx`: the help text reads `SIT_AFTER_S`.
+- Tests: `engine/{gestures,figure,motion}.test.ts`, `layer/controller.test.ts`.
+- Evidence:
+  - `docs/review/F-207-{results,parity,sit-timing}.txt`, and `F-207-*.png` (link and fog at 1.5s
+    standing and 4.0s seated, plus the nav top edge);
+  - `docs/review/F-tools/run-parity.sh`, which gains the owner-change mode and `PARITY_PURE=1`;
+  - `docs/review/F-tools/sit-timing.mjs`, which is new.
+- Records: `docs/status/agent-stickman.md`, and the frontmatter of
+  `docs/tasks/TASK-207-sit-after-2s.md`.
+
+### Contracts
+- **No public interface change.** `index.ts`, `types.ts` and `contract.test.tsx` are untouched, and
+  the contract tests pass 193/193.
+- **Internal engine type:** `Figure` gains a required `target: Vec2`. Its only users are inside
+  `frontend/src/stickman` (grep shows none outside), and all of them are updated.
+- **Behavior** follows the amended API.md §2.3 "Sit" and ACCEPTANCE S-04 (dce75d6).
+
+### Skills Used
+| Skill | Stage invoked | What it actually changed |
+|---|---|---|
+| superpowers:test-driven-development | TASK-207 start, before the threshold change | The sit tests went RED on 5 (3 failing on their assertions), then GREEN on 2. For the ruled change I followed the cycle **without re-invoking the skill**: 8 tests went RED for the intended reasons (4/s values; idle 0 while walking), then GREEN in 9a13b36 (A) and 82b18f8 (B). The move-frame refinement went RED (idle = dt where 0 was expected), then GREEN in 3551528. |
+| superpowers:requesting-code-review | After the first evidence (1737532) | Verdict "With fixes". It found my 2.5s options misstated, the parity gate permanently red with run 2 not reproducible, the "seated" stills taken before he was seated, a mislabeled 72 ms figure, an idle estimate one frame late, and wrong labels. |
+| superpowers:receiving-code-review | After the first review | All 6 items accepted after checking each. Fixes: 0557213, d20c74b, d11ff5a (a controller test; threshold mutations 5, 1.9 and 2.1 were KILLED), f8e36b4, 25c602b and e78b296. The task went BLOCKED on the ruling. |
+| superpowers:verification-before-completion | Before the BLOCKED report | It ran the full suite (631/631). The ruling then arrived and implementation resumed, so that run does not count for this handoff. |
+| superpowers:requesting-code-review | After the ruled change's evidence (baafd58) | Verdict "Yes": 0 critical, 0 important, 6 minor. I fixed 1-5 (wording and comments) in edbeba5 and 3f750b8. Item 6 is under Known Issues. |
+| superpowers:verification-before-completion | Immediately before this handoff | See Verification. No implementation since. |
+
+Not invoked for TASK-207:
+- `ecc:browser-qa`. The browser evidence came from the committed F-tools scripts.
+- `superpowers:receiving-code-review` for the second review. I applied its guidance from the earlier
+  load.
+
+### Verification
+A fresh run at d4c256e:
+- `npm test`: **633/633** in 51 files. The stickman tests alone: 237/237.
+- `npm run test:contract`: **193/193**.
+- `typecheck` and `lint`: exit 0.
+- `build`: exit 0. JS is 84.83 KB gzip and CSS 6.54 KB gzip.
+- The 27 commits on the branch's first-parent chain touch no protected file and nothing in
+  `docs/reference`. Every file they touch is in the stickman slice or is one of my own docs.
+- Neither a secret-pattern scan of the added lines nor a check for a tracked `.env` found anything.
+- Mutation checks: each mutant below was KILLED, and the file was restored byte-identical every time.
+  - B turned off.
+  - The previous target never updated.
+  - Only x movement counted (KILLED once a vertical assertion was added).
+  - His own speed resetting idle again.
+  - The move frame counting its dt again.
+  - `SIT_EASE` set to 5 and to 7.
+  - `SIT_AFTER_S` set to 5, 1.9 and 2.1.
+- Parity: default mode 19/19, exit 0. `PARITY_PURE=1` 16/3, exit 1.
+- Browser (F-207-sit-timing.txt): the table is in F-207-results.txt section 3. The main-page console
+  showed no errors or warnings.
+
+### What Was NOT Verified
+- **Real input hardware.** All runs used headless Chrome at 60 Hz with mouse events sent over CDP.
+  Each event's timestamp came about 15 ms before the frame that handled it began.
+  - The guarantee "never before 2.0s after the hand stops" relies on that ordering, which is how
+    Chrome aligns input to frames.
+  - If real hardware gave an event a timestamp later than its frame's begin time, the sit could
+    start a fraction of a frame early, measured from the hand.
+- **120 Hz displays and throttled tabs.** Neither was measured. Below 20 fps the `MAX_DT` clamp
+  makes idle run slow, so he would sit later than 2s. That is pre-existing.
+- **"Sits as he arrives" after a walk longer than 2s** is tested in the engine only. At the approved
+  `hurry` pace no walk on a 1440 screen lasts 2s; an 800px run settles in about 1.1s.
+- **Keyboard focus, resize and loader-handoff target changes under B** were checked by code
+  inspection (reviewer and me) and by the existing controller tests. I made no browser timing of
+  sitting under keyboard focus.
+- **The touch walker** (its flag is false in production) inherits B through its scroll-driven
+  target. I did not re-time it.
+- **The parity checkpoints cannot see the move-frame refinement.** The engine test pins it.
+- **The owner** has not seen the new timing.
+
+### Known Issues
+- **Product question for the manager (second review, item 6).** Any pointer move, even 1.2px or
+  less, now restarts the clock.
+  - He doesn't walk for a move that small, so the stand-up (about 0.5s) is fully visible, and he
+    sits again 2s later.
+  - This matches "any movement stands him back up", and the named figure test pins the 1px reset.
+  - If spurious stand-ups show up (pen hover, jittery sensors), a dead zone would need a ruling.
+- **Scrolling with a still pointer:** he sits while the page scrolls under him. This is unchanged in
+  kind; the clock is the pointer's stillness.
+- **Touch walker taps** (flag off): the clock restarts when he reaches the tap, not at the tap
+  itself, so he sits about 2s plus the run time after a tap.
+- **Optional test not added:** "keyboard focus plus a scroll with an unchanged rect does not reset
+  idle". It would pin the value comparison at the integration level.
+- **Pre-existing, not changed here:**
+  - On the top nav his head is above the viewport while he stands
+    (F-207-nav-top-edge-1500ms-DEFECT.png).
+  - The lab page has a `favicon.ico` 404.
+- **Stale TASK-206 wording in my files** (out of TASK-207's scope, left for a cleanup):
+  - The header comment at `loader/Loader.tsx:4` still says "minimum 1.2s".
+  - The test `Loader.test.tsx:51` is named "still waits the 1.2s minimum" but asserts `MIN_MS`
+    (2200).
+- **Stale "5s" in manager-owned docs:**
+  - TASK-201, lines 63 and 95;
+  - TASK-202, line 57;
+  - `docs/superpowers/plans/2026-10-16-portfolio-v1.md:44`;
+  - `docs/superpowers/specs/2026-10-16-portfolio-design.md:111`.
+- **Merges in range:** 447450a and 84e2eba are the manager's merges from main into this branch.
+  Local `main` already merged `agent/stickman` at d4c256e (ddabe8f). This handoff commit comes after
+  that merge.
+
+### Commit
+`agent/stickman` @ the commit that adds this section. **Local only. OWNER HOLD: not pushed, not
+deployed.**

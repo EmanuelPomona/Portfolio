@@ -188,7 +188,7 @@ and order**; exact geometry is the builder's.
 | `wireframe-1-loader-and-hero.jpg`, loader | A blank sheet. In the middle, a dense ball of looping pencil scribble. At the end of the line, a tiny stickman holding a pencil much larger than he is. Below the scribble, a pill-shaped outline progress bar labeled "75% …". (The yellow is the owner's highlighter, not a palette color.) |
 | `wireframe-1-loader-and-hero.jpg`, hero | Full-bleed misty alpine photograph. The nav is centered at the top and underlined: Home, Projects, About, Contact. Top left: "Emanuel Ling", and below it "CS + Math @ Pomona College". The mountains fill the right two-thirds. |
 | `wireframe-2-projects.jpg` | Background of fog with pine clusters. "Projects" heading top left. Three framed screens alternate sides down the page (left, right, left), each with its title large on the opposite side: SagePlan, StreetSafe, Snake-AI. Build all four projects in this rhythm. |
-| `wireframe-3-about-photos-masked.jpg` | Same fog background. "About Me" heading. "Brief description:" then "Classes:" as short lines. Then a loose, overlapping scatter of five photos at varied sizes and offsets, in reading order: 4:3 landscape; 2:3 tall; small 4:3; 9:16 tall; 4:3 landscape. **Not a grid.** The photos are masked here for privacy; the owner supplies them later. |
+| `wireframe-3-about-photos-masked.jpg` | Same fog background. "About Me" heading. "Brief description:" then "Classes:" as short lines. Then a loose, overlapping scatter of five photos at varied sizes and offsets, in reading order: 4:3 landscape; 2:3 tall; small 4:3; 9:16 tall; 4:3 landscape. **Not a grid.** The photos are masked here for privacy; the owner supplies them later. *Superseded for layout by ADR-013 (round 6): the owner chose an asymmetrical bento wall.* |
 
 The browser-window reference is a stock mockup in the owner's inputs. It shows
 standard dark macOS browser chrome:
@@ -221,8 +221,12 @@ Frontend covers every relevant state from protocol §8.
   - Rest: grayscale, low contrast, sunk into the fog.
   - Attention: full color and full contrast. The caption, or its empty slot,
     becomes readable.
-  - Empty, which is every slot in v1: a mist-tone panel at the slot's aspect
-    ratio.
+  - Empty (any slot without a photo yet): a mist-tone panel in its tile.
+- **Photo wall** (owner, round 6; ADR-013): an editorial bento wall, not a scatter. One solid
+  rectangle of tiles with a single thin gutter, a feature tile, and columns whose breaks are
+  staggered so no gutter crosses the whole wall; references were an editorial bento of portraits
+  and a tiled "collage frames" sheet. Each photo's own shape (tall, wide, square) chooses its
+  tile, so cropping stays small. It keeps the section's fog, type, and rest/attention states.
 - **Links:** charcoal text with a hairline underline. On hover or focus, the
   underline and text turn Deep Forest. The focus ring is a 2px Deep Forest
   outline with a 3px offset, visible on every interactive element.
