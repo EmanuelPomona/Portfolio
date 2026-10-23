@@ -6,6 +6,8 @@ to them. It is a static Vite + React + TypeScript site on Vercel.
 
 ## Run it
 
+https://emanuel-ling.vercel.app.
+
 ```bash
 scripts/bootstrap.sh     # installs deps, writes .env with this worktree's port
 source .env
